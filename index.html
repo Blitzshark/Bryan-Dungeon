@@ -7,41 +7,73 @@
 body{
     margin:0;
     overflow:hidden;
-    background:#222;
+    background:#1a1a1a;
 }
 
 #player{
     width:40px;
     height:40px;
-    background:lime;
+    border-radius:50%;
+    background:#00ff66;
     position:absolute;
     left:100px;
     top:100px;
+    box-shadow:0 0 20px #00ff66;
 }
 </style>
-
 </head>
+
 <body>
 
 <div id="player"></div>
 
 <script>
 
-let player = document.getElementById("player");
+const player = document.getElementById("player");
 
 let x = 100;
 let y = 100;
 
-document.addEventListener("keydown", (e)=>{
+const speed = 5;
 
-    if(e.key === "w") y -= 10;
-    if(e.key === "s") y += 10;
-    if(e.key === "a") x -= 10;
-    if(e.key === "d") x += 10;
+const keys = {};
+
+document.addEventListener("keydown", (e)=>{
+    keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", (e)=>{
+    keys[e.key.toLowerCase()] = false;
+});
+
+function gameLoop(){
+
+    let dx = 0;
+    let dy = 0;
+
+    if(keys["w"]) dy -= 1;
+    if(keys["s"]) dy += 1;
+    if(keys["a"]) dx -= 1;
+    if(keys["d"]) dx += 1;
+
+    if(dx !== 0 || dy !== 0){
+
+        const length = Math.sqrt(dx * dx + dy * dy);
+
+        dx /= length;
+        dy /= length;
+
+        x += dx * speed;
+        y += dy * speed;
+    }
 
     player.style.left = x + "px";
     player.style.top = y + "px";
-});
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
 
 </script>
 
