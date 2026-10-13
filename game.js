@@ -92,4 +92,57 @@ socket.on("players", (players) => {
         playerElements[id].player.style.background =
             players[id].color;
 
-        playerElements[id].name.textContent
+        playerElements[id].name.textContent =
+            players[id].name;
+    }
+
+    for (const id in playerElements) {
+
+        if (!players[id]) {
+
+            playerElements[id].player.remove();
+
+            delete playerElements[id];
+        }
+    }
+
+});
+
+function update() {
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["w"]) dy--;
+    if (keys["s"]) dy++;
+    if (keys["a"]) dx--;
+    if (keys["d"]) dx++;
+
+    if (dx !== 0 || dy !== 0) {
+
+        const len = Math.hypot(dx, dy);
+
+        dx /= len;
+        dy /= len;
+
+        localPlayer.x += dx * 5;
+        localPlayer.y += dy * 5;
+
+        socket.emit("move", {
+            x: localPlayer.x,
+            y: localPlayer.y
+        });
+    }
+
+    world.style.left =
+        (-localPlayer.x + window.innerWidth / 2) +
+        "px";
+
+    world.style.top =
+        (-localPlayer.y + window.innerHeight / 2) +
+        "px";
+
+    requestAnimationFrame(update);
+}
+
+update();
