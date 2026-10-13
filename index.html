@@ -1,75 +1,27 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bryan's Basement</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bryan's Dungeon</title>
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#090d14;color:#eef3ff;font-family:system-ui,Arial;overflow:hidden}
-button,input{font:inherit}
-button{background:#6849d8;color:white;border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-weight:700}
-button:hover{filter:brightness(1.2)}
-input{background:#111827;color:white;border:1px solid #35425b;padding:11px;border-radius:8px;min-width:0}
-#top{height:54px;background:#111827;border-bottom:1px solid #29344a;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-#brand{font-weight:900;letter-spacing:1px;color:#b6a2ff}
-#status{font-size:12px;color:#aab6cc}
-#game{display:block;width:100%;height:calc(100dvh - 54px);outline:none}
-#setup{position:fixed;inset:54px 0 0;display:grid;place-items:center;background:radial-gradient(ellipse,#1a2540,#090d14 70%);z-index:5}
-.panel{width:min(420px,92vw);background:#111827;border:1px solid #35425b;border-radius:18px;padding:26px;box-shadow:0 20px 80px #0009}
-h1{font-size:30px;margin:0 0 4px}
-.sub{color:#aab6cc;font-size:14px;margin:0 0 22px}
-.field{display:grid;gap:7px;margin:14px 0}
-.field label{font-size:13px;color:#bdc8dc}
-#name{width:100%}
-#color{width:100%;height:42px;padding:4px}
-#play{width:100%;margin-top:12px}
-#message{color:#ff9a9a;font-size:13px;min-height:20px;margin-top:10px}
-#help{position:fixed;bottom:12px;left:12px;background:#0b1020d9;border:1px solid #29344a;border-radius:10px;padding:10px 13px;font-size:12px;color:#c4cee0;pointer-events:none;line-height:1.7}
-#sidebar{position:fixed;right:12px;top:66px;width:205px;background:#0b1020e8;border:1px solid #29344a;border-radius:12px;padding:12px;pointer-events:none}
-.small{font-size:11px;color:#96a5c0}
-#players{font-size:13px;line-height:1.9;overflow-wrap:anywhere}
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#251e42;border:1px solid #7663ba;border-radius:10px;padding:10px 18px;display:none;z-index:4;text-align:center}
-@media(max-width:650px){#sidebar{width:150px;right:6px;top:62px;padding:8px}#help{font-size:10px;bottom:5px;left:5px}.panel{padding:20px}}
+:root{--ink:#d7d0c2;--muted:#9d978b;--panel:#191a18;--panel2:#22231f;--line:#45443b;--stone:#37372f;--gold:#b29a68;--red:#8f5147;--green:#73836a}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10110f;color:var(--ink);font:14px/1.4 Georgia,"Times New Roman",serif}button,input,select{font:inherit}button{cursor:pointer;color:#e5dece;background:#393a32;border:1px solid #666354;border-radius:4px;padding:9px 12px;box-shadow:inset 0 1px #ffffff0c}button:hover{background:#4a493d;border-color:#9d8d68}button:disabled{opacity:.45;cursor:default}input,select{background:#11120f;color:var(--ink);border:1px solid #555449;border-radius:4px;padding:9px;min-width:0}label{display:block;color:#b9b1a1;font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}.small{font-size:12px;color:var(--muted)}#top{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#171815;border-bottom:1px solid #4a493f;position:relative;z-index:3}#brand{font-weight:bold;letter-spacing:.14em;font-size:13px;color:#c6b68f}#status{font-size:12px;color:#9d978b}#game{display:block;width:100%;height:calc(100dvh - 48px);outline:none}#setup{position:fixed;inset:48px 0 0;z-index:8;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 35%,#343329 0,#1a1b17 45%,#0f100e 100%)}.panel{background:linear-gradient(145deg,#252620,#171815);border:1px solid #5a5749;box-shadow:0 18px 60px #000a,inset 0 1px #ffffff0a;border-radius:5px;padding:22px}.setup-panel{width:min(420px,92vw)}h1,h2,h3,p{margin-top:0}h1{font-size:30px;letter-spacing:.03em;margin-bottom:4px;font-weight:normal}h2{font-size:20px;font-weight:normal;margin-bottom:12px}h3{font-size:16px;font-weight:normal;margin-bottom:8px}.sub{color:#aaa391;margin:0 0 18px}.field{margin:12px 0}.field input,.field select{width:100%}#color{height:38px;padding:3px}#play{width:100%;margin-top:10px;background:#514b39;border-color:#8b7b57}#message{min-height:20px;margin-top:10px;color:#c98e7c;font-size:13px}#help{position:fixed;bottom:10px;left:10px;z-index:2;background:#141510eF;border:1px solid #48473d;border-radius:4px;padding:8px 11px;font-size:12px;color:#b9b2a2;pointer-events:none;line-height:1.65}#sidebar{position:fixed;z-index:2;right:10px;top:58px;width:205px;max-height:calc(100dvh - 80px);overflow:auto;background:#171814ed;border:1px solid #48473d;padding:10px;border-radius:4px;pointer-events:none}#sidebar h3{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:#c6b68f;margin:0 0 7px}#players{font-size:12px;line-height:1.9;overflow-wrap:anywhere}.rule{border:0;border-top:1px solid #45443b;margin:9px 0}#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:10;background:#25251f;border:1px solid #8a7b58;padding:9px 16px;max-width:90vw;text-align:center;display:none;color:#e4d8b8;box-shadow:0 5px 20px #0008}#dock{position:fixed;z-index:4;left:50%;transform:translateX(-50%);top:58px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 250px)}.dockbtn{font-size:12px;padding:7px 10px;background:#1b1c17eF}#modal{position:fixed;z-index:7;inset:48px 0 0;background:#080907b8;display:none;place-items:center;padding:14px}#modal.show{display:grid}.modal-panel{width:min(620px,96vw);max-height:88dvh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}.modal-head h2{margin:0}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.list{display:grid;gap:8px}.entry{border:1px solid #45443b;background:#1c1d18;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:12px}.entry strong{font-weight:normal;color:#e0d5bd}.entry .desc{font-size:12px;color:#a39c8d;margin-top:3px}.entry button{flex:0 0 auto}.notice{color:#c6b68f;font-size:12px;margin:8px 0}.tools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tools button.active{background:#6a5d40;border-color:#c3ab74}.grid-maker{display:grid;grid-template-columns:repeat(12,minmax(12px,1fr));gap:2px;max-width:100%;overflow:auto;background:#10110e;padding:5px;border:1px solid #4a493f}.tile{aspect-ratio:1;padding:0;min-width:0;border-radius:0;font-size:11px;background:#34352e;border:1px solid #4a493f}.tile.floor{background:#38382f}.tile.wall{background:#171815}.tile.crate{background:#6d5237}.tile.skeleton{background:#b4a88b;color:#25251f}.tile.chain{background:#565952}.tile.helmet{background:#78745f}.tile.exit{background:#53634a}.tile.spawn{background:#766346}.hidden{display:none!important}@media(max-width:650px){#sidebar{width:142px;right:5px;top:55px;padding:7px}#dock{top:auto;bottom:95px;max-width:calc(100vw - 12px)}#help{font-size:10px;left:5px;bottom:5px;max-width:170px}.setup-panel{padding:18px}.entry{align-items:flex-start}.modal-panel{padding:15px}.grid-maker{grid-template-columns:repeat(10,minmax(17px,1fr))}}
 </style>
 </head>
 <body>
-<header id="top">
- <div id="brand">⚔ BRYAN'S DUNGEON</div>
- <div id="status">Connecting to server…</div>
-</header>
-<canvas id="game" tabindex="0"></canvas>
-
-<div id="setup">
- <div class="panel">
-  <h1>Enter the Realm</h1>
-  <p class="sub">Explore. Form a squad. Defeat the dungeon bosses.</p>
-  <div class="field">
-   <label for="name">UNIQUE PLAYER NAME</label>
-   <input id="name" maxlength="18" placeholder="Choose a name" autocomplete="nickname">
-  </div>
-  <div class="field">
-   <label for="color">CHARACTER COLOR</label>
-   <input id="color" type="color" value="#54e6a5">
-  </div>
-  <button id="play">ENTER THE LOBBY</button>
-  <div id="message"></div>
-  <p class="small">Names are case-insensitive. Up to 5 players per squad.</p>
- </div>
-</div>
-
-<div id="sidebar">
- <div style="font-weight:800;margin-bottom:6px">REALM STATUS</div>
- <div id="stats" class="small">Waiting for server…</div>
- <hr style="border-color:#29344a">
- <div style="font-weight:800;margin-bottom:6px">PLAYERS ONLINE</div>
- <div id="players">—</div>
-</div>
-<div id="toast"></div>
-<div id="help">WASD / Arrows: Move<br>Space: Attack<br>Walk into a portal to join a squad<br>Walk into the return portal to leave</div>
-
+<header id="top"><div id="brand">⚔ BRYAN'S DUNGEON</div><div id="status">Connecting to the keep…</div></header>
+<canvas id="game" tabindex="0" aria-label="Dungeon game"></canvas>
+<div id="setup"><div class="panel setup-panel"><h1>Enter the Keep</h1><p class="sub">Cold stone. Old iron. Something stirs below.</p>
+<div class="field"><label for="name">Adventurer name</label><input id="name" maxlength="18" placeholder="Choose a name" autocomplete="nickname"></div>
+<div class="field"><label for="color">Cloak color</label><input id="color" type="color" value="#777b68"></div><div class="field"><label for="cloak-preset">Old-world palette</label><select id="cloak-preset"><option value="#777b68">Weathered sage</option><option value="#8b7562">Leather brown</option><option value="#777078">Ash gray</option><option value="#777d80">Iron gray</option><option value="#a18b6b">Old brass</option><option value="#8a665c">Rust red</option><option value="#686f5e">Moss green</option><option value="#8a8478">Stone dust</option><option value="#6c727f">Slate blue</option><option value="#a18a83">Faded rose</option></select></div>
+<div class="field"><label for="class">Starting class</label><select id="class"><option value="vanguard">Vanguard — sword and shield</option><option value="ranger">Ranger — shortbow</option><option value="arcanist">Arcanist — ember staff</option></select></div>
+<button id="play">Enter the lobby</button><div id="message"></div><p class="small">Names must be unique while online. Expeditions hold up to five adventurers.</p></div></div>
+<div id="sidebar"><h3>Keep Ledger</h3><div id="stats" class="small">Waiting for the server…</div><hr class="rule"><h3>Adventurers</h3><div id="players">No one here yet.</div><hr class="rule"><h3>Expedition</h3><div id="squad-status" class="small">No queue joined</div></div>
+<div id="dock"><button class="dockbtn" id="queue-btn">Join an expedition queue</button><button class="dockbtn" id="community-btn">Community dungeons</button><button class="dockbtn" id="maker-btn">Dungeon workshop</button><button class="dockbtn" id="npc-btn">Speak to the keeper</button></div>
+<div id="toast" role="status"></div>
+<div id="help">WASD / arrows · Move<br>Space / click · Attack<br>E · Speak / interact<br>Queue before entering an expedition</div>
+<div id="modal"><div class="panel modal-panel"><div class="modal-head"><h2 id="modal-title">The Keep</h2><button id="modal-close">Close</button></div><div id="modal-content"></div></div></div>
 <script src="game.js"></script>
-</body>
-</html>
+</body></html>
