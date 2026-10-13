@@ -39,7 +39,8 @@ function sendQueue(to) {
   const members = queue.members.map(id => players[id]).filter(Boolean).map(p => ({
     id: p.id, name: p.name, playerClass: p.playerClass, color: p.color
   }));
-  const chosen = published.find(d => d.id === queue.dungeonId);\n  const data = { queue: { id: queue.id, leader: queue.leader, expedition: queue.expedition, dungeonId: queue.dungeonId, dungeonName: chosen ? chosen.name : null }, members };
+  const chosen = published.find(d => d.id === queue.dungeonId);
+  const data = { queue: { id: queue.id, leader: queue.leader, expedition: queue.expedition, dungeonId: queue.dungeonId, dungeonName: chosen ? chosen.name : null }, members };
   if (to) io.to(to).emit("queueState", data); else io.emit("queueState", data);
 }
 function makeEnemies(floor) {
@@ -66,16 +67,23 @@ function startExpedition() {
   const members = queue.members.filter(id => players[id] && players[id].zone === "lobby");
   if (!members.length) return;
   const id = crypto.randomUUID();
-  const custom = published.find(d => d.id === queue.dungeonId);\n  const exp = { id, floor: 1, members, enemies: makeEnemies(1), mapTiles: custom ? custom.tiles : null, lastTick: Date.now() };
+  const custom = published.find(d => d.id === queue.dungeonId);
+  const exp = { id, floor: 1, members, enemies: makeEnemies(1), mapTiles: custom ? custom.tiles : null, lastTick: Date.now() };
   expeditions.set(id, exp);
   queue.expedition = id;
   for (const playerId of members) {
     const p = players[playerId];
     p.zone = "dungeon"; p.expeditionId = id; p.floor = 1; p.x = 170 + Math.random() * 45; p.y = 170 + Math.random() * 45;
     p.hp = p.maxHp;
+    if (custom && custom.tiles) {
+      let spawn = null;
+      custom.tiles.forEach((row,y)=>row.forEach((t,x)=>{ if(t==="spawn" && !spawn) spawn={x,y}; }));
+      if (spawn) { p.x = 150 + spawn.x * 78 + 39; p.y = 170 + spawn.y * 78 + 39; }
+    }
   }
   broadcastPlayers();
-  broadcastExpedition(exp, "queueState", { started: true });
+  const memberCards = members.map(playerId => players[playerId]).filter(Boolean).map(p => ({ id:p.id, name:p.name, playerClass:p.playerClass, color:p.color }));
+  for (const playerId of members) io.to(playerId).emit("queueState", { queue: { id: queue.id, leader: queue.leader, expedition: id, dungeonId: queue.dungeonId, dungeonName: custom ? custom.name : null }, members: memberCards, started: true, expedition: id, floor: 1, enemies: exp.enemies, mapTiles: exp.mapTiles || null });
   broadcastExpedition(exp);
   sendQueue();
 }
