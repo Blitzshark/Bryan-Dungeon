@@ -5,89 +5,63 @@
 <title>Bryan's Basement</title>
 
 <style>
-
 body{
     margin:0;
-    overflow:hidden;
     background:#111;
-    font-family:Arial,sans-serif;
+    color:white;
+    font-family:Arial;
 }
 
 #world{
-    position:absolute;
     width:3000px;
     height:3000px;
-
+    position:absolute;
     background-image:
-        linear-gradient(#222 1px, transparent 1px),
-        linear-gradient(90deg, #222 1px, transparent 1px);
-
+    linear-gradient(#222 1px, transparent 1px),
+    linear-gradient(90deg,#222 1px,transparent 1px);
     background-size:50px 50px;
-}
-
-.player{
-    position:absolute;
-    width:32px;
-    height:32px;
-    border-radius:50%;
-}
-
-.playerName{
-    position:absolute;
-    top:-20px;
-    left:-25px;
-    width:80px;
-
-    text-align:center;
-    color:white;
-    font-size:12px;
 }
 
 #ui{
     position:fixed;
     top:10px;
     left:10px;
-
-    z-index:1000;
-
+    z-index:999;
+    background:#000c;
     padding:10px;
-
-    background:rgba(0,0,0,.75);
     border-radius:10px;
+}
 
+.player{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    position:absolute;
+}
+
+.playerName{
+    position:absolute;
+    top:-18px;
+    width:80px;
+    left:-24px;
+    text-align:center;
+    font-size:12px;
     color:white;
 }
-
-#nameBox{
-    width:140px;
-    margin-top:5px;
-}
-
-#colorBox{
-    margin-top:5px;
-    width:140px;
-}
-
 </style>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.jsscript"/script>
+
 </head>
 
 <body>
 
-<div id="world"></div>
-
 <div id="ui">
-
-    <div id="count">
-        Players Online: 0
-    </div>
+    <div id="count">Players Online: 0</div>
 
     <br>
 
-    <input
-        id="nameBox"
-        type="text"
-        value="Player"
-        maxlength="16">
+    <input id="nameBox" value="Player">
 
     <br><br>
 
@@ -95,11 +69,11 @@ body{
         id="colorBox"
         type="color"
         value="#00ff66">
-
 </div>
 
-https://cdn.socket.io/4.7.5/socket.io.min.jsscript>
-game.jsscript>
+<div id="world"></div>
+
+<script src="game.js"></script>
 
 </body>
 </html>
