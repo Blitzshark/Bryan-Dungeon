@@ -1,79 +1,75 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bryan's Basement</title>
-
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <style>
-body{
-    margin:0;
-    background:#111;
-    color:white;
-    font-family:Arial;
-}
-
-#world{
-    width:3000px;
-    height:3000px;
-    position:absolute;
-    background-image:
-    linear-gradient(#222 1px, transparent 1px),
-    linear-gradient(90deg,#222 1px,transparent 1px);
-    background-size:50px 50px;
-}
-
-#ui{
-    position:fixed;
-    top:10px;
-    left:10px;
-    z-index:999;
-    background:#000c;
-    padding:10px;
-    border-radius:10px;
-}
-
-.player{
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    position:absolute;
-}
-
-.playerName{
-    position:absolute;
-    top:-18px;
-    width:80px;
-    left:-24px;
-    text-align:center;
-    font-size:12px;
-    color:white;
-}
+*{box-sizing:border-box}
+body{margin:0;background:#090d14;color:#eef3ff;font-family:system-ui,Arial;overflow:hidden}
+button,input{font:inherit}
+button{background:#6849d8;color:white;border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-weight:700}
+button:hover{filter:brightness(1.2)}
+input{background:#111827;color:white;border:1px solid #35425b;padding:11px;border-radius:8px;min-width:0}
+#top{height:54px;background:#111827;border-bottom:1px solid #29344a;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+#brand{font-weight:900;letter-spacing:1px;color:#b6a2ff}
+#status{font-size:12px;color:#aab6cc}
+#game{display:block;width:100%;height:calc(100dvh - 54px);outline:none}
+#setup{position:fixed;inset:54px 0 0;display:grid;place-items:center;background:radial-gradient(ellipse,#1a2540,#090d14 70%);z-index:5}
+.panel{width:min(420px,92vw);background:#111827;border:1px solid #35425b;border-radius:18px;padding:26px;box-shadow:0 20px 80px #0009}
+h1{font-size:30px;margin:0 0 4px}
+.sub{color:#aab6cc;font-size:14px;margin:0 0 22px}
+.field{display:grid;gap:7px;margin:14px 0}
+.field label{font-size:13px;color:#bdc8dc}
+#name{width:100%}
+#color{width:100%;height:42px;padding:4px}
+#play{width:100%;margin-top:12px}
+#message{color:#ff9a9a;font-size:13px;min-height:20px;margin-top:10px}
+#help{position:fixed;bottom:12px;left:12px;background:#0b1020d9;border:1px solid #29344a;border-radius:10px;padding:10px 13px;font-size:12px;color:#c4cee0;pointer-events:none;line-height:1.7}
+#sidebar{position:fixed;right:12px;top:66px;width:205px;background:#0b1020e8;border:1px solid #29344a;border-radius:12px;padding:12px;pointer-events:none}
+.small{font-size:11px;color:#96a5c0}
+#players{font-size:13px;line-height:1.9;overflow-wrap:anywhere}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#251e42;border:1px solid #7663ba;border-radius:10px;padding:10px 18px;display:none;z-index:4;text-align:center}
+@media(max-width:650px){#sidebar{width:150px;right:6px;top:62px;padding:8px}#help{font-size:10px;bottom:5px;left:5px}.panel{padding:20px}}
 </style>
-
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.jsscript"/script>
-
 </head>
-
 <body>
+<header id="top">
+ <div id="brand">⚔ BRYAN'S DUNGEON</div>
+ <div id="status">Connecting to server…</div>
+</header>
+<canvas id="game" tabindex="0"></canvas>
 
-<div id="ui">
-    <div id="count">Players Online: 0</div>
-
-    <br>
-
-    <input id="nameBox" value="Player">
-
-    <br><br>
-
-    <input
-        id="colorBox"
-        type="color"
-        value="#00ff66">
+<div id="setup">
+ <div class="panel">
+  <h1>Enter the Realm</h1>
+  <p class="sub">Explore. Form a squad. Defeat the dungeon bosses.</p>
+  <div class="field">
+   <label for="name">UNIQUE PLAYER NAME</label>
+   <input id="name" maxlength="18" placeholder="Choose a name" autocomplete="nickname">
+  </div>
+  <div class="field">
+   <label for="color">CHARACTER COLOR</label>
+   <input id="color" type="color" value="#54e6a5">
+  </div>
+  <button id="play">ENTER THE LOBBY</button>
+  <div id="message"></div>
+  <p class="small">Names are case-insensitive. Up to 5 players per squad.</p>
+ </div>
 </div>
 
-<div id="world"></div>
+<div id="sidebar">
+ <div style="font-weight:800;margin-bottom:6px">REALM STATUS</div>
+ <div id="stats" class="small">Waiting for server…</div>
+ <hr style="border-color:#29344a">
+ <div style="font-weight:800;margin-bottom:6px">PLAYERS ONLINE</div>
+ <div id="players">—</div>
+</div>
+<div id="toast"></div>
+<div id="help">WASD / Arrows: Move<br>Space: Attack<br>Walk into a portal to join a squad<br>Walk into the return portal to leave</div>
 
 <script src="game.js"></script>
-
 </body>
 </html>
