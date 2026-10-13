@@ -104,9 +104,12 @@ function leaveExpedition(id) {
   }
   p.expeditionId = null; p.zone = "lobby"; p.floor = 1; p.x = 280; p.y = 260; p.hp = p.maxHp;
   if (queue.expedition && queue.expedition === (exp && exp.id)) {
-    queue.expedition = null;
-    queue.members = queue.members.filter(x => players[x] && players[x].zone === "lobby");
-    queue.leader = queue.members[0] || null;
+    if (!exp || !exp.members.length) {
+      queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null };
+    } else {
+      queue.members = exp.members.slice();
+      if (!queue.members.includes(queue.leader)) queue.leader = queue.members[0] || null;
+    }
   }
   io.to(id).emit("returned");
   broadcastPlayers(); sendQueue();
