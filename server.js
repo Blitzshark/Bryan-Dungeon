@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e6 })
 app.use(express.json({ limit: "128kb" }));
 
 const players = Object.create(null);
-let queue = { id: "keep-queue", members: [], leader: null, expedition: null };
+let queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null };
 const expeditions = new Map();
 const published = [];
 const NPC_LINES = [
@@ -39,7 +39,7 @@ function sendQueue(to) {
   const members = queue.members.map(id => players[id]).filter(Boolean).map(p => ({
     id: p.id, name: p.name, playerClass: p.playerClass, color: p.color
   }));
-  const data = { queue: { id: queue.id, leader: queue.leader, expedition: queue.expedition }, members };
+  const chosen = published.find(d => d.id === queue.dungeonId);\n  const data = { queue: { id: queue.id, leader: queue.leader, expedition: queue.expedition, dungeonId: queue.dungeonId, dungeonName: chosen ? chosen.name : null }, members };
   if (to) io.to(to).emit("queueState", data); else io.emit("queueState", data);
 }
 function makeEnemies(floor) {
@@ -55,7 +55,7 @@ function makeEnemies(floor) {
   return enemies;
 }
 function expeditionState(exp) {
-  return { id: exp.id, floor: exp.floor, enemies: exp.enemies, members: exp.members.slice() };
+  return { id: exp.id, floor: exp.floor, enemies: exp.enemies, members: exp.members.slice(), mapTiles: exp.mapTiles || null };
 }
 function broadcastExpedition(exp, event = "expeditionState", extra = {}) {
   const payload = { ...expeditionState(exp), ...extra };
@@ -66,7 +66,7 @@ function startExpedition() {
   const members = queue.members.filter(id => players[id] && players[id].zone === "lobby");
   if (!members.length) return;
   const id = crypto.randomUUID();
-  const exp = { id, floor: 1, members, enemies: makeEnemies(1), lastTick: Date.now() };
+  const custom = published.find(d => d.id === queue.dungeonId);\n  const exp = { id, floor: 1, members, enemies: makeEnemies(1), mapTiles: custom ? custom.tiles : null, lastTick: Date.now() };
   expeditions.set(id, exp);
   queue.expedition = id;
   for (const playerId of members) {
@@ -82,7 +82,7 @@ function startExpedition() {
 function removeFromQueue(id) {
   queue.members = queue.members.filter(x => x !== id);
   if (queue.leader === id) queue.leader = queue.members[0] || null;
-  if (!queue.members.length) queue = { id: "keep-queue", members: [], leader: null, expedition: null };
+  if (!queue.members.length) queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null };
   else if (!queue.expedition) sendQueue();
 }
 function leaveExpedition(id) {
@@ -143,7 +143,7 @@ io.on("connection", socket => {
     if (Number.isFinite(data.fy)) p.fy = Math.max(-1, Math.min(1, data.fy));
     broadcastPlayers();
   });
-  socket.on("queueJoin", () => {
+  socket.on("queueJoin", data => {
     const p = players[socket.id]; if (!p) return socket.emit("serverMessage", { text: "Enter the keep first." });
     if (p.zone !== "lobby") return socket.emit("serverMessage", { text: "Return to the keep before joining a new queue." });
     if (queue.expedition) return socket.emit("serverMessage", { text: "That party has already left. Wait for the next queue." });
@@ -186,7 +186,7 @@ io.on("connection", socket => {
     const p = players[socket.id]; if (!p || p.zone !== "dungeon" || !p.expeditionId) return;
     const exp = expeditions.get(p.expeditionId); if (!exp || exp.enemies.length) return;
     exp.floor += 1; exp.enemies = makeEnemies(exp.floor);
-    for (const id of exp.members) { const member = players[id]; if (member) { member.floor = exp.floor; member.x = 170; member.y = 170; member.hp = member.maxHp; io.to(id).emit("floorChanged", { floor: exp.floor, enemies: exp.enemies }); } }
+    for (const id of exp.members) { const member = players[id]; if (member) { member.floor = exp.floor; member.x = 170; member.y = 170; member.hp = member.maxHp; io.to(id).emit("floorChanged", { floor: exp.floor, enemies: exp.enemies, mapTiles: exp.mapTiles || null }); } }
     broadcastPlayers(); broadcastExpedition(exp);
   });
   socket.on("returnLobby", () => leaveExpedition(socket.id));
