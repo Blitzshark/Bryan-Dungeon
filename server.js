@@ -156,7 +156,10 @@ io.on("connection", socket => {
     if (p.zone !== "lobby") return socket.emit("serverMessage", { text: "Return to the keep before joining a new queue." });
     if (queue.expedition) return socket.emit("serverMessage", { text: "That party has already left. Wait for the next queue." });
     if (queue.members.includes(socket.id)) return sendQueue(socket.id);
+    const requestedDungeon = String(data && data.dungeonId || "") || null;
+    if (queue.members.length && queue.dungeonId !== requestedDungeon) return socket.emit("serverMessage", { text: "Everyone in a party must choose the same dungeon. Leave the queue to change maps." });
     if (queue.members.length >= 5) return socket.emit("serverMessage", { text: "The party is full. Wait for the next opening." });
+    if (!queue.members.length) queue.dungeonId = requestedDungeon;
     queue.members.push(socket.id); if (!queue.leader) queue.leader = socket.id;
     sendQueue();
     if (queue.members.length === 5) startExpedition();
