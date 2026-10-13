@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Dungeon Ascension</title>
 
 <style>
 body{
     margin:0;
     overflow:hidden;
-    background:#1a1a1a;
+    background:#111;
+    background-image:
+        linear-gradient(#222 1px, transparent 1px),
+        linear-gradient(90deg, #222 1px, transparent 1px);
+    background-size:50px 50px;
 }
 
 #player{
-    width:40px;
-    height:40px;
+    width:32px;
+    height:32px;
     border-radius:50%;
     background:#00ff66;
     position:absolute;
@@ -20,10 +25,27 @@ body{
     top:100px;
     box-shadow:0 0 20px #00ff66;
 }
+
+#stats{
+    position:fixed;
+    top:10px;
+    left:10px;
+    color:white;
+    background:rgba(0,0,0,0.6);
+    padding:10px;
+    border-radius:10px;
+    font-family:Arial, sans-serif;
+}
 </style>
 </head>
 
 <body>
+
+<div id="stats">
+Level: 1<br>
+XP: 0<br>
+Gold: 0
+</div>
 
 <div id="player"></div>
 
@@ -38,11 +60,11 @@ const speed = 5;
 
 const keys = {};
 
-document.addEventListener("keydown", (e)=>{
+document.addEventListener("keydown",(e)=>{
     keys[e.key.toLowerCase()] = true;
 });
 
-document.addEventListener("keyup", (e)=>{
+document.addEventListener("keyup",(e)=>{
     keys[e.key.toLowerCase()] = false;
 });
 
@@ -51,17 +73,17 @@ function gameLoop(){
     let dx = 0;
     let dy = 0;
 
-    if(keys["w"]) dy -= 1;
-    if(keys["s"]) dy += 1;
-    if(keys["a"]) dx -= 1;
-    if(keys["d"]) dx += 1;
+    if(keys["w"]) dy--;
+    if(keys["s"]) dy++;
+    if(keys["a"]) dx--;
+    if(keys["d"]) dx++;
 
     if(dx !== 0 || dy !== 0){
 
-        const length = Math.sqrt(dx * dx + dy * dy);
+        const len = Math.sqrt(dx*dx + dy*dy);
 
-        dx /= length;
-        dy /= length;
+        dx /= len;
+        dy /= len;
 
         x += dx * speed;
         y += dy * speed;
