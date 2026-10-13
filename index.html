@@ -2,102 +2,104 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Dungeon Ascension</title>
+<title>Bryan's Basement</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
     background:#111;
+    font-family:Arial,sans-serif;
+}
+
+#world{
+    position:absolute;
+    width:3000px;
+    height:3000px;
+
     background-image:
         linear-gradient(#222 1px, transparent 1px),
         linear-gradient(90deg, #222 1px, transparent 1px);
+
     background-size:50px 50px;
 }
 
-#player{
+.player{
+    position:absolute;
     width:32px;
     height:32px;
     border-radius:50%;
-    background:#00ff66;
-    position:absolute;
-    left:100px;
-    top:100px;
-    box-shadow:0 0 20px #00ff66;
 }
 
-#stats{
+.playerName{
+    position:absolute;
+    top:-20px;
+    left:-25px;
+    width:80px;
+
+    text-align:center;
+    color:white;
+    font-size:12px;
+}
+
+#ui{
     position:fixed;
     top:10px;
     left:10px;
-    color:white;
-    background:rgba(0,0,0,0.6);
+
+    z-index:1000;
+
     padding:10px;
+
+    background:rgba(0,0,0,.75);
     border-radius:10px;
-    font-family:Arial, sans-serif;
+
+    color:white;
 }
+
+#nameBox{
+    width:140px;
+    margin-top:5px;
+}
+
+#colorBox{
+    margin-top:5px;
+    width:140px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="stats">
-Level: 1<br>
-XP: 0<br>
-Gold: 0
+<div id="world"></div>
+
+<div id="ui">
+
+    <div id="count">
+        Players Online: 0
+    </div>
+
+    <br>
+
+    <input
+        id="nameBox"
+        type="text"
+        value="Player"
+        maxlength="16">
+
+    <br><br>
+
+    <input
+        id="colorBox"
+        type="color"
+        value="#00ff66">
+
 </div>
 
-<div id="player"></div>
-
-<script>
-
-const player = document.getElementById("player");
-
-let x = 100;
-let y = 100;
-
-const speed = 5;
-
-const keys = {};
-
-document.addEventListener("keydown",(e)=>{
-    keys[e.key.toLowerCase()] = true;
-});
-
-document.addEventListener("keyup",(e)=>{
-    keys[e.key.toLowerCase()] = false;
-});
-
-function gameLoop(){
-
-    let dx = 0;
-    let dy = 0;
-
-    if(keys["w"]) dy--;
-    if(keys["s"]) dy++;
-    if(keys["a"]) dx--;
-    if(keys["d"]) dx++;
-
-    if(dx !== 0 || dy !== 0){
-
-        const len = Math.sqrt(dx*dx + dy*dy);
-
-        dx /= len;
-        dy /= len;
-
-        x += dx * speed;
-        y += dy * speed;
-    }
-
-    player.style.left = x + "px";
-    player.style.top = y + "px";
-
-    requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
-
-</script>
+https://cdn.socket.io/4.7.5/socket.io.min.jsscript>
+game.jsscript>
 
 </body>
 </html>
