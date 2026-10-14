@@ -253,7 +253,7 @@ setInterval(()=>{
   else if(queue.countdownEndsAt&&!queue.expedition&&now-(queue.lastCountdownBroadcast||0)>=1000){queue.lastCountdownBroadcast=now;sendQueue();}
   for(const exp of expeditions.values()){
     if(!exp.enemies.length)continue;if(exp.combatMode==="turnbased"&&!exp.turnReady)continue;let changed=false;
-    const targets=exp.members.map(id=>players[id]).filter(p=>p&&p.zone==="dungeon"&&p.expeditionId===exp.id&&p.hp>0);
+    const targets=exp.members.map(id=>players[id]).filter(p=>p&&p.zone==="dungeon"&&p.expeditionId===exp.id&&p.hp>0&&!p.down);
     for(const e of exp.enemies){
       if(!targets.length)break;let target=targets[0],distance=Infinity;
       for(const p of targets){const d=Math.hypot(p.x-e.x,p.y-e.y);if(d<distance){distance=d;target=p;}}
@@ -272,7 +272,7 @@ setInterval(()=>{
       }
       if(e.type==="raidboss"&&e.hp<e.maxHp*.5&&now-(e.lastSummon||0)>10000&&exp.enemies.length<12){e.lastSummon=now;exp.enemies.push(...makeEnemies(6,"adds").filter(x=>!x.boss).slice(0,3));}
     }
-    if(!targets.length&&exp.members.length){for(const id of exp.members){const p=players[id];if(p&&p.down){p.hp=1;io.to(id).emit("raidDefeated",{text:"Your party has fallen. You crawl back to the keep."});if(!exp.returnTimer)exp.returnTimer=setTimeout(()=>{for(const memberId of exp.members.slice())leaveExpedition(memberId);},1600);}}}
+    if(!targets.length&&exp.members.length){if(!exp.returnTimer){for(const id of exp.members){const p=players[id];if(p)io.to(id).emit("raidDefeated",{text:"The party has fallen. Returning to the keep…"});}exp.returnTimer=setTimeout(()=>{for(const memberId of exp.members.slice())leaveExpedition(memberId);},1800);}}
     if(exp.combatMode==="turnbased"&&changed)exp.turnReady=false;if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp);broadcastPlayers();}
   }
 },250);
