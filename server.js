@@ -98,13 +98,13 @@ function leaveExpedition(id) {
   const exp = expeditions.get(p.expeditionId);
   if (exp) {
     exp.members = exp.members.filter(x => x !== id);
-    if (!exp.members.length) expeditions.delete(exp.id);
+    if (!exp.members.length) { expeditions.delete(exp.id); if(exp.id===raidExpeditionId)raidExpeditionId=null; }
     else broadcastExpedition(exp);
   }
   p.expeditionId = null; p.zone = "lobby"; p.floor = 1; p.x = 280; p.y = 260; p.hp = p.maxHp; p.down = false;
   if (queue.expedition && queue.expedition === (exp && exp.id)) {
     if (!exp || !exp.members.length) {
-      queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null };
+      queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null, countdownEndsAt: null };
     } else {
       queue.members = exp.members.slice();
       if (!queue.members.includes(queue.leader)) queue.leader = queue.members[0] || null;
@@ -240,7 +240,7 @@ io.on("connection", socket => {
     removeFromQueue(socket.id);
     if (players[socket.id] && players[socket.id].expeditionId) {
       const exp = expeditions.get(players[socket.id].expeditionId);
-      if (exp) { exp.members = exp.members.filter(id => id !== socket.id); if (!exp.members.length) expeditions.delete(exp.id); else broadcastExpedition(exp); }
+      if (exp) { exp.members = exp.members.filter(id => id !== socket.id); if (!exp.members.length) { expeditions.delete(exp.id); if(exp.id===raidExpeditionId)raidExpeditionId=null; } else broadcastExpedition(exp); }
     }
     delete players[socket.id];
     broadcastPlayers(); sendQueue();
@@ -249,7 +249,7 @@ io.on("connection", socket => {
 setInterval(()=>{
   const now=Date.now();
   if(queue.countdownEndsAt&&!queue.expedition&&queue.members.length&&now>=queue.countdownEndsAt)startExpedition();
-  else if(queue.countdownEndsAt&&!queue.expedition)sendQueue();
+  else if(queue.countdownEndsAt&&!queue.expedition&&now-(queue.lastCountdownBroadcast||0)>=1000){queue.lastCountdownBroadcast=now;sendQueue();}
   for(const exp of expeditions.values()){
     if(!exp.enemies.length)continue;let changed=false;
     const targets=exp.members.map(id=>players[id]).filter(p=>p&&p.zone==="dungeon"&&p.expeditionId===exp.id&&p.hp>0);
