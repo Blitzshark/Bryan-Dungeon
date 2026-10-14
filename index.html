@@ -11,6 +11,8 @@
 
 #scene-banner{position:fixed;z-index:20;top:20%;left:50%;width:min(680px,94vw);transform:translate(-50%,-12px) scale(.97);opacity:0;pointer-events:none;text-align:center;padding:20px 24px;color:#e5d2a4;background:linear-gradient(90deg,transparent,rgba(14,13,10,.94) 18%,rgba(14,13,10,.94) 82%,transparent);border-top:1px solid #9a7848;border-bottom:1px solid #9a7848;text-shadow:0 0 18px #c98e46;transition:opacity .28s ease,transform .28s ease}
 #scene-banner.scene-show{opacity:1;transform:translate(-50%,0) scale(1)}
+#scene-banner:not(.scene-show){opacity:0;transform:translate(-50%,-12px) scale(.97)}
+#render-error{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;}
 .scene-kicker{font:10px Georgia,serif;letter-spacing:.34em;color:#a99a7b;margin-bottom:7px}.scene-title{font:bold clamp(20px,3vw,31px) Georgia,serif;letter-spacing:.08em}.scene-sub{font:13px Georgia,serif;color:#c8bda5;margin-top:8px}
 #render-error{display:none;position:fixed;z-index:50;left:50%;top:50%;transform:translate(-50%,-50%);max-width:90vw;padding:14px 18px;background:#211b18;border:1px solid #d18b65;color:#f1d9bd;font:13px Georgia,serif}
 #combat-hud{transition:opacity .2s ease,transform .2s ease}body.in-match #combat-hud{opacity:1}body:not(.in-match) #combat-hud{opacity:.96}
