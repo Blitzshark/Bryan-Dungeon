@@ -203,8 +203,9 @@ io.on("connection", socket => {
   socket.on("nextFloor", () => {
     const p = players[socket.id]; if (!p || p.zone !== "dungeon" || !p.expeditionId) return;
     const exp = expeditions.get(p.expeditionId); if (!exp || exp.enemies.length) return;
+    if (exp.mode === "raid") { for (const memberId of exp.members.slice()) { io.to(memberId).emit("raidVictory", { text: "The Hollow Titan is defeated! Your raid is complete." }); leaveExpedition(memberId); } return; }
     exp.floor += 1; exp.enemies = makeEnemies(exp.floor, exp.mode);
-    for (const id of exp.members) { const member = players[id]; if (member) { member.floor = exp.floor; member.x = 170; member.y = 170; member.hp = member.maxHp; io.to(id).emit("floorChanged", { floor: exp.floor, enemies: exp.enemies, mapTiles: exp.mapTiles || null }); } }
+    for (const id of exp.members) { const member = players[id]; if (member) { member.floor = exp.floor; member.x = 170; member.y = 170; member.hp = member.maxHp; member.down = false; io.to(id).emit("floorChanged", { floor: exp.floor, enemies: exp.enemies, mapTiles: exp.mapTiles || null }); } }
     broadcastPlayers(); broadcastExpedition(exp);
   });
   socket.on("raidJoin",()=>{
