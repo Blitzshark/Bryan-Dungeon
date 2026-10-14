@@ -184,7 +184,7 @@ io.on("connection", socket => {
   }
   socket.on("attack",data=>{
     const p=players[socket.id];if(!p||p.zone!=="dungeon"||p.hp<=0||!p.expeditionId)return;
-    const exp=expeditions.get(p.expeditionId);if(!exp||!validPosition(data))return;
+    const exp=expeditions.get(p.expeditionId);if(!exp||!validPosition(data))return;if(exp.combatMode==="turnbased"){if(exp.turnPhase==="enemy")return;exp.turnPhase="enemy";exp.turnReady=true;exp.turnReadyUntil=Date.now()+2200;}
     const klass=p.playerClass,range=klass==="ranger"?190:klass==="arcanist"?165:115,damage=(klass==="vanguard"?12:klass==="ranger"?9:11)+(p.weaponPower||0);
     const fx=Number.isFinite(data.fx)?data.fx:p.fx||1,fy=Number.isFinite(data.fy)?data.fy:p.fy||0,arc=klass==="vanguard"?.85:.55;
     const targets=exp.enemies.filter(e=>{const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy);return d<range&&(d===0||(dx*fx+dy*fy)/d>Math.cos(arc));});
@@ -192,7 +192,7 @@ io.on("connection", socket => {
   });
   socket.on("ability",data=>{
     const p=players[socket.id];if(!p||p.zone!=="dungeon"||p.hp<=0||!p.expeditionId)return;
-    const exp=expeditions.get(p.expeditionId);if(!exp)return;
+    const exp=expeditions.get(p.expeditionId);if(!exp)return;if(exp.combatMode==="turnbased"){if(exp.turnPhase==="enemy")return;exp.turnPhase="enemy";exp.turnReady=true;exp.turnReadyUntil=Date.now()+2200;}
     const slot=Math.max(1,Math.min(4,Number(data&&data.slot)||1)),klass=p.playerClass,mult=data&&data.ultimate?8:slot===4?4.5:slot===3?2.8:slot===2?1.9:1.35,range=data&&data.ultimate?520:slot===1?170:slot===2?230:slot===3?280:360;
     const dmg=Math.round((klass==="vanguard"?15:klass==="ranger"?12:14)*mult)+(p.weaponPower||0),near=exp.enemies.filter(e=>Math.hypot(e.x-p.x,e.y-p.y)<range);
     if(klass==="vanguard"&&slot===2){p.hp=Math.min(p.maxHp,p.hp+22);io.to(socket.id).emit("healed",{amount:22});}
