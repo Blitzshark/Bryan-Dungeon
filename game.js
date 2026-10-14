@@ -57,7 +57,8 @@ function drawCombatOverlay(now,w,h){
   if(damageFlash>now){ctx.save();ctx.strokeStyle="rgba(210,65,53,"+Math.min(.65,(damageFlash-now)/260)+")";ctx.lineWidth=14;ctx.strokeRect(7,7,w-14,h-14);ctx.restore()}
   if(joined&&localZone==="dungeon"&&combatMode==="turnbased"){ctx.save();ctx.fillStyle="#11120fdc";ctx.fillRect(w/2-94,52,188,27);ctx.strokeStyle=window.__awaitingTurn?"#d27b57":"#9aaf81";ctx.strokeRect(w/2-94,52,188,27);ctx.textAlign="center";ctx.fillStyle=window.__awaitingTurn?"#edb08c":"#c5d9a8";ctx.font="12px Georgia,serif";ctx.fillText(window.__awaitingTurn?"ENEMY TURN · BRACE":"YOUR TURN · CHOOSE ACTION",w/2,69);ctx.restore()}
 }
-\nfunction showToast(s,ms=2500){ui.toast.textContent=s;ui.toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>ui.toast.style.display="none",ms)}
+
+function showToast(s,ms=2500){ui.toast.textContent=s;ui.toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>ui.toast.style.display="none",ms)}
 function setStatus(s,ok=false){ui.status.textContent=s;ui.status.style.color=ok?"#9ca889":"#9d978b"}
 function safeName(v){return String(v||"").trim().replace(/\s+/g," ").slice(0,18)}
 function emit(event,data){if(socket&&connected)socket.emit(event,data)}
