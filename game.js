@@ -68,6 +68,7 @@ socket.on("damageTaken",d=>{damageFlash=performance.now()+260;showToast("-"+(d.a
 socket.on("healed",d=>{showToast("Restored "+d.amount+" health.")});
 socket.on("playerDown",()=>{me.hp=0;showToast("YOU HAVE FALLEN — the party must survive.",3500)});
 socket.on("raidDefeated",d=>showToast(d.text||"The party has fallen."));
+socket.on("raidVictory",d=>showToast(d.text||"Raid cleared!"));
 
 }
 function enter(){const name=safeName(ui.name.value);if(!name){ui.message.textContent="Choose a name first.";ui.name.focus();return}if(!/^[\p{L}\p{N}_ -]+$/u.test(name)){ui.message.textContent="Use letters, numbers, spaces, _ or -.";return}if(!connected){ui.message.textContent="The server is still waking. Try again in a moment.";return}me.name=name;me.color=ui.color.value||muted[0];me.class=ui.class.value;ui.message.textContent="";emit("join",{name,color:me.color,playerClass:me.class})}
