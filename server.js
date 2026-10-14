@@ -54,7 +54,7 @@ function makeEnemies(floor, mode) {
   return enemies;
 }
 function expeditionState(exp) {
-  return { id: exp.id, floor: exp.floor, enemies: exp.enemies, members: exp.members.slice(), mapTiles: exp.mapTiles || null };
+  return { id: exp.id, floor: exp.floor, enemies: exp.enemies, members: exp.members.slice(), mapTiles: exp.mapTiles || null, combatMode: exp.combatMode || "freeroam", turnPhase: exp.turnPhase || "player" };
 }
 function broadcastExpedition(exp, event = "expeditionState", extra = {}) {
   const payload = { ...expeditionState(exp), ...extra };
@@ -66,7 +66,7 @@ function startExpedition() {
   if (!members.length) return;
   const id = crypto.randomUUID();
   const custom = published.find(d => d.id === queue.dungeonId);
-  const exp = { id, floor: 1, mode: "normal", combatMode: queue.combatMode || "freeroam", turnReady: false, members, enemies: makeEnemies(1), mapTiles: null, lastTick: Date.now() };
+  const exp = { id, floor: 1, mode: "normal", combatMode: queue.combatMode || "freeroam", turnReady: false, turnPhase: "player", turnReadyUntil: 0, members, enemies: makeEnemies(1), mapTiles: null, lastTick: Date.now() };
   queue.countdownEndsAt = null;
   expeditions.set(id, exp);
   queue.expedition = id;
@@ -252,7 +252,7 @@ setInterval(()=>{
   if(queue.countdownEndsAt&&!queue.expedition&&queue.members.length&&now>=queue.countdownEndsAt)startExpedition();
   else if(queue.countdownEndsAt&&!queue.expedition&&now-(queue.lastCountdownBroadcast||0)>=1000){queue.lastCountdownBroadcast=now;sendQueue();}
   for(const exp of expeditions.values()){
-    if(!exp.enemies.length)continue;if(exp.combatMode==="turnbased"&&(!exp.turnReady||now>(exp.turnReadyUntil||0))){exp.turnReady=false;continue;}let changed=false;
+    if(!exp.enemies.length)continue;if(exp.combatMode==="turnbased"){if(exp.turnPhase!=="enemy")continue;if(now>(exp.turnReadyUntil||0)){exp.turnReady=false;exp.turnPhase="player";broadcastExpedition(exp,"combatState",{turnPhase:"player",message:"Your turn."});continue;}}let changed=false;
     const targets=exp.members.map(id=>players[id]).filter(p=>p&&p.zone==="dungeon"&&p.expeditionId===exp.id&&p.hp>0&&!p.down);
     for(const e of exp.enemies){
       if(!targets.length)break;let target=targets[0],distance=Infinity;
@@ -273,7 +273,7 @@ setInterval(()=>{
       if(e.type==="raidboss"&&e.hp<e.maxHp*.5&&now-(e.lastSummon||0)>10000&&exp.enemies.length<12){e.lastSummon=now;exp.enemies.push(...makeEnemies(6,"adds").filter(x=>!x.boss).slice(0,3));}
     }
     if(!targets.length&&exp.members.length){if(!exp.returnTimer){for(const id of exp.members){const p=players[id];if(p)io.to(id).emit("raidDefeated",{text:"The party has fallen. Returning to the keep…"});}exp.returnTimer=setTimeout(()=>{for(const memberId of exp.members.slice())leaveExpedition(memberId);},1800);}}
-    if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp);broadcastPlayers();}
+    if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp,"combatState",{turnPhase:exp.turnPhase||"player"});broadcastPlayers();}
   }
 },250);
 app.get("/", (req, res) => res.send("Bryan's Dungeon server is awake."));
