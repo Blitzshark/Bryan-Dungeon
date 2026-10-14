@@ -20,7 +20,7 @@ const NPC_LINES = [
   "If you find a helmet without a skull, leave it where it lies. It may be waiting for someone.",
   "Bring a party. The dark has a long reach, and it never tires."
 ];
-const allowedClasses = new Set(["vanguard", "ranger", "arcanist"]);
+const allowedClasses = new Set(["vanguard", "ranger", "arcanist", "paladin", "rogue", "necromancer"]);
 const allowedColors = /^#[0-9a-f]{6}$/i;
 const allowedTiles = new Set(["floor", "wall", "crate", "skeleton", "chain", "helmet", "exit", "spawn"]);
 
@@ -45,7 +45,7 @@ function sendQueue(to) {
   if (to) io.to(to).emit("queueState", data); else io.emit("queueState", data);
 }
 function makeEnemies(floor, mode) {
-  const defs=[["skeleton","Bone Soldier",18,43,15],["brute","Crypt Brute",48,24,11],["archer","Grave Archer",16,35,13],["shade","Lantern Shade",22,66,12],["bomber","Cinder Husk",20,31,14],["mage","Rune Acolyte",25,29,12],["sentinel","Iron Sentinel",38,21,16]];
+  const defs=[["skeleton","Bone Soldier",18,43,15],["brute","Crypt Brute",48,24,11],["archer","Grave Archer",16,35,13],["shade","Lantern Shade",22,66,12],["bomber","Cinder Husk",20,31,14],["mage","Rune Acolyte",25,29,12],["sentinel","Iron Sentinel",38,21,16],["lancer","Crypt Lancer",29,51,14],["leech","Soul Leech",24,39,12],["hexer","Hex Weaver",28,27,13]];
   if(mode==="raid")return [{id:crypto.randomUUID(),type:"raidboss",name:"THE HOLLOW TITAN",x:860,y:470,r:82,hp:3600,maxHp:3600,speed:23,boss:true,stage:1,hitAt:0,attackCd:0}];
   const count=Math.min(5+Math.floor(floor*.8),12), enemies=[];
   for(let i=0;i<count;i++){const d=defs[Math.floor(Math.random()*defs.length)],scale=1+floor*.19,hp=Math.round(d[2]*scale);enemies.push({id:crypto.randomUUID(),type:d[0],name:d[1],x:260+Math.random()*690,y:210+Math.random()*470,r:d[4]+Math.min(5,floor*.25),hp,maxHp:hp,speed:d[3]+Math.min(20,floor),boss:false,hitAt:0,attackCd:0});}
@@ -66,7 +66,7 @@ function startExpedition() {
   if (!members.length) return;
   const id = crypto.randomUUID();
   const custom = published.find(d => d.id === queue.dungeonId);
-  const exp = { id, floor: 1, mode: "normal", members, enemies: makeEnemies(1), mapTiles: custom ? custom.tiles : null, lastTick: Date.now() };
+  const exp = { id, floor: 1, mode: "normal", combatMode: queue.combatMode || "freeroam", turnReady: false, members, enemies: makeEnemies(1), mapTiles: null, lastTick: Date.now() };
   queue.countdownEndsAt = null;
   expeditions.set(id, exp);
   queue.expedition = id;
@@ -89,7 +89,7 @@ function startExpedition() {
 function removeFromQueue(id) {
   queue.members = queue.members.filter(x => x !== id);
   if (queue.leader === id) queue.leader = queue.members[0] || null;
-  if (!queue.members.length) queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null, countdownEndsAt: null };
+  if (!queue.members.length) queue = { id: "keep-queue", members: [], leader: null, expedition: null, dungeonId: null, combatMode: "freeroam", countdownEndsAt: null };
   else if (!queue.expedition) sendQueue();
 }
 function leaveExpedition(id) {
@@ -158,10 +158,10 @@ io.on("connection", socket => {
     if (p.zone !== "lobby") return socket.emit("serverMessage", { text: "Return to the keep before joining a new queue." });
     if (queue.expedition) return socket.emit("serverMessage", { text: "That party has already left. Wait for the next queue." });
     if (queue.members.includes(socket.id)) return sendQueue(socket.id);
-    const requestedDungeon = String(data && data.dungeonId || "") || null;
-    if (queue.members.length && queue.dungeonId !== requestedDungeon) return socket.emit("serverMessage", { text: "Everyone in a party must choose the same dungeon. Leave the queue to change maps." });
+    const requestedDungeon = null;
+    if (queue.members.length && queue.combatMode !== ((data && data.combatMode === "turnbased") ? "turnbased" : "freeroam")) return socket.emit("serverMessage", { text: "Everyone in a party must choose the same combat mode." });
     if (queue.members.length >= 5) return socket.emit("serverMessage", { text: "The party is full. Wait for the next opening." });
-    if (!queue.members.length) queue.dungeonId = requestedDungeon;
+    if (!queue.members.length) { queue.dungeonId = null; queue.combatMode = data && data.combatMode === "turnbased" ? "turnbased" : "freeroam"; }
     queue.members.push(socket.id); if (!queue.leader) queue.leader = socket.id;
     if (!queue.countdownEndsAt) queue.countdownEndsAt = Date.now() + 10000;
     sendQueue();
@@ -252,7 +252,7 @@ setInterval(()=>{
   if(queue.countdownEndsAt&&!queue.expedition&&queue.members.length&&now>=queue.countdownEndsAt)startExpedition();
   else if(queue.countdownEndsAt&&!queue.expedition&&now-(queue.lastCountdownBroadcast||0)>=1000){queue.lastCountdownBroadcast=now;sendQueue();}
   for(const exp of expeditions.values()){
-    if(!exp.enemies.length)continue;let changed=false;
+    if(!exp.enemies.length)continue;if(exp.combatMode==="turnbased"&&!exp.turnReady)continue;let changed=false;
     const targets=exp.members.map(id=>players[id]).filter(p=>p&&p.zone==="dungeon"&&p.expeditionId===exp.id&&p.hp>0);
     for(const e of exp.enemies){
       if(!targets.length)break;let target=targets[0],distance=Infinity;
@@ -260,20 +260,20 @@ setInterval(()=>{
       if(e.boss){const stage=e.hp/e.maxHp<.3?3:e.hp/e.maxHp<.65?2:1;if(stage!==e.stage){e.stage=stage;e.attackCd=0;broadcastExpedition(exp,"combatState",{message:stage===2?"The boss enters its second phase!":"THE BOSS ENRAGES — THE FLOOR SHUDDERS!"});}}
       if(distance>e.r+32){const speed=e.speed*(e.type==="shade"&&e.stage>=2?1.55:1);e.x+=(target.x-e.x)/Math.max(1,distance)*speed*.25;e.y+=(target.y-e.y)/Math.max(1,distance)*speed*.25;changed=true;}
       if(!e.attackCd)e.attackCd=now+700+Math.random()*500;
-      if(now>=e.attackCd&&!e.telegraphAt){e.telegraphAt=now;e.targetId=target.id;e.attackType=e.type==="archer"?"volley":e.type==="bomber"?"blast":e.type==="shade"?"dash":e.type==="mage"?"rune":e.boss?(e.stage>=3?"cataclysm":e.stage===2?"shockwave":"cleave"):e.type==="brute"?"slam":"claw";changed=true;}
+      if(now>=e.attackCd&&!e.telegraphAt){e.telegraphAt=now;e.targetId=target.id;e.attackType=e.type==="archer"?"volley":e.type==="bomber"?"blast":e.type==="shade"||e.type==="leech"?"dash":e.type==="mage"||e.type==="hexer"?"rune":e.type==="lancer"?"charge":e.type==="sentinel"?"guardbreak":e.boss?(e.stage>=3?"cataclysm":e.stage===2?"shockwave":"cleave"):e.type==="brute"?"slam":"claw";changed=true;}
       if(e.telegraphAt&&now-e.telegraphAt>(e.boss?(e.stage>=3?450:750):e.type==="bomber"?550:850)){
         const victim=players[e.targetId]||target,dist=Math.hypot(victim.x-e.x,victim.y-e.y);let hit=false;
         if(["blast","shockwave","cataclysm"].includes(e.attackType))hit=dist<(e.attackType==="cataclysm"?390:e.attackType==="shockwave"?250:145);
         else if(e.attackType==="volley"||e.attackType==="rune")hit=dist<(e.attackType==="rune"?300:520);
         else if(e.attackType==="dash"){e.x=victim.x+(e.x-victim.x)*.15;e.y=victim.y+(e.y-victim.y)*.15;hit=dist<240;}
-        else hit=dist<(e.type==="brute"?100:e.boss?190:65);
-        if(hit&&victim.hp>0){const dmg=e.type==="raidboss"?(e.stage>=3?34:24):e.boss?(e.stage>=3?24:e.stage===2?18:13):e.type==="brute"?16:e.type==="bomber"?20:e.type==="mage"?13:e.type==="archer"?11:e.type==="shade"?14:7;victim.hp=Math.max(0,victim.hp-dmg);io.to(victim.id).emit("damageTaken",{amount:dmg,attack:e.attackType});if(victim.hp===0){victim.down=true;victim.zone="dungeon";io.to(victim.id).emit("playerDown",{name:victim.name});}}
+        else if(e.attackType==="charge"){e.x+=((victim.x-e.x)/Math.max(1,dist))*125;e.y+=((victim.y-e.y)/Math.max(1,dist))*125;hit=dist<220;}else if(e.attackType==="guardbreak")hit=dist<145;else hit=dist<(e.type==="brute"?100:e.boss?190:65);
+        if(hit&&victim.hp>0){const dmg=e.type==="raidboss"?(e.stage>=3?34:24):e.boss?(e.stage>=3?24:e.stage===2?18:13):e.type==="brute"?16:e.type==="bomber"?20:e.type==="mage"||e.type==="hexer"?13:e.type==="archer"||e.type==="lancer"?11:e.type==="shade"||e.type==="leech"?14:e.type==="sentinel"?17:7;victim.hp=Math.max(0,victim.hp-dmg);io.to(victim.id).emit("damageTaken",{amount:dmg,attack:e.attackType});if(victim.hp===0){victim.down=true;victim.zone="dungeon";io.to(victim.id).emit("playerDown",{name:victim.name});}}
         e.telegraphAt=0;e.attackCd=now+(e.boss?(e.stage>=3?850:1450):e.type==="bomber"?2100:1200+Math.random()*600);e.attackType=null;changed=true;
       }
       if(e.type==="raidboss"&&e.hp<e.maxHp*.5&&now-(e.lastSummon||0)>10000&&exp.enemies.length<12){e.lastSummon=now;exp.enemies.push(...makeEnemies(6,"adds").filter(x=>!x.boss).slice(0,3));}
     }
     if(!targets.length&&exp.members.length){for(const id of exp.members){const p=players[id];if(p&&p.down){p.hp=1;io.to(id).emit("raidDefeated",{text:"Your party has fallen. You crawl back to the keep."});if(!exp.returnTimer)exp.returnTimer=setTimeout(()=>{for(const memberId of exp.members.slice())leaveExpedition(memberId);},1600);}}}
-    if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp);broadcastPlayers();}
+    if(exp.combatMode==="turnbased"&&changed)exp.turnReady=false;if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp);broadcastPlayers();}
   }
 },250);
 app.get("/", (req, res) => res.send("Bryan's Dungeon server is awake."));
