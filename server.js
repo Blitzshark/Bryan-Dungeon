@@ -193,7 +193,7 @@ io.on("connection", socket => {
   socket.on("ability",data=>{
     const p=players[socket.id];if(!p||p.zone!=="dungeon"||p.hp<=0||!p.expeditionId)return;
     const exp=expeditions.get(p.expeditionId);if(!exp)return;
-    const slot=Math.max(1,Math.min(4,Number(data&&data.slot)||1)),klass=p.playerClass,mult=slot===4?4.5:slot===3?2.8:slot===2?1.9:1.35,range=slot===1?170:slot===2?230:slot===3?280:360;
+    const slot=Math.max(1,Math.min(4,Number(data&&data.slot)||1)),klass=p.playerClass,mult=data&&data.ultimate?8:slot===4?4.5:slot===3?2.8:slot===2?1.9:1.35,range=data&&data.ultimate?520:slot===1?170:slot===2?230:slot===3?280:360;
     const dmg=Math.round((klass==="vanguard"?15:klass==="ranger"?12:14)*mult)+(p.weaponPower||0),near=exp.enemies.filter(e=>Math.hypot(e.x-p.x,e.y-p.y)<range);
     if(klass==="vanguard"&&slot===2){p.hp=Math.min(p.maxHp,p.hp+22);io.to(socket.id).emit("healed",{amount:22});}
     near.forEach(e=>damageEnemy(exp,e,dmg,socket.id));
@@ -266,12 +266,12 @@ setInterval(()=>{
         else if(e.attackType==="volley"||e.attackType==="rune")hit=dist<(e.attackType==="rune"?300:520);
         else if(e.attackType==="dash"){e.x=victim.x+(e.x-victim.x)*.15;e.y=victim.y+(e.y-victim.y)*.15;hit=dist<240;}
         else hit=dist<(e.type==="brute"?100:e.boss?190:65);
-        if(hit&&victim.hp>0){const dmg=e.type==="raidboss"?(e.stage>=3?34:24):e.boss?(e.stage>=3?24:e.stage===2?18:13):e.type==="brute"?16:e.type==="bomber"?20:e.type==="mage"?13:e.type==="archer"?11:e.type==="shade"?14:7;victim.hp=Math.max(0,victim.hp-dmg);io.to(victim.id).emit("damageTaken",{amount:dmg,attack:e.attackType});if(victim.hp===0){victim.down=true;victim.zone="downed";io.to(victim.id).emit("playerDown",{name:victim.name});}}
+        if(hit&&victim.hp>0){const dmg=e.type==="raidboss"?(e.stage>=3?34:24):e.boss?(e.stage>=3?24:e.stage===2?18:13):e.type==="brute"?16:e.type==="bomber"?20:e.type==="mage"?13:e.type==="archer"?11:e.type==="shade"?14:7;victim.hp=Math.max(0,victim.hp-dmg);io.to(victim.id).emit("damageTaken",{amount:dmg,attack:e.attackType});if(victim.hp===0){victim.down=true;victim.zone="dungeon";io.to(victim.id).emit("playerDown",{name:victim.name});}}
         e.telegraphAt=0;e.attackCd=now+(e.boss?(e.stage>=3?850:1450):e.type==="bomber"?2100:1200+Math.random()*600);e.attackType=null;changed=true;
       }
       if(e.type==="raidboss"&&e.hp<e.maxHp*.5&&now-(e.lastSummon||0)>10000&&exp.enemies.length<12){e.lastSummon=now;exp.enemies.push(...makeEnemies(6,"adds").filter(x=>!x.boss).slice(0,3));}
     }
-    if(!targets.length&&exp.members.length){for(const id of exp.members){const p=players[id];if(p&&p.zone==="downed"){p.zone="dungeon";p.hp=1;io.to(id).emit("raidDefeated",{text:"Your party has fallen. You crawl back to the keep."});setTimeout(()=>leaveExpedition(id),1600);}}}
+    if(!targets.length&&exp.members.length){for(const id of exp.members){const p=players[id];if(p&&p.down){p.hp=1;io.to(id).emit("raidDefeated",{text:"Your party has fallen. You crawl back to the keep."});if(!exp.returnTimer)exp.returnTimer=setTimeout(()=>{for(const memberId of exp.members.slice())leaveExpedition(memberId);},1600);}}}
     if(changed||now-(exp.lastBroadcast||0)>500){exp.lastBroadcast=now;broadcastExpedition(exp);broadcastPlayers();}
   }
 },250);
