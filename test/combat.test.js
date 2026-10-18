@@ -51,3 +51,5 @@ test('the full eight-encounter campaign is winnable with legal actions and story
 });
 
 test('camp supplies can be bought only after victory with sufficient gold',()=>{const s=E.createRun();assert.equal(E.buyTonic(s),false);s.phase='victory';s.gold=19;assert.equal(E.buyTonic(s),false);s.gold=24;const count=s.potions;assert.equal(E.buyTonic(s),true);assert.equal(s.gold,4);assert.equal(s.potions,count+1);assert.equal(E.buyTonic(s),false);});
+
+test('resolved actions carry exact presentation cues without changing turn rules',()=>{const s=E.createRun();const result=E.act(s,{type:'skill',skill:'volley',target:'enemy-0'});assert.equal(result.action,'skill');assert.equal(result.skill,'volley');assert.equal(result.actor,'rowan');assert(result.events.every(e=>e.source==='rowan'&&e.type==='damage'&&typeof e.guarded==='boolean'));assert.equal(E.active(s).id,'mira');const focused=E.act(s,{type:'focus'});assert.equal(focused.action,'focus');assert.equal(focused.events[0].type,'focus');assert.equal(E.active(s).id,'hero');});

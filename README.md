@@ -40,14 +40,20 @@ Defeat can be retried without losing previous campaign progress.
 Use the enemy cards or click an enemy to choose a target. Fight / Items / Focus
 and every action support mouse and touch. Keyboard: 1–3 change tabs; Q strikes;
 W uses the active character’s technique; E mends with Mira; arrows change target;
-Escape opens the menu. Progress saves after each resolved action. Returning to
+Escape opens the menu. H folds or unfolds the compact bottom controls.
+The larger arena keeps fighters above the controls on desktop and mobile; party
+and enemy models face inward. Melee attacks lunge, ranged attacks launch arrows
+or spell bolts, and healing and guarding have their own effects. Sounds begin
+after interaction and can be muted with the music-note button. Reduced-motion
+preferences disable lunges and particle motion. Progress saves after each resolved action. Returning to
 the title lets you continue the campaign later.
 
 ## Files
 
 - `campaign.js`: deterministic campaign and combat engine, usable in Node tests.
 - `scene.js`: dependency-free Canvas block-world rendering and battle effects.
-- `game.js`: menus, combat presentation, save handling, and sound.
+- `game.js`: menus, combat presentation, and save handling.
+- `sound.js`: locally synthesized attack, impact, healing, guard, and outcome sounds.
 - `styles.css`: responsive interface.
 - `server.js`: optional local static development server.
 

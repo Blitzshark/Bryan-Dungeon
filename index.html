@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#131c1b"><meta name="description" content="A block-world campaign RPG. Assemble your party, explore the Greenwood, and defeat the Hollow King. Every battle is turn based.">
 <title>Bryan’s Dungeon — The Hollow Road</title>
-<link rel="stylesheet" href="styles.css?v=4">
-<script defer src="campaign.js?v=4"></script><script defer src="scene.js?v=4"></script><script defer src="game.js?v=4"></script>
+<link rel="stylesheet" href="styles.css?v=5">
+<script defer src="campaign.js?v=5"></script><script defer src="scene.js?v=5"></script><script defer src="sound.js?v=5"></script><script defer src="game.js?v=5"></script>
 </head>
 <body>
 <canvas id="world" aria-label="Block-world battle arena. Use the enemy cards to select a target."></canvas>
@@ -18,7 +18,7 @@
  <div class="battle-announcement" id="battle-announcement" role="status" aria-live="polite"></div>
  <aside class="battle-log panel"><button id="log-toggle" aria-expanded="true">BATTLE JOURNAL <span>−</span></button><div id="log-lines" aria-live="polite"></div></aside>
  <section class="command-deck panel" id="command-deck" aria-label="Turn actions">
-  <div class="actor-header"><div class="actor-portrait" id="actor-portrait">◆</div><div class="actor-info"><div class="eyebrow" id="actor-job">VANGUARD · LEVEL 1</div><h2 id="actor-name">Your adventurer</h2></div><div class="turn-indicator" id="turn-indicator"><i></i> YOUR TURN</div><div class="gold"><span>◈</span> <b id="gold-count">0</b></div></div>
+  <div class="actor-header"><div class="actor-portrait" id="actor-portrait">◆</div><div class="actor-info"><div class="eyebrow" id="actor-job">VANGUARD · LEVEL 1</div><h2 id="actor-name">Your adventurer</h2></div><div class="turn-indicator" id="turn-indicator"><i></i> YOUR TURN</div><div class="gold"><span>◈</span> <b id="gold-count">0</b></div><button id="deck-toggle" class="icon-button" aria-label="Hide battle controls" aria-expanded="true" title="Hide controls (H)">⌄</button></div>
   <div class="resource-row"><div><div class="resource-label"><span>HEALTH</span><b id="hp-label"></b></div><div class="meter health"><i id="hp-fill"></i></div></div><div><div class="resource-label"><span>FOCUS</span><b id="mp-label"></b></div><div class="meter focus"><i id="mp-fill"></i></div></div></div>
   <nav class="action-tabs" aria-label="Action category"><button data-tab="fight" class="active">⚔ <span>Fight</span><kbd>1</kbd></button><button data-tab="items">▣ <span>Items</span><kbd>2</kbd></button><button data-tab="focus">✦ <span>Focus</span><kbd>3</kbd></button></nav>
   <div id="action-content" class="action-content"></div><div class="deck-foot"><span id="target-hint">Select an enemy to target</span><span>NO TIMER. TAKE YOUR TURN.</span></div>

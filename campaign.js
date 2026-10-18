@@ -48,7 +48,7 @@ function endTurn(s){
  do{s.cursor++;if(s.cursor>=s.order.length){s.round++;s.order=makeOrder(s);s.cursor=0;note(s,'Round '+s.round+'.');}}while(!active(s)||active(s).hp<=0);
  beginTurn(s);
 }
-function damage(s,source,target,amount,events){const dealt=Math.min(target.hp,Math.max(1,Math.round(amount*(target.guard?.5:1))));target.hp-=dealt;events.push({type:'damage',target:target.id,source:source.id,amount:dealt});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');}
+function damage(s,source,target,amount,events){const dealt=Math.min(target.hp,Math.max(1,Math.round(amount*(target.guard?.5:1))));target.hp-=dealt;events.push({type:'damage',target:target.id,source:source.id,amount:dealt,guarded:!!target.guard});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');}
 function act(s,command){
  const actor=active(s);if(!actor||actor.side!=='party')return {ok:false,error:'Wait for your party’s turn.'};
  const events=[];
@@ -73,7 +73,7 @@ function act(s,command){
   if(skill.heal){const ally=living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];const amount=Math.min(skill.heal,ally.maxHp-ally.hp);ally.hp+=amount;events.push({type:'heal',target:ally.id,amount});note(s,actor.name+' mends '+ally.name+' for '+amount+'.');}
   else{(skill.all?living(s,'enemy'):[target]).forEach(t=>damage(s,actor,t,actor.atk*skill.mult,events));}
  }else return {ok:false,error:'Choose an action.'};
- const result={ok:true,actor:actor.id,events};endTurn(s);return result;
+ const result={ok:true,actor:actor.id,action:command.type,skill:command.skill||null,events};endTurn(s);return result;
 }
 function enemyAct(s){
  const actor=active(s);if(!actor||actor.side!=='enemy')return {ok:false,error:'Not an enemy turn.'};
@@ -81,7 +81,7 @@ function enemyAct(s){
  const enraged=actor.kind==='king'&&actor.hp<actor.maxHp*.4;
  if(enraged){note(s,'The Hollow King unleashes a sweeping blow!');targets.forEach(t=>damage(s,actor,t,actor.atk*.7,events));}
  else damage(s,actor,target,actor.atk,events);
- const result={ok:true,actor:actor.id,events};endTurn(s);return result;
+ const result={ok:true,actor:actor.id,action:"enemy",skill:["mage","wisp"].includes(actor.kind)?"ember":actor.kind==="king"||actor.kind==="golem"?"sunder":"strike",events};endTurn(s);return result;
 }
 function travel(s){if(s.phase!=='victory')return false;if([1,4].includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':'shrine';return true;}s.stage++;startBattle(s);return true;}
 function choose(s,choice){
