@@ -148,7 +148,7 @@ framing rather than a fast zoom.
   gold**. Victories earn additional tavern gold, separate from the party’s camp
   bag. Reward credit is tracked per run so reloads do not award it twice.
 - There are **6 classes**, **5 races**, and **8 weapon types**. Every class and
-  race has its own ultimate; every weapon has its own attack. **Arts / 4** shows
+  race has its own ultimate; every weapon has its own attack. **Arts / 3** shows
   them. Ultimates require 100 charge: actions grant 25 and incoming hits grant
   15. Weapon techniques use focus and turn-based cooldowns. Loot weapons retain
   the technique of their weapon type.
@@ -203,7 +203,8 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   remains visible with reduced motion (without foot bobbing).
 - At camp, choose a character and press **Equip best gear**, or directly equip
   an item with its stat comparison visible. Upgrade and sell are under each
-  item's expandable controls. Traveling automatically fully heals the party.
+  item's expandable controls. Traveling preserves health. Resting consumes one ordinary stage and fully
+  heals; it cannot skip a boss. Healing items can also be used at camp.
   Online players can only equip characters they control.
 
 ### Timed turns and attack presentation
@@ -219,3 +220,23 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   spinning cleaves, piercing arrows, lightning, ice shards, flame plumes and
   magic charge circles. Charged class/race ultimates add brief cinematic camera
   movement and framing. Universe Cleave keeps its separate cosmic cutscene.
+
+### Rest, story scenes, transitions and sound
+
+- Victories and level-ups never heal or revive the party. Story stat rewards
+  increase maximum health without restoring current health. Shrine medicine
+  grants consumable tonics. Camp tonics and embers consume the same inventory
+  as battle items; continuing gives no healing.
+- A camp rest heals everyone and spends the next ordinary campaign stage,
+  earning no battle rewards for that stage. It is unavailable immediately
+  before a mandatory boss, at the final camp, and in endless raids (use items).
+  Only the online party host can commit this shared progression cost.
+- The Focus category is removed; Fight, Items and Arts use keys 1, 2 and 3.
+  Guard & focus remains a technique in Fight.
+- Story decisions play a short group scene showing supplies or practice.
+  Entry and victory get marching scenes; world changes pass through a gate
+  as the scenery changes. Online room timing reserves the transition before
+  enemies or the next player decision can begin.
+- Synthesized audio includes footsteps, portal swells, story chimes, campfire
+  rest tones, attack-specific accents and a subtle echo. The sound button
+  controls these effects as well as combat audio.

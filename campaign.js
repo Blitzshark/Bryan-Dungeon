@@ -57,7 +57,7 @@ function checkEnd(s){
   const gold=s.mode==='raid'?40+22*s.raidLevel:24+s.stage*11,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;s.gold+=gold;s.tavernGold=(s.tavernGold||0)+gold;s.xp+=xp;s.potions+=1;
   if(s.mode==='raid')s.raidBest=Math.max(s.raidBest,s.raidLevel);
   const level=s.mode==='raid'?s.raidLevel+1:1+Math.floor((s.stage+1)/2);let leveled=false;
-  s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}p.hp=Math.min(p.maxHp,Math.max(p.hp,1)+Math.round(p.maxHp*.35));p.mp=p.maxMp;});
+  s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}});
   const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;
   s.reward={gold,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
  }
@@ -110,6 +110,7 @@ function botAct(s){
  if(fallen&&s.embers)command={type:'revive',target:fallen.id};
  else if(weak.hp<weak.maxHp*.4&&s.potions)command={type:'potion',target:weak.id};
  else if(['mage','paladin'].includes(a.job)&&weak.hp<weak.maxHp*.65&&a.mp>=3&&!a.cooldowns.mend)command={type:'skill',skill:'mend'};
+ else if((a.charge||0)>=100)command={type:'skill',skill:CLASSES[a.job].ultimate,target:living(s,'enemy')[0]?.id};
  else{const key=CLASSES[a.job].skill,target=living(s,'enemy').sort((a,b)=>a.hp-b.hp)[0]?.id;command=a.mp<SKILLS[key].cost?{type:'focus'}:{type:'skill',skill:a.cooldowns[key]?'strike':key,target};}
  return act(s,command);
 }
@@ -156,27 +157,27 @@ function campAction(s,command){
  }else if(command.type==='unequip'){if(!item)return {ok:false,error:'Gear not found.'};item.owner=null;}
  else if(command.type==='sell'){if(!item||item.owner)return {ok:false,error:'Unequip an item before selling it.'};s.gold+=item.price;s.inventory=s.inventory.filter(i=>i!==item);}
  else if(command.type==='upgrade'){if(!item)return {ok:false,error:'Choose gear to upgrade.'};const cost=25+item.upgrades*20;if(item.upgrades>=3||s.gold<cost)return {ok:false,error:item.upgrades>=3?'This item is fully upgraded.':'Not enough gold.'};s.gold-=cost;item.upgrades++;if(item.slot==='weapon')item.atk+=2;else item.def++;item.price+=10;}
- else if(command.type==='rest'){if(s.campRested)return {ok:false,error:'Your party has already rested.'};s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;p.status={};});s.campRested=true;}
+ else if(command.type==='use-tonic'||command.type==='use-ember'){if(!hero)return {ok:false,error:'Choose an adventurer.'};if(command.type==='use-tonic'){if(!s.potions||hero.hp<=0||hero.hp>=hero.maxHp)return {ok:false,error:'Choose an injured standing adventurer with a tonic available.'};s.potions--;hero.hp=Math.min(hero.maxHp,hero.hp+tonicHeal(s));}else{if(!s.embers||hero.hp>0)return {ok:false,error:'Choose a fallen adventurer with an ember available.'};s.embers--;hero.hp=Math.ceil(hero.maxHp*.5);}}
+ else if(command.type==='rest'){if(s.mode==='raid'||s.stage>=29||s.stage%10===8)return {ok:false,error:'No spare stage remains before this boss. Use healing items.'};if(s.campRested)return {ok:false,error:'Your party has already rested.'};s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;p.status={};});s.campRested=true;s.restSpent=true;note(s,'Resting consumes the next stage. No battle rewards are earned.');}
  else if(command.type==='buy-tonic'||command.type==='buy-ember'){const price=command.type==='buy-tonic'?20:80;if(s.gold<price)return {ok:false,error:'Not enough gold.'};s.gold-=price;if(price===20)s.potions++;else s.embers++;}
  else return {ok:false,error:'Choose a camp action.'};
  return {ok:true};
 }
 function travel(s){
  if(s.phase!=='camp')return false;
- if(!s.campRested)campAction(s,{type:'rest'});
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===CHAPTERS.length-1){s.phase='complete';return true;}
  if([1,4,7,11,14,17,22,26].includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':s.stage===14?'shrine':'crossroads';return true;}
- s.stage++;startBattle(s);return true;
+ s.stage+=s.restSpent?2:1;s.restSpent=false;startBattle(s);return true;
 }
 function choose(s,choice){
  if(s.phase!=='story'||!['accept','decline'].includes(choice))return false;
  if(s.choice==='stranger'){
   if(choice==='accept'){const p=s.party[0],c=CLASSES.rogue;p.job='rogue';p.atk+=3;p.speed=c.speed;p.color=c.color;p.maxMp=Math.max(p.maxMp,8);}
-  else s.party.forEach(p=>{p.maxHp+=8;p.hp=Math.min(p.maxHp,p.hp+8);});
- }else if(s.choice==='crossroads'){if(choice==='accept'){s.potions+=2;s.gold+=35;}else s.party.forEach(p=>{p.atk+=1;p.maxHp+=6;p.hp=Math.min(p.maxHp,p.hp+6);});
- }else if(choice==='accept')s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;});else{s.gold+=50;s.embers++;}
- s.stories.push(s.stage);s.stage++;startBattle(s);return true;
+  else s.party.forEach(p=>{p.maxHp+=8;});
+ }else if(s.choice==='crossroads'){if(choice==='accept'){s.potions+=2;s.gold+=35;}else s.party.forEach(p=>{p.atk+=1;p.maxHp+=6;});
+ }else if(choice==='accept'){s.potions+=3;}else{s.gold+=50;s.embers++;}
+ s.lastChoice={kind:s.choice,choice};s.stories.push(s.stage);s.stage+=s.restSpent?2:1;s.restSpent=false;startBattle(s);return true;
 }
 function buyTonic(s){return campAction(s,{type:'buy-tonic'}).ok;}
 function retry(s){if(s.phase!=='defeat')return false;s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;});s.potions=Math.max(2,s.potions);startBattle(s);return true;}
