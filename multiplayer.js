@@ -26,8 +26,8 @@ class OnlineParty{
  async status(){return this.request();}
  async list(mode='all'){return this.request(null,null,'list=1&mode='+encodeURIComponent(mode));}
  accept(data,initial=false){if(this.room?.code===data.code&&data.version<this.room.version)return;if(data.token){this.session={code:data.code,token:data.token,server:this.server};sessionStorage.setItem(KEY,JSON.stringify(this.session));}if(initial)this.lastEvent=null;this.room=data;this.clockOffset=data.serverNow-Date.now();const event=initial?null:data.event&&data.event.id!==this.lastEvent?data.event.result:null;this.lastEvent=data.event?.id||this.lastEvent;this.onUpdate(data,event,initial);}
- async create(name,job,mode='campaign',listed=true){this.closed=false;const data=await this.request({op:'create',name,job,mode,listed});this.accept(data,true);this.schedule();return data;}
- async join(code,name){this.closed=false;const data=await this.request({op:'join',code,name});this.accept(data,true);this.schedule();return data;}
+ async create(name,job,mode='campaign',listed=true,profile=null){this.closed=false;const data=await this.request({op:'create',name,job,mode,listed,profile});this.accept(data,true);this.schedule();return data;}
+ async join(code,name,profile=null){this.closed=false;const data=await this.request({op:'join',code,name,profile});this.accept(data,true);this.schedule();return data;}
  async resume(){if(!this.session)throw Error('There is no room to resume in this browser tab.');this.closed=false;if(typeof this.session.server==='string')this.server=this.session.server;const data=await this.request(null,this.session.code);this.accept(data,true);this.schedule();return data;}
  schedule(){clearTimeout(this.timer);if(this.closed||!this.session)return;this.timer=setTimeout(()=>this.poll(),1200);}
  async poll(){if(this.closed||!this.session||this.inFlight){this.schedule();return;}try{const data=await this.request(null,this.session.code);if(!this.closed)this.accept(data);}catch(error){this.onError(error);if([401,404].includes(error.status)){this.stop();return;}}finally{this.schedule();}}

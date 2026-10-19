@@ -121,19 +121,58 @@ Name inputs support select-all, delete, and replacement. Dragging selected text
 outside the input does not dismiss the setup dialog.
 
 An adventurer named **Bryan** (case insensitive) gains **Universe cleave** in
-the Fight menu. Its nine-second cutscene zooms from Earth to galaxies and the
-universe, then cuts and explodes for exactly **10,000,000 damage to every
-living enemy**. It works in solo and online, checks the name on the server,
-and reserves the full cinematic before subsequent turns or travel. Reduced
-motion uses fixed framing without a fast camera zoom.
+the Fight menu. Its nine-second, text-free cutscene pulls away from Earth into
+the galaxy, then the universe, before the cut and explosion. The combat HUD is
+hidden throughout; ten-million damage counters appear on return to the battle.
+The full action reserves ten seconds on the server. Reduced motion uses fixed
+framing rather than a fast zoom.
 
-Mouse/touch supports every action. Keyboard: 1–3 switch tabs; Q strikes; W uses
-the active character’s technique; E mends with Mira; arrows select targets; H
+## Tavern, characters and abilities
+
+- Press **Tavern** in the header or **Menu → Visit the tavern**. Solo combat
+  pauses while visiting. Online rooms continue synchronizing; other players may
+  need to wait for your character’s turn while you are away.
+- **WASD**, arrow keys, clicking the floor, or the touch direction pad move your
+  character through the Wandering Ember. The hearth, idle NPCs, tables, rugs,
+  and quartermaster are rendered locally. Nearby visitors appear through the
+  same shared backend as rooms. An unavailable backend leaves a usable offline
+  tavern and shop with a visible connection status.
+- Walk to **Alden behind the bar** and press **E** or **Talk to Alden**. Buy and
+  equip classes, weapon types, and races. Your profile starts with **150 welcome
+  gold**. Victories earn additional tavern gold, separate from the party’s camp
+  bag. Reward credit is tracked per run so reloads do not award it twice.
+- There are **6 classes**, **5 races**, and **8 weapon types**. Every class and
+  race has its own ultimate; every weapon has its own attack. **Arts / 4** shows
+  them. Ultimates require 100 charge: actions grant 25 and incoming hits grant
+  15. Weapon techniques use focus and turn-based cooldowns. Loot weapons retain
+  the technique of their weapon type.
+- Humans earn 10% extra tavern gold; elves regain focus each turn; dwarves take
+  2 less damage per hit; revenants heal for 15% of attack damage; dragonborn gain
+  3 attack. Ultimates include party healing/guarding, single-target executions,
+  area attacks, and burning damage. Special weapons can burn, chill, guard, or
+  siphon health.
+- **Menu → Customize character**, or the tavern’s **Customize** button, edits
+  name, starting clothes, skin, trousers, hair color/style, face, and outfit.
+  The preview updates immediately. Appearances are visible in the tavern and
+  combat. Changes apply to a current run at camp, or to a new run; mid-battle
+  purchases apply when the build is next loaded at camp or in a new journey.
+- NPC companions now receive generated names, classes, faces, hair, and clothing
+  when a party is created or an empty slot receives a new companion. IDs stay
+  stable for equipment ownership. Multiplayer friends use their own profiles.
+- Profiles and unlocks persist in this browser without an account. They are
+  imported on a tavern visit; purchase deductions and equipment ownership are
+  validated within the shared visit. This is a cooperative game with local save
+  files, not a server-held competitive economy or cross-device account system.
+
+Mouse/touch supports every action. Keyboard: 1–4 switch tabs (4 = Arts); Q strikes; W uses
+the active character’s technique; E mends with a spellcaster; arrows select targets; H
 folds the bottom controls; Escape opens the menu. The music-note button mutes.
 
 ## Main files
 
-- `campaign.js`: deterministic combat, worlds, loot, gear, campfires, migration.
+- `campaign.js`: seeded combat, randomized companions, abilities, worlds and loot.
+- `hero-options.js`: profiles, appearance validation, classes/races/weapons and shop.
+- `tavern.js`, `lib/tavern.js`: walkable inn, shop, shared visitor presence.
 - `scene.js`: block-world arenas, enemy models, campfire, walking and VFX.
 - `game.js`: battle menus, camp UI, room lobby, progression and local saving.
 - `multiplayer.js`: authenticated room sessions and synchronized client updates.

@@ -95,9 +95,9 @@ class CampaignScene{
  this.shadow(x,z,unit.kind==='king'?1:.64,.5,unit.hp?.32:.15);
  const selected=this.selected===unit.id,active=this.state&&DungeonCampaign.active(this.state)?.id===unit.id;
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
- this.bodyTransform={x,z,angle:this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2};
+ this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2};
  const armLift=pose.gesture*.3;
- const color=flash?'#ff3d48':unit.color,skin=unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d';
+ const look=unit.appearance||{},color=flash?'#ff3d48':look.clothes||unit.color,skin=look.skin|| (unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d');
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
   this.box(x,y+.02,z,.8,.5,.75,color);this.box(x,y+.52,z,.54,.15,.5,shade(color,1.1));this.box(x-.16,y+.3,z+.39,.09,.08,.02,'#253e2b');this.box(x+.13,y+.3,z+.39,.09,.08,.02,'#253e2b');
  }else if(unit.kind==='rat'){
@@ -106,17 +106,20 @@ class CampaignScene{
   const bob=this.reduced?0:Math.sin(time/650+index)*.08;this.box(x,y+.6+bob,z,.5,.6,.5,color);this.box(x,y+.45+bob,z,.25,.15,.25,shade(color,.8));this.box(x-.12,y+.9+bob,z+.26,.07,.08,.02,'#e1f9dc');this.box(x+.12,y+.9+bob,z+.26,.07,.08,.02,'#e1f9dc');
  }else{
   const big=unit.kind==='golem'?1.35:unit.kind==='king'?1.65:1;const Y=h=>y+h*big;
-  const armor=flash?'#ff3d48':unit.kind==='king'?'#555f56':unit.kind==='skeleton'?'#aaac9b':unit.job==='mage'||unit.kind==='mage'?'#625976':color;
-  this.box(x-.16*big,Y(.02+Math.max(0,pose.stride)),z+pose.stride,.26*big,.5*big,.3*big,'#303c34');this.box(x+.16*big,Y(.02+Math.max(0,-pose.stride)),z-pose.stride,.26*big,.5*big,.3*big,'#303c34');
+  const armor=look.clothes?color:flash?'#ff3d48':unit.kind==='king'?'#555f56':unit.kind==='skeleton'?'#aaac9b':unit.job==='mage'||unit.kind==='mage'?'#625976':color;
+  this.box(x-.16*big,Y(.02+Math.max(0,pose.stride)),z+pose.stride,.26*big,.5*big,.3*big,look.pants||'#303c34');this.box(x+.16*big,Y(.02+Math.max(0,-pose.stride)),z-pose.stride,.26*big,.5*big,.3*big,look.pants||'#303c34');
   this.box(x,Y(.52),z,.62*big,.66*big,.38*big,armor);this.box(x,Y(.51),z,.65*big,.07*big,.42*big,'#887751');
   this.box(x-.44*big,Y(.55),z-pose.stride,.24*big,.61*big,.28*big,armor);this.box(x+.44*big,Y(.55+armLift),z+pose.stride,.24*big,.61*big,.28*big,armor);
   this.box(x,Y(1.19),z,.48*big,.46*big,.45*big,flash?'#ff5960':skin);
-  const hair=unit.id==='hero'?'#594b3d':unit.id==='rowan'?'#b4ae95':unit.id==='mira'?'#393c3b':unit.kind==='king'?'#454f47':'#514c40';
-  if(unit.kind!=='skeleton'&&unit.kind!=='golem'){this.box(x,Y(1.56),z-.025*big,.53*big,.17*big,.48*big,hair);this.box(x-.22*big,Y(1.35),z-.05*big,.1*big,.3*big,.4*big,hair);}
+  const hair=look.hairColor|| (unit.id==='hero'?'#594b3d':unit.id==='rowan'?'#b4ae95':unit.id==='mira'?'#393c3b':unit.kind==='king'?'#454f47':'#514c40');
+  if(unit.kind!=='skeleton'&&unit.kind!=='golem'&&look.hair!=='bald'){this.box(x,Y(1.56),z-.025*big,.53*big,.17*big,.48*big,hair);this.box(x-.22*big,Y(1.35),z-.05*big,.1*big,.3*big,.4*big,hair);}
+  if(look.hair==='long')this.box(x,Y(.95),z-.17*big,.55*big,.6*big,.22*big,hair);if(look.hair==='spiky')for(let j=-1;j<=1;j++)this.box(x+j*.17,Y(1.68+Math.abs(j)*.06),z,.13,.2,.32,hair);if(look.outfit==='coat')this.box(x,Y(.2),z,.66*big,.35*big,.42*big,armor);if(look.outfit==='tunic')this.box(x,Y(.6),z+.2,.3*big,.5*big,.03,'#d1bd85');
+  if(look.face==='smile')this.box(x,Y(1.27),z+.235*big,.15*big,.025*big,.02,'#6f4f42');if(look.face==='fierce')for(const side of [-1,1])this.box(x+side*.1*big,Y(1.46),z+.24*big,.1*big,.03*big,.02,'#47352d');if(look.face==='scar')this.box(x+.13*big,Y(1.31),z+.24*big,.025*big,.21*big,.02,'#ac6457');if(unit.race==='elf')for(const side of [-1,1])this.box(x+side*.29*big,Y(1.4),z,.16,.11,.11,skin);if(unit.race==='dwarf')this.box(x,Y(1.11),z+.24,.38,.23,.13,hair);if(unit.race==='dragonborn')for(const side of [-1,1])this.box(x+side*.2,Y(1.67),z,.09,.25,.1,'#dcc591');
   this.box(x-.11*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');this.box(x+.1*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');
   if(unit.kind==='king'){for(let i=-1;i<=1;i++)this.box(x+i*.22*big,Y(1.65),z,.12*big,.24*big,.12*big,'#c5ad68');this.box(x,Y(1.58),z,.56*big,.1*big,.5*big,'#b29b57');}
-  if(unit.job==='mage'||unit.kind==='mage'){this.box(x+.6*big,Y(.02+armLift),z,.07*big,1.35*big,.07*big,'#8e7854');this.box(x+.6*big,Y(1.35+armLift),z,.19*big,.22*big,.19*big,'#c8bc8b');}
-  else if(unit.job==='ranger'||unit.kind==='archer'){this.box(x+.62*big,Y(.45),z,.07*big,.8*big,.1*big,'#b6a273');this.box(x+.56*big,Y(.5),z,.18*big,.06*big,.07*big,'#c6b98b');}
+  const held=unit.side==='party'&&this.state?DungeonCampaign.weaponFor(this.state,unit).style:null;
+  if(held==='magic'||!held&&(unit.job==='mage'||unit.kind==='mage')){this.box(x+.6*big,Y(.02+armLift),z,.07*big,1.35*big,.07*big,'#8e7854');this.box(x+.6*big,Y(1.35+armLift),z,.19*big,.22*big,.19*big,'#c8bc8b');}
+  else if(held==='arrow'||!held&&(unit.job==='ranger'||unit.kind==='archer')){this.box(x+.62*big,Y(.45),z,.07*big,.8*big,.1*big,'#b6a273');this.box(x+.56*big,Y(.5),z,.18*big,.06*big,.07*big,'#c6b98b');}
   else {this.box(x+.55*big,Y(.63+armLift),z+.04*big,.08*big,.75*big,.08*big,'#b7c4bd');this.box(x+.55*big,Y(.58+armLift),z,.32*big,.08*big,.1*big,'#b5a16c');if(unit.side==='party')this.box(x-.62*big,Y(.48),z,.12*big,.56*big,.46*big,shade(color,.8));}
  }
  this.bodyTransform=null;
@@ -164,10 +167,11 @@ class CampaignScene{
  }
  play(result){
  const now=performance.now(),actor=this.state&&DungeonCampaign.unit(this.state,result.actor);
- const support=['focus','potion','revive'].includes(result.action)||result.skill==='mend';
- const style=result.skill==='universe'?'cosmic':support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'?'heavy':'slash';
- const duration=result.skill==='universe'?9000:this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=result.skill==='universe'?7000:this.reduced?80:['slash','heavy'].includes(style)?720:450;
- this.animations.push({actor:result.actor,target:result.events?.[0]?.target,style,at:now,duration});
+ const support=['focus','potion','revive'].includes(result.action)||!!DungeonCampaign.SKILLS[result.skill]?.heal;
+ const style=result.skill==='universe'?'cosmic':DungeonCampaign.SKILLS[result.skill]?.style||(actor?.side==='party'&&this.state&&DungeonCampaign.weaponFor(this.state,actor).skill===result.skill?DungeonCampaign.weaponFor(this.state,actor).style:null)|| (support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'||DungeonCampaign.SKILLS[result.skill]?.ultimate?'heavy':'slash');
+ const duration=result.skill==='universe'?10000:this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=result.skill==='universe'?9000:this.reduced?80:['slash','heavy'].includes(style)?720:450;
+ const primary=result.events?.find(e=>e.type==='damage'&&e.source===result.actor&&e.target!==result.actor)||result.events?.[0];
+ this.animations.push({actor:result.actor,target:primary?.target,style,at:now,duration});
  for(const event of result.events||[])this.effects.push({...event,style,at:now+impactAt,start:now,duration});
  return {duration,impactAt,style};
  }
