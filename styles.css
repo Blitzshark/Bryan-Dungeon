@@ -39,3 +39,4 @@
 .decision-clock{position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:25;background:#233228ee;border:1px solid #d8e8b070;color:#e4edce;border-radius:20px;padding:7px 14px;font-size:11px;pointer-events:none;white-space:nowrap}.decision-clock.urgent{color:#ffd2ba;border-color:#eb9577;background:#4c2926ee}#open-tavern:disabled{opacity:.4;cursor:not-allowed}
 .journey-scene{position:fixed;inset:0;width:100vw;height:100dvh;z-index:40;background:#101918;pointer-events:auto}
 .damage-number.critical{color:#ffe168!important;text-shadow:0 0 12px #ffb72e,0 2px 4px #241705;font-weight:900}.damage-number.miss{color:#d6d7e2;font-size:16px}
+.title-bottom{pointer-events:none}

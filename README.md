@@ -260,3 +260,31 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   before the dust disperses; its cosmic cutscene and guaranteed damage remain.
 - The third world blends void and hell: obsidian stone, violet rifts and floating
   fragments, glowing lava fissures, and ember particles.
+
+### Campaign II: The Lying Greenwood
+
+Complete the Greenwood, Ashen Dungeon and Hollow Depths, then choose
+**Enter the Lying Greenwood** on the completion screen. Existing completed
+saves can unlock it through **Continue**. Your party, health, equipment, gold
+and supplies carry forward; entering does not grant free healing.
+
+The sequel contains ten new stages, three story stops, higher-tier gear and
+six new enemy types: Mirror Pilgrims, Briar Jesters, False Lanterns, Dream
+Moths, Hollow Marionettes and the solo Masked Sovereign boss. Illusion casters
+create translucent false images that absorb hits. **Guard & focus** exposes
+all images without relying on accuracy. Tricksters renew their images every
+third action, so revealing and timing attacks matters.
+
+The sequel uses the campaign save slot, supports online parties, and requires
+the host to open the shared continuation. Raids and the original 30-stage
+campaign retain their separate progression rules.
+
+Story choices use six distinct action sequences: the blade lesson, formation
+drill, wagon supply handoff, paired sparring, shrine medicine gathering and
+ember procession. Each has its own movement, staging and props.
+
+Critical attacks now receive cinematic framing, a brief camera push and one
+short contrast impact beat. Reduced motion omits the contrast beat and camera
+movement. An adventurer named **Bryan** (case-insensitive) always critically
+hits and never suffers a normal accuracy miss; false images can still absorb
+a hit. Universe Cleave remains exactly 10,000,000 damage per enemy.

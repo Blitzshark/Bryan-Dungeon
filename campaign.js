@@ -7,6 +7,10 @@ const ENEMIES={
  skeleton:{name:'Keep Sentinel',hp:44,atk:10,speed:4,color:'#d6cdb3',kind:'skeleton'},mage:{name:'Ash Cultist',hp:43,atk:12,speed:6,color:'#a595bf',kind:'mage'},bat:{name:'Vault Bat',hp:29,atk:9,speed:11,color:'#867a9e',kind:'bat',behavior:'drain'},mimic:{name:'Hungry Chest',hp:68,atk:14,speed:3,color:'#b1915e',kind:'mimic',behavior:'charge'},armor:{name:'Hollow Armor',hp:72,atk:13,speed:3,color:'#92a1a0',kind:'golem',behavior:'guard'},ratkin:{name:'Scrap Ratkin',hp:42,atk:11,speed:9,color:'#a58b77',kind:'rat',behavior:'poison'},skull:{name:'Lantern Skull',hp:38,atk:12,speed:7,color:'#d7ba81',kind:'skull'},acolyte:{name:'Bone Acolyte',hp:50,atk:10,speed:5,color:'#a891b9',kind:'mage',behavior:'heal'},gargoyle:{name:'Gutter Gargoyle',hp:78,atk:14,speed:4,color:'#86918c',kind:'gargoyle',behavior:'pounce'},revenant:{name:'Chain Revenant',hp:67,atk:14,speed:6,color:'#8bb4ab',kind:'specter',behavior:'drain'},hound:{name:'Cinder Hound',hp:55,atk:13,speed:10,color:'#a66c58',kind:'wolf',behavior:'pounce'},warden:{name:'THE IRON WARDEN',hp:250,atk:23,speed:4,color:'#909786',kind:'king',boss:true,behavior:'charge'},
  crystal:{name:'Fractured Crystal',hp:63,atk:16,speed:3,color:'#b69ad6',kind:'crystal',behavior:'guard'},imp:{name:'Ember Imp',hp:48,atk:15,speed:10,color:'#bf826e',kind:'imp',behavior:'poison'},shade:{name:'Veil Stalker',hp:68,atk:17,speed:9,color:'#8a8aa8',kind:'specter',behavior:'drain'},voidslime:{name:'Void Slime',hp:77,atk:15,speed:3,color:'#a48bc9',kind:'slime',behavior:'poison'},hellhound:{name:'Rift Hound',hp:82,atk:19,speed:9,color:'#9783a2',kind:'wolf',behavior:'pounce'},sentinel:{name:'Obsidian Sentinel',hp:108,atk:19,speed:3,color:'#727c91',kind:'golem',behavior:'guard'},oracle:{name:'Blind Oracle',hp:72,atk:17,speed:6,color:'#bf9db8',kind:'mage',behavior:'heal'},demon:{name:'Rift Brute',hp:120,atk:22,speed:3,color:'#9e7376',kind:'demon',behavior:'sweep'},king:{name:'THE HOLLOW KING',hp:320,atk:27,speed:5,color:'#7d8798',kind:'king',boss:true,behavior:'sweep'}
 };
+Object.assign(ENEMIES,{
+ mirrorkin:{name:'Mirror Pilgrim',hp:145,atk:31,speed:8,color:'#a597cc',kind:'humanoid',behavior:'illusion'},jester:{name:'Briar Jester',hp:165,atk:34,speed:11,color:'#c78fae',kind:'humanoid',behavior:'illusion'},lantern:{name:'False Lantern',hp:155,atk:32,speed:7,color:'#8ed3c2',kind:'wisp',behavior:'illusion'},dreammoth:{name:'Dream Moth',hp:130,atk:33,speed:12,color:'#9ca3dc',kind:'bat',behavior:'illusion'},puppet:{name:'Hollow Marionette',hp:220,atk:36,speed:5,color:'#aa90ad',kind:'skeleton',behavior:'guard'},masquerade:{name:'THE MASKED SOVEREIGN',hp:900,atk:48,speed:8,color:'#c19cd8',kind:'king',boss:true,behavior:'illusion'}
+});
+const SEQUEL=[['The Greenwood, Again',['mirrorkin','dreammoth']],['The Laughing Path',['jester','lantern']],['A Thousand Footsteps',['mirrorkin','mirrorkin','puppet']],['The False Campfire',['lantern','dreammoth','jester']],['Behind the Painted Bark',['puppet','jester']],['The Borrowed Faces',['mirrorkin','jester','lantern']],['The Moonlit Masquerade',['dreammoth','dreammoth','puppet']],['A Forest of Mirrors',['jester','mirrorkin','lantern']],['The Last True Path',['puppet','jester','dreammoth']],['The Masked Sovereign',['masquerade']]].map(([name,enemies],i)=>({name,enemies,biome:'forest',world:0,progress:i+1,boss:i===9,subtitle:'CAMPAIGN II · THE LYING GREENWOOD · '+(i+1)+'/10'}));
 const layouts=[
  [['slime','slime'],['rat','spider','rat'],['wolf','beetle'],['archer','bandit','slime'],['boar','mushroom','spider'],['shaman','wolf','beetle'],['treant','wisp','mushroom'],['archer','boar','spider'],['golem','shaman','wolf'],['briar']],
  [['skeleton','bat','ratkin'],['mimic','skull'],['armor','skeleton','mage'],['gargoyle','bat','bat'],['acolyte','ratkin','revenant'],['hound','skull','mage'],['mimic','armor','bat'],['revenant','acolyte','gargoyle'],['armor','mage','hound'],['warden']],
@@ -15,13 +19,14 @@ const layouts=[
 const titles=[['The Greenwood','Webbed Trail','The Hunting Grounds','Outlaw Crossing','Spore Hollow','The Root Circle','The Walking Grove','The Broken Bridge','The Briar Gate','The Briar Sovereign'],['Below the Keep','A Chest in the Dark','The Silent Watch','The Gutter Roost','The Bone Chapel','The Cinder Kennel','The False Treasury','The Chain Gallery','The Warden’s Door','The Iron Warden'],['Into the Rift','The Veil Crossing','The Crystal Watch','A Crack in the World','The Oracle’s Chamber','The Hungry Road','The Obsidian Gate','The Last Descent','The Throne Approach','The Hollow King']];
 const CHAPTERS=WORLDS.flatMap((world,w)=>layouts[w].map((enemies,p)=>({name:titles[w][p],subtitle:p===9?'WORLD BOSS · '+world.name:'Progression '+(p+1)+' of 10 · '+world.name,biome:world.biome,world:w,progress:p+1,boss:p===9,enemies})));
 const RAID_BOSSES=['briar','warden','king','treant','gargoyle','demon'];
-function encounter(s){if(s.mode!=='raid')return CHAPTERS[s.stage];const level=s.raidLevel,type=RAID_BOSSES[(level-1)%RAID_BOSSES.length],world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:WORLDS[world].biome,world,progress:level,boss:true,enemies:[type]};}
+function encounter(s){if(s.mode!=='raid')return s.act===2?SEQUEL[s.stage]:CHAPTERS[s.stage];const level=s.raidLevel,type=RAID_BOSSES[(level-1)%RAID_BOSSES.length],world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:WORLDS[world].biome,world,progress:level,boss:true,enemies:[type]};}
 function raidBossStats(level){return {hp:120+60*level+Math.round(12*Math.pow(level,1.3)),atk:10+5*level+Math.floor(level/5)*2};}
 const RARITIES={common:{name:'Common',color:'#b4c5a1'},rare:{name:'Rare',color:'#8fc4df'},epic:{name:'Epic',color:'#c2a1e6'}};
 const CLASSES={warrior:{name:'Vanguard',hp:88,mp:6,atk:13,speed:6,color:'#d5aa73',skill:'sunder'},ranger:{name:'Wayfarer',hp:72,mp:8,atk:12,speed:9,color:'#91ad85',skill:'volley'},mage:{name:'Arcanist',hp:65,mp:10,atk:11,speed:7,color:'#ac9bc8',skill:'ember'},rogue:{name:'Nightblade',hp:78,mp:8,atk:15,speed:10,color:'#a29ac2',skill:'shadow'}};
 for(const [key,extra]of Object.entries(P.CLASS_EXTRAS))CLASSES[key]={...CLASSES[key],...extra};
 const SKILLS={...P.SKILLS,universe:{name:'Universe cleave',cost:0,cd:0,description:'Bryan cuts through the universe. 10,000,000 damage to every enemy.',all:true,mult:1},strike:{name:'Strike',cost:0,cd:0,description:'A reliable hit. No focus cost.',mult:1},sunder:{name:'Sundering blow',cost:2,cd:2,description:'A heavy strike for 170% damage.',mult:1.7},volley:{name:'Scatter shot',cost:3,cd:2,description:'Hit every enemy for 85% damage.',mult:.85,all:true},ember:{name:'Ember arc',cost:3,cd:2,description:'Burn every enemy for 105% damage.',mult:1.05,all:true},shadow:{name:'Hidden blade',cost:2,cd:2,description:'A precise strike for 190% damage.',mult:1.9},mend:{name:'Mend',cost:3,cd:2,description:'Restore 30 health to the weakest ally.',heal:30}};
 const clone=value=>JSON.parse(JSON.stringify(value));
+function beginSequel(s){if(s.mode==='raid'||s.act===2||s.phase!=='complete'||s.stage!==29)return false;s.act=2;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,race:'human',weapon:job==='ranger'?'bow':job==='mage'?'staff':'sword',charge:0,raceCharge:0,appearance:P.appearance({clothes:c.color}),cooldowns:{},guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
@@ -54,9 +59,9 @@ function beginTurn(s){const actor=active(s);if(!actor)return;actor.guard=false;i
 function checkEnd(s){
  if(!living(s,'party').length){s.phase='defeat';note(s,'The party has fallen. The road is not over.');return true;}
  if(!living(s,'enemy').length){
-  const gold=s.mode==='raid'?40+22*s.raidLevel:24+s.stage*11,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;s.gold+=gold;s.tavernGold=(s.tavernGold||0)+gold;s.xp+=xp;s.potions+=1;
+  const gold=s.mode==='raid'?40+22*s.raidLevel:s.act===2?360+s.stage*35:24+s.stage*11,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;s.gold+=gold;s.tavernGold=(s.tavernGold||0)+gold;s.xp+=xp;s.potions+=1;
   if(s.mode==='raid')s.raidBest=Math.max(s.raidBest,s.raidLevel);
-  const level=s.mode==='raid'?s.raidLevel+1:1+Math.floor((s.stage+1)/2);let leveled=false;
+  const level=s.mode==='raid'?s.raidLevel+1:s.act===2?17+Math.floor((s.stage+1)/2):1+Math.floor((s.stage+1)/2);let leveled=false;
   s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}});
   const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;s.campConfirmed=false;
   s.reward={gold,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
@@ -68,11 +73,11 @@ function endTurn(s){
  do{s.cursor++;if(s.cursor>=s.order.length){s.round++;s.order=makeOrder(s);s.cursor=0;note(s,'Round '+s.round+'.');}}while(!active(s)||active(s).hp<=0);
  beginTurn(s);
 }
-function damage(s,source,target,amount,events){const gear=(s.inventory||[]).filter(i=>i.owner===source.id),miss=gear.some(i=>i.enchantment==='precise')?.02:.08;if(nextRandom(s)<miss){events.push({type:'miss',source:source.id,target:target.id,amount:0});note(s,source.name+' misses '+target.name+'.');return false;}const critical=nextRandom(s)<(.15+(gear.some(i=>i.enchantment==='keen')?.08:0));if(critical)amount*=1.6;const armor=target.side==='party'?stats(s,target).def:0;const dealt=Math.min(target.hp,Math.max(1,Math.round(Math.max(1,amount-armor)*(target.guard?.5:1))));target.hp-=dealt;if(target.side==='party'){target.charge=Math.min(100,(target.charge||0)+15);target.raceCharge=Math.min(100,(target.raceCharge||0)+15);}if(source.race==='revenant'&&source.hp>0&&source.side==='party'){const heal=Math.min(source.maxHp-source.hp,Math.ceil(dealt*.15));if(heal>0){source.hp+=heal;events.push({type:'heal',target:source.id,amount:heal});}}events.push({type:'damage',target:target.id,source:source.id,amount:dealt,critical,defeated:!target.hp,guarded:!!target.guard});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');return true;}
+function damage(s,source,target,amount,events){const gear=(s.inventory||[]).filter(i=>i.owner===source.id),bryan=source.side==='party'&&source.name.trim().toLowerCase()==='bryan',miss=gear.some(i=>i.enchantment==='precise')?.02:.08;if(!bryan&&nextRandom(s)<miss){events.push({type:'miss',source:source.id,target:target.id,amount:0});note(s,source.name+' misses '+target.name+'.');return false;}const critical=bryan||nextRandom(s)<(.15+(gear.some(i=>i.enchantment==='keen')?.08:0));if(critical)amount*=1.6;if(target.images>0){target.images--;events.push({type:'miss',reason:'illusion',target:target.id,source:source.id,amount:0});note(s,'A false image of '+target.name+' shatters.');return false;}const armor=target.side==='party'?stats(s,target).def:0;const dealt=Math.min(target.hp,Math.max(1,Math.round(Math.max(1,amount-armor)*(target.guard?.5:1))));target.hp-=dealt;if(target.side==='party'){target.charge=Math.min(100,(target.charge||0)+15);target.raceCharge=Math.min(100,(target.raceCharge||0)+15);}if(source.race==='revenant'&&source.hp>0&&source.side==='party'){const heal=Math.min(source.maxHp-source.hp,Math.ceil(dealt*.15));if(heal>0){source.hp+=heal;events.push({type:'heal',target:source.id,amount:heal});}}events.push({type:'damage',target:target.id,source:source.id,amount:dealt,critical,defeated:!target.hp,guarded:!!target.guard});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');return true;}
 function act(s,command){
  const actor=active(s);if(!actor||actor.side!=='party')return {ok:false,error:'Wait for your party’s turn.'};
  const events=[];
- if(command.type==='focus'){actor.guard=true;const amount=Math.min(3,actor.maxMp-actor.mp);actor.mp+=amount;note(s,actor.name+' focuses: +'+amount+' focus and guards until their next turn.');events.push({type:'focus',target:actor.id,amount});}
+ if(command.type==='focus'){living(s,'enemy').forEach(e=>{if(e.images){e.images=0;events.push({type:'reveal',target:e.id,source:actor.id,amount:0});}});note(s,actor.name+' studies the battlefield, exposing every illusion.');actor.guard=true;const amount=Math.min(3,actor.maxMp-actor.mp);actor.mp+=amount;note(s,actor.name+' focuses: +'+amount+' focus and guards until their next turn.');events.push({type:'focus',target:actor.id,amount});}
  else if(command.type==='potion'){
   const target=unit(s,command.target);
   if(!s.potions)return {ok:false,error:'No healing tonics left.'};
@@ -92,7 +97,7 @@ function act(s,command){
   if(!skill.heal&&!skill.all&&(!target||target.side!=='enemy'||target.hp<=0))return {ok:false,error:'Choose a standing enemy.'};
   actor.mp-=skill.cost;if(skill.ultimate)actor.charge=0;if(skill.raceUltimate)actor.raceCharge=0;if(skill.cd)actor.cooldowns[key]=skill.cd+1;
   if(skill.heal){const allies=skill.healAll?living(s,'party'):[living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]];for(const ally of allies){const amount=Math.min(skill.heal+Math.max(0,actor.level-1)*2,ally.maxHp-ally.hp);ally.hp+=amount;if(skill.shield)ally.guard=true;events.push({type:'heal',target:ally.id,amount});}note(s,actor.name+' uses '+skill.name+'.');}
-  else if(key==='universe'){living(s,'enemy').forEach(t=>{t.hp=Math.max(0,t.hp-10000000);events.push({type:'damage',target:t.id,source:actor.id,amount:10000000,guarded:false,defeated:!t.hp});});note(s,actor.name+' cleaves the universe.');}
+  else if(key==='universe'){living(s,'enemy').forEach(t=>{t.hp=Math.max(0,t.hp-10000000);events.push({type:'damage',target:t.id,source:actor.id,amount:10000000,critical:true,guarded:false,defeated:!t.hp});});note(s,actor.name+' cleaves the universe.');}
   else{for(const t of (skill.all?living(s,'enemy'):[target])){const hit=damage(s,actor,t,stats(s,actor).atk*skill.mult,events);if(hit&&t.hp>0&&(skill.burn||skill.chill)){t.status=t.status||{};if(skill.burn)t.status.burn=2;if(skill.chill)t.status.chill=2;}}if(skill.shield)actor.guard=true;if(skill.drain){const amount=Math.min(actor.maxHp-actor.hp,Math.ceil(events.filter(e=>e.type==='damage').reduce((n,e)=>n+e.amount,0)*.35));actor.hp+=amount;if(amount)events.push({type:'heal',target:actor.id,amount});}}
  }else return {ok:false,error:'Choose an action.'};
  if(!SKILLS[command.skill]?.ultimate)actor.charge=Math.min(100,(actor.charge||0)+25);if(!SKILLS[command.skill]?.raceUltimate)actor.raceCharge=Math.min(100,(actor.raceCharge||0)+25);
@@ -119,6 +124,7 @@ function enemyAct(s){
  const targets=living(s,'party'),target=targets[Math.floor(nextRandom(s)*targets.length)],events=[];actor.turns=(actor.turns||0)+1;
  let skill=['mage','wisp','skull','crystal','specter','imp'].includes(actor.kind)?'ember':actor.kind==='archer'?'volley':actor.boss||['golem','treant','demon','boar'].includes(actor.kind)?'sunder':'strike';
  const injured=living(s,'enemy').filter(e=>e.hp<e.maxHp*.7).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
+ if(actor.behavior==='illusion'&&actor.turns%3===1){actor.images=actor.boss?2:1;events.push({type:'illusion',target:actor.id,source:actor.id,amount:0});note(s,actor.name+' weaves '+actor.images+' false image(s). Guard & focus to expose them.');}
  const baseAtk=actor.atk;if(actor.status?.chill)actor.atk=Math.round(actor.atk*.65);
  if(actor.behavior==='heal'&&injured&&actor.turns%2){const amount=Math.min(18+encounter(s).world*8,injured.maxHp-injured.hp);injured.hp+=amount;events.push({type:'heal',target:injured.id,amount});note(s,actor.name+' restores '+amount+' health to '+injured.name+'.');skill='mend';}
  else if(actor.behavior==='guard'&&actor.turns%3===1){actor.guard=true;events.push({type:'focus',target:actor.id,amount:0});note(s,actor.name+' braces behind its armor.');skill='guard';}
@@ -135,15 +141,15 @@ function enemyAct(s){
  const result={ok:true,actor:actor.id,action:skill==='guard'?'focus':'enemy',skill,events};endTurn(s);return result;
 }
 function poisonTick(s,actor,events){if(actor.status?.burn&&actor.hp>0){const amount=Math.min(actor.hp,Math.max(4,Math.ceil(actor.maxHp*.05)));actor.hp-=amount;actor.status.burn--;events.push({type:'damage',target:actor.id,source:actor.id,amount,status:'burn'});}if(actor.status?.poison&&actor.hp>0){const amount=Math.min(actor.hp,3+encounter(s).world*2);actor.hp-=amount;actor.status.poison--;events.push({type:'damage',target:actor.id,source:actor.id,amount,guarded:false,status:'poison'});note(s,actor.name+' takes '+amount+' poison damage.');}}
-function tonicHeal(s){return s.mode==='raid'?40+s.raidLevel*8:40+Math.floor(s.stage/10)*20;}
+function tonicHeal(s){return s.mode==='raid'?40+s.raidLevel*8:s.act===2?120:40+Math.floor(s.stage/10)*20;}
 function stats(s,p){const gear=(s.inventory||[]).filter(i=>i.owner===p.id);return {atk:p.atk+gear.reduce((n,i)=>n+i.atk+(i.enchantment==='mighty'?2:0),0)+(gear.some(i=>i.slot==='weapon')?0:P.WEAPONS[p.weapon]?.atk||0)+(p.race==='dragonborn'?3:0),def:gear.reduce((n,i)=>n+i.def+(i.enchantment==='sturdy'?2:0),0)+(p.race==='dwarf'?2:0)};}
 function rollLoot(s){
- const boss=encounter(s).boss,count=boss?2:1,tier=s.mode==='raid'?s.raidLevel:1+Math.floor(s.stage/10);return Array.from({length:count},(_,i)=>{
+ const boss=encounter(s).boss,count=boss?2:1,tier=s.mode==='raid'?s.raidLevel:s.act===2?4+Math.floor(s.stage/5):1+Math.floor(s.stage/10);return Array.from({length:count},(_,i)=>{
   const r=nextRandom(s),slot=['weapon','armor','charm'][Math.floor(nextRandom(s)*3)],rarity=boss?'epic':r>.77?'rare':'common',quality=rarity==='epic'?3:rarity==='rare'?2:1;
   const names={weapon:['Traveler’s Blade','Ashwood Edge','Riftforged Steel'],armor:['Ironbark Vest','Keepkeeper Mail','Obsidian Mantle'],charm:['Mossbound Charm','Lantern Sigil','Hollow Star']};
   const enchantment=nextRandom(s)<(boss?.75:.35)?['keen','precise','mighty','sturdy'][Math.floor(nextRandom(s)*4)]:null;
   const weaponKey=slot==='weapon'?Object.keys(P.WEAPONS)[Math.floor(nextRandom(s)*Object.keys(P.WEAPONS).length)]:null;
-  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:tier-1])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:weaponKey?P.WEAPONS[weaponKey].skill:null,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:10+tier*quality*8,owner:null,upgrades:0};
+  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:Math.min(2,tier-1)])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:weaponKey?P.WEAPONS[weaponKey].skill:null,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:10+tier*quality*8,owner:null,upgrades:0};
  });
 }
 function gearPower(i){return i.atk+i.def+(i.enchantment==='mighty'||i.enchantment==='sturdy'?2:0);}
@@ -162,7 +168,7 @@ function campAction(s,command){
  else if(command.type==='sell'){if(!item||item.owner)return {ok:false,error:'Unequip an item before selling it.'};s.gold+=item.price;s.inventory=s.inventory.filter(i=>i!==item);}
  else if(command.type==='upgrade'){if(!item)return {ok:false,error:'Choose gear to upgrade.'};const cost=25+item.upgrades*20;if(item.upgrades>=3||s.gold<cost)return {ok:false,error:item.upgrades>=3?'This item is fully upgraded.':'Not enough gold.'};s.gold-=cost;item.upgrades++;if(item.slot==='weapon')item.atk+=2;else item.def++;item.price+=10;}
  else if(command.type==='use-tonic'||command.type==='use-ember'){if(!hero)return {ok:false,error:'Choose an adventurer.'};if(command.type==='use-tonic'){if(!s.potions||hero.hp<=0||hero.hp>=hero.maxHp)return {ok:false,error:'Choose an injured standing adventurer with a tonic available.'};s.potions--;hero.hp=Math.min(hero.maxHp,hero.hp+tonicHeal(s));}else{if(!s.embers||hero.hp>0)return {ok:false,error:'Choose a fallen adventurer with an ember available.'};s.embers--;hero.hp=Math.ceil(hero.maxHp*.5);}}
- else if(command.type==='rest'){if(s.mode==='raid'||s.stage>=29||s.stage%10===8)return {ok:false,error:'No spare stage remains before this boss. Use healing items.'};if(s.campRested)return {ok:false,error:'Your party has already rested.'};s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;p.status={};});s.campRested=true;s.restSpent=true;note(s,'Resting consumes the next stage. No battle rewards are earned.');}
+ else if(command.type==='rest'){if(s.mode==='raid'||s.stage>=(s.act===2?9:29)||s.stage%10===8)return {ok:false,error:'No spare stage remains before this boss. Use healing items.'};if(s.campRested)return {ok:false,error:'Your party has already rested.'};s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;p.status={};});s.campRested=true;s.restSpent=true;note(s,'Resting consumes the next stage. No battle rewards are earned.');}
  else if(command.type==='buy-tonic'||command.type==='buy-ember'){const price=command.type==='buy-tonic'?20:80;if(s.gold<price)return {ok:false,error:'Not enough gold.'};s.gold-=price;if(price===20)s.potions++;else s.embers++;}
  else return {ok:false,error:'Choose a camp action.'};
  s.campConfirmed=false;return {ok:true};
@@ -170,8 +176,8 @@ function campAction(s,command){
 function travel(s){
  if(s.phase!=='camp')return false;
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
- if(s.stage===CHAPTERS.length-1){s.phase='complete';return true;}
- if([1,4,7,11,14,17,22,26].includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':s.stage===14?'shrine':'crossroads';return true;}
+ if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';return true;}
+ if((s.act===2?[2,5,7]:[1,4,7,11,14,17,22,26]).includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.act===2?'crossroads':s.stage===1?'stranger':s.stage===14?'shrine':'crossroads';return true;}
  s.stage+=s.restSpent?2:1;s.restSpent=false;startBattle(s);return true;
 }
 function choose(s,choice){
@@ -189,7 +195,7 @@ function restore(value){
  try{const s=typeof value==='string'?JSON.parse(value):clone(value);
  if(s?.version===4){s.version=5;s.stage=s.phase==='story'&&s.choice==='shrine'?14:s.stage<4?s.stage:s.stage<7?s.stage+6:19;s.inventory=[];s.campRested=false;s.campConfirmed=false;s.stories=[];if(['victory','complete'].includes(s.phase)){s.phase='camp';s.reward=s.reward||{gold:0,xp:0};s.reward.loot=[];s.reward.boss=encounter(s).boss;}s.party.forEach(p=>p.status={});}
  if(!s||s.version!==5||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CHAPTERS.length||!['battle','camp','story','defeat','complete'].includes(s.phase))return null;
- s.mode=s.mode||'campaign';s.raidLevel=s.raidLevel||1;s.raidBest=s.raidBest||0;
+ s.mode=s.mode||'campaign';if(s.act!==undefined&&![1,2].includes(s.act))return null;if(s.act===2&&(s.mode==='raid'||s.stage>=SEQUEL.length))return null;s.raidLevel=s.raidLevel||1;s.raidBest=s.raidBest||0;
  if(!['campaign','raid'].includes(s.mode)||!Number.isSafeInteger(s.raidLevel)||s.raidLevel<1||!Number.isSafeInteger(s.raidBest)||s.raidBest<0)return null;
  if(!Array.isArray(s.inventory)||!Array.isArray(s.stories))return null;
  if(!Array.isArray(s.party)||s.party.length!==3||!Array.isArray(s.enemies)||!Array.isArray(s.order)||!Array.isArray(s.log)||!Array.isArray(s.history))return null;
@@ -200,5 +206,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,finishCamp,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,finishCamp,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
