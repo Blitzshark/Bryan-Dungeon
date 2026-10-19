@@ -141,7 +141,8 @@ framing rather than a fast zoom.
   opacity); local characters and NPCs stay opaque. Timestamped movement samples
   are interpolated with a short buffer, smooth facing, and bounded prediction
   during missing updates. An unavailable backend leaves a usable offline
-  tavern and shop with a visible connection status.
+  tavern and shop with a visible connection status. Visits reconnect automatically
+  after expiry; rejected movement resynchronizes to the shared position.
 - Walk to **Alden behind the bar** and press **E** or **Talk to Alden**. Buy and
   equip classes, weapon types, and races. Your profile starts with **150 welcome
   gold**. Victories earn additional tavern gold, separate from the party’s camp
@@ -158,6 +159,9 @@ framing rather than a fast zoom.
   siphon health.
 - **Menu → Customize character**, or the tavern’s **Customize** button, edits
   name, starting clothes, skin, trousers, hair color/style, face, and outfit.
+  Choose **Draw your own face** for a touch-friendly 16×16 pixel editor with
+  colors, eraser, undo and clear. Choose **Default** to keep the original face.
+  Drawings are saved locally and shared with other tavern visitors.
   The preview updates immediately. Appearances are visible in the tavern and
   combat. Changes apply to a current run at camp, or to a new run; mid-battle
   purchases apply when the build is next loaded at camp or in a new journey.

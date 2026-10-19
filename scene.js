@@ -11,13 +11,13 @@ class CampaignScene{
 
  setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp';if(this.biome!==biome||this.title!==title||this.camp!==camp){this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
  project(x,y,z){return {x:this.cx+(x-z*.57)*this.scale,y:this.cy+(x*.27+z*.47-y)*this.scale};}
- polygon(points,color,stroke){const c=this.paint;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.6;c.stroke();}}
+ polygon(points,color,stroke){if(this.actorPolygons&&points.every(p=>Number.isFinite(p.depth))){this.actorPolygons.push({depth:points.reduce((sum,p)=>sum+p.depth,0)/points.length,draw:()=>this.polygon(points,color,stroke)});return;}const c=this.paint;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.6;c.stroke();}}
  plane(x,z,w,d,color){this.polygon([this.project(x,0,z),this.project(x+w,0,z),this.project(x+w,0,z+d),this.project(x,0,z+d)],color);}
  box(x,y,z,w,h,d,color,top){
  if(this.bodyTransform){this.orientedBox(x,y,z,w,h,d,color,top);return;}const a=x-w/2,b=z-d/2,p=(xx,yy,zz)=>this.project(xx,yy,zz);this.polygon([p(a,y,b+d),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a,y+h,b+d)],shade(color,.83));this.polygon([p(a+w,y,b),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a+w,y+h,b)],shade(color,.65));this.polygon([p(a,y+h,b),p(a+w,y+h,b),p(a+w,y+h,b+d),p(a,y+h,b+d)],top||shade(color,1.13));}
  orientedBox(x,y,z,w,h,d,color,top){
  const t=this.bodyTransform,cos=Math.cos(t.angle),sin=Math.sin(t.angle);
- const point=(dx,dy,dz)=>{let xx=x+dx,yy=y+dy,zz=z+dz;const part=this.partTransform;if(part){const py=yy-part.y,pz=zz-part.z,pc=Math.cos(part.angle),ps=Math.sin(part.angle);yy=part.y+py*pc-pz*ps;zz=part.z+py*ps+pz*pc;}const px=xx-t.x,pz=zz-t.z;return this.project(t.x+px*cos+pz*sin,yy,t.z-px*sin+pz*cos);};
+ const point=(dx,dy,dz)=>{let xx=x+dx,yy=y+dy,zz=z+dz;const part=this.partTransform;if(part){const py=yy-part.y,pz=zz-part.z,pc=Math.cos(part.angle),ps=Math.sin(part.angle);yy=part.y+py*pc-pz*ps;zz=part.z+py*ps+pz*pc;}const px=xx-t.x,pz=zz-t.z;const wx=t.x+px*cos+pz*sin,wz=t.z-px*sin+pz*cos;return {...this.project(wx,yy,wz),depth:wx*.57+yy*.624+wz};};
  const faces=[
   {n:[0,1],v:[[-w/2,0,d/2],[w/2,0,d/2],[w/2,h,d/2],[-w/2,h,d/2]]},
   {n:[0,-1],v:[[w/2,0,-d/2],[-w/2,0,-d/2],[-w/2,h,-d/2],[w/2,h,-d/2]]},
@@ -26,6 +26,11 @@ class CampaignScene{
  ];
  for(const face of faces){const nx=face.n[0]*cos+face.n[1]*sin,nz=-face.n[0]*sin+face.n[1]*cos;if(nx*.57+nz>.001)this.polygon(face.v.map(v=>point(...v)),shade(color,.74-.09*nx+.09*nz));}
  this.polygon([point(-w/2,h,-d/2),point(w/2,h,-d/2),point(w/2,h,d/2),point(-w/2,h,d/2)],top||shade(color,1.13));
+ }
+ drawFace(x,y,z,big,drawing){
+ const t=this.bodyTransform,cos=Math.cos(t.angle),sin=Math.sin(t.angle);if(sin*.57+cos<=.001)return;
+ this.faceTextures??=new Map();let texture=this.faceTextures.get(drawing);if(!texture){texture=document.createElement('canvas');texture.width=texture.height=16;FaceEditor.paint(texture,drawing);if(this.faceTextures.size>=64)this.faceTextures.delete(this.faceTextures.keys().next().value);this.faceTextures.set(drawing,texture);}
+ const point=(dx,dy)=>this.project(x+dx*cos+.24*big*sin,y+dy*big,z-dx*sin+.24*big*cos),a=point(-.2*big,1.53),b=point(.2*big,1.53),d=point(-.2*big,1.23),c=this.paint;const draw=()=>{c.save();c.transform((b.x-a.x)/16,(b.y-a.y)/16,(d.x-a.x)/16,(d.y-a.y)/16,a.x,a.y);c.imageSmoothingEnabled=false;c.drawImage(texture,0,0);c.restore();};if(this.actorPolygons)this.actorPolygons.push({depth:(x+.24*big*sin)*.57+(y+1.42*big)*.624+z+.24*big*cos+.001,draw});else draw();
  }
  poseFor(unit,index,time){
  const pos=this.positionFor(unit,index),anim=this.animations.find(a=>a.actor===unit.id&&time>=a.at&&time-a.at<a.duration);let x=pos.x,z=pos.z,y=0,gesture=0,stride=0,swing=0,facing=null;
@@ -95,7 +100,8 @@ class CampaignScene{
  this.shadow(x,z,unit.kind==='king'?1:.64,.5,unit.hp?.32:.15);
  const selected=this.selected===unit.id,active=this.state&&DungeonCampaign.active(this.state)?.id===unit.id;
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
- this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
+ // Sort body surfaces together so belts, arms and hair cannot paint over nearer torsos.
+ this.actorPolygons=[];this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
  const armLift=pose.swing?0:pose.gesture*.3;
  const look=unit.appearance||{},color=flash?'#ff3d48':look.clothes||unit.color,skin=look.skin|| (unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d');
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
@@ -115,7 +121,7 @@ class CampaignScene{
   if(unit.kind!=='skeleton'&&unit.kind!=='golem'&&look.hair!=='bald'){this.box(x,Y(1.56),z-.025*big,.53*big,.17*big,.48*big,hair);this.box(x-.22*big,Y(1.35),z-.05*big,.1*big,.3*big,.4*big,hair);}
   if(look.hair==='long')this.box(x,Y(.95),z-.17*big,.55*big,.6*big,.22*big,hair);if(look.hair==='spiky')for(let j=-1;j<=1;j++)this.box(x+j*.17,Y(1.68+Math.abs(j)*.06),z,.13,.2,.32,hair);if(look.outfit==='coat')this.box(x,Y(.2),z,.66*big,.35*big,.42*big,armor);if(look.outfit==='tunic')this.box(x,Y(.6),z+.2,.3*big,.5*big,.03,'#d1bd85');
   if(look.face==='smile')this.box(x,Y(1.27),z+.235*big,.15*big,.025*big,.02,'#6f4f42');if(look.face==='fierce')for(const side of [-1,1])this.box(x+side*.1*big,Y(1.46),z+.24*big,.1*big,.03*big,.02,'#47352d');if(look.face==='scar')this.box(x+.13*big,Y(1.31),z+.24*big,.025*big,.21*big,.02,'#ac6457');if(unit.race==='elf')for(const side of [-1,1])this.box(x+side*.29*big,Y(1.4),z,.16,.11,.11,skin);if(unit.race==='dwarf')this.box(x,Y(1.11),z+.24,.38,.23,.13,hair);if(unit.race==='dragonborn')for(const side of [-1,1])this.box(x+side*.2,Y(1.67),z,.09,.25,.1,'#dcc591');
-  this.box(x-.11*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');this.box(x+.1*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');
+  if(look.face==='drawn'&&look.faceDrawing)this.drawFace(x,y,z,big,look.faceDrawing);else{this.box(x-.11*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');this.box(x+.1*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');}
   if(unit.kind==='king'){for(let i=-1;i<=1;i++)this.box(x+i*.22*big,Y(1.65),z,.12*big,.24*big,.12*big,'#c5ad68');this.box(x,Y(1.58),z,.56*big,.1*big,.5*big,'#b29b57');}
   this.partTransform=pose.swing?{y:Y(1.08),z,angle:pose.swing}:null;
   const held=unit.side==='party'&&this.state?DungeonCampaign.weaponFor(this.state,unit).style:null;
@@ -123,7 +129,7 @@ class CampaignScene{
   else if(held==='arrow'||!held&&(unit.job==='ranger'||unit.kind==='archer')){this.box(x+.62*big,Y(.45),z,.07*big,.8*big,.1*big,'#b6a273');this.box(x+.56*big,Y(.5),z,.18*big,.06*big,.07*big,'#c6b98b');}
   else {this.box(x+.55*big,Y(.63+armLift),z+.04*big,.08*big,.75*big,.08*big,'#b7c4bd');this.box(x+.55*big,Y(.58+armLift),z,.32*big,.08*big,.1*big,'#b5a16c');this.partTransform=null;if(unit.side==='party')this.box(x-.62*big,Y(.48),z,.12*big,.56*big,.46*big,shade(color,.8));}
  }
- this.partTransform=null;this.bodyTransform=null;
+ const polygons=this.actorPolygons;this.actorPolygons=null;polygons.sort((a,b)=>a.depth-b.depth).forEach(p=>p.draw());this.partTransform=null;this.bodyTransform=null;
  if(unit.guard&&unit.hp){const c=this.paint,p=this.project(x,1.95,z);c.fillStyle='#b8d4d3';c.font='12px Arial';c.textAlign='center';c.fillText('◇',p.x,p.y);}
  const labelHeight={king:3.1,golem:2.7,stag:3.5,treant:3.2,demon:2.5,gargoyle:2.3,bat:1.9,mushroom:1.4,mimic:1.4,beetle:1,spider:.95,wolf:1.55,boar:1.7,crystal:2,skull:1.65,specter:2.1,slime:.95,rat:.95,wisp:1.5}[unit.kind]||1.95;const point=this.project(x,labelHeight,z);this.positions.set(unit.id,{x:point.x,y:point.y,worldX:pos.x,worldZ:pos.z,groundY:this.project(x,0,z).y,facing:unit.side==='party'?1:-1});
  if(!this.title){const c=this.paint,w=Math.max(48,this.scale*1.12);c.font='600 '+Math.max(7,Math.min(10,this.scale*.17))+'px Arial';c.textAlign='center';c.shadowColor='#102217';c.shadowBlur=5;c.fillStyle=unit.hp?'#e4e8d3':'#9a9e88';c.fillText(unit.name,point.x,point.y);c.shadowBlur=0;c.fillStyle='#142016';c.fillRect(point.x-w/2,point.y+6,w,4);c.fillStyle=unit.side==='party'?'#9fbd7a':'#c87969';c.fillRect(point.x-w/2,point.y+6,w*(unit.hp/unit.maxHp),4);if(active){c.fillStyle='#e1d2a2';c.beginPath();c.moveTo(point.x,point.y-17);c.lineTo(point.x-4,point.y-23);c.lineTo(point.x+4,point.y-23);c.fill();}}
