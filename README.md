@@ -1,61 +1,98 @@
 # Bryan’s Dungeon: The Hollow Road
 
-A complete standalone, turn-based campaign RPG inspired by block-world party
-battlers. Three controllable adventurers face eight encounters across a forest,
-an underground keep, and the Hollow King’s throne. Story choices unlock a new
-class or improve the party. Includes items, focus, guarding, cooldowns, leveling,
-retry, camp supply purchases, optional synthesized sound, and automatic local saves.
+A turn-based, block-world campaign for solo play or a party of up to three online
+players. Three worlds contain ten encounters each. The tenth encounter in every
+world is a boss: the Briar Sovereign, the Iron Warden, and the Hollow King.
+Defeating the forest boss opens the Ashen Dungeon; the second boss opens the
+Hollow Depths. There are 35 enemy types with distinct silhouettes and behaviors.
 
-## Play and host
+## Playing
 
-Publish this repository through GitHub Pages or serve its static files on Vercel.
-`index.html` is the entry point. No API, account, build step, or multiplayer server
-is required. The game works without contacting Render or Socket.IO. System fonts are used, so the game has no external runtime dependencies. Saves stay in this browser on
-this origin. The previous free-roam game has been replaced, and old saves are not
-imported. This is a solo campaign; online multiplayer is not included.
+- Begin a solo journey, or choose **Play with friends** on the Vercel site.
+- Create a room, copy the invite link, and send it to up to two friends.
+- The host controls their adventurer and any unclaimed companions. Friends own
+  their assigned adventurer’s turns. The host starts the campaign.
+- Every encounter ends at a campfire. Rest, sort loot, equip or upgrade gear,
+  sell unequipped items, and buy healing tonics or revival embers.
+- In online rooms, everyone online must ready up before the host travels onward.
+- Disconnected characters can be controlled by the host after 15 seconds. If the
+  host disconnects, an active member can become host after 30 seconds. Reloading
+  the same browser tab lets a player rejoin their authenticated room session.
+- Room data expires after 24 hours without updates. Solo saves are local to this
+  browser. The earlier eight-encounter saves migrate without erasing progress.
 
-For local development with Node.js 22+:
+## Vercel hosting
+
+`vercel.json` explicitly builds static game files into `public/` and publishes the
+serverless `/api/rooms` function. This avoids serving the old Express health
+message as the homepage. The existing Git integration can deploy pushes to main.
+
+Online rooms require shared Redis storage because Vercel function instances do
+not share process memory. In the Vercel project:
+
+1. Open **Storage → Create Database → Upstash Redis**.
+2. Connect it to **Production** and **Preview**, keeping credentials sensitive.
+3. Keep the integration’s default environment variable names.
+4. Deploy the latest commit, then click **Visit** on the newest deployment.
+
+The server reads `KV_REST_API_URL` and `KV_REST_API_TOKEN`, or the equivalent
+`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. These are server-only
+variables; do not add them to browser JavaScript. See `.env.example` for names.
+If Redis is missing, online room creation returns a clear setup message. Solo
+play still works. Vercel does **not** fall back to unreliable process memory.
+
+GitHub Pages can host the solo campaign, but it cannot run the online room API.
+The invite link must use the same Vercel website for every player.
+
+## Development and checks
+
+Use Node.js 24:
 
 ```sh
 npm install --package-lock=false
 npm start
 npm test
+npm run build
 ```
 
-Open the local server’s root or `/play` (default port 3000, configurable with
-`PORT`). To develop without npm, any static HTTP server also works.
+The local server defaults to port 3000 (`PORT` can override it). Root and `/play`
+serve the game. `/api/rooms?status=1` reports online-room readiness. Development
+uses a clearly identified in-memory room store, shared by browsers connected to
+that local server. Restarting the development server clears local online rooms.
+Set Redis variables if you need persistent shared rooms in development. The game
+has no external frontend libraries, assets, sound downloads, or font requests.
 
-## Rules
+The tests cover all thirty legal encounters, world bosses, campfires, equipment,
+status effects, save migration, multiplayer ownership, concurrent enemy ticks,
+ready checks, reconnect handling, and the Redis REST/lock protocol. Browser
+validation additionally uses three isolated player sessions, actual shared
+battles, campfire interactions, mobile layouts, and every creature mesh.
 
-Each living fighter gets exactly one action per round, in speed order. Party
-turns wait indefinitely for the player. Enemies act automatically, individually.
-No free movement, continuous combat, attack timers, or network authority exists.
-Strike is free; class techniques cost focus and have cooldowns measured in the
-acting character’s turns. Focus restores 3 focus and guards against half of all
-incoming damage until that character’s next turn. Tonics heal 40; embers revive a
-fallen ally at half health. Using an item consumes a turn. Victory grants gold,
-XP, one tonic, and partial healing. Party levels increase every two encounters.
-Defeat can be retried without losing previous campaign progress.
+## Combat and controls
 
-Use the enemy cards or click an enemy to choose a target. Fight / Items / Focus
-and every action support mouse and touch. Keyboard: 1–3 change tabs; Q strikes;
-W uses the active character’s technique; E mends with Mira; arrows change target;
-Escape opens the menu. H folds or unfolds the compact bottom controls.
-The larger arena keeps fighters above the controls on desktop and mobile; party
-and enemy models face inward. Melee attacks lunge, ranged attacks launch arrows
-or spell bolts, and healing and guarding have their own effects. Sounds begin
-after interaction and can be muted with the music-note button. Reduced-motion
-preferences disable lunges and particle motion. Progress saves after each resolved action. Returning to
-the title lets you continue the campaign later.
+Each living fighter gets one action per round in speed order. Party turns wait
+for player input. Enemies take individual server-driven turns in online rooms.
+Strike is free; stronger skills cost focus and recover on the owner’s turns.
+Focus restores 3 focus and halves incoming damage until the next turn. Poison
+lasts two actions; armored enemies guard; healers aid their allies; chargers
+telegraph heavy attacks; some enemies drain life or sweep the party.
 
-## Files
+Melee fighters walk to the target, swing, and retreat. Archers draw and release
+projectiles; casters raise their staff and cast bolts. Hits, healing, guard,
+poison, and campfires have effects. Sounds are synthesized locally. Reduced
+motion keeps actions readable without walking or particle movement.
 
-- `campaign.js`: deterministic campaign and combat engine, usable in Node tests.
-- `scene.js`: dependency-free Canvas block-world rendering and battle effects.
-- `game.js`: menus, combat presentation, and save handling.
-- `sound.js`: locally synthesized attack, impact, healing, guard, and outcome sounds.
-- `styles.css`: responsive interface.
-- `server.js`: optional local static development server.
+Mouse/touch supports every action. Keyboard: 1–3 switch tabs; Q strikes; W uses
+the active character’s technique; E mends with Mira; arrows select targets; H
+folds the bottom controls; Escape opens the menu. The music-note button mutes.
 
-Deploy the updated static files to publish this rebuild. Local changes alone do
-not update an existing GitHub Pages or Vercel deployment.
+## Main files
+
+- `campaign.js`: deterministic combat, worlds, loot, gear, campfires, migration.
+- `scene.js`: block-world arenas, enemy models, campfire, walking and VFX.
+- `game.js`: battle menus, camp UI, room lobby, progression and local saving.
+- `multiplayer.js`: authenticated room sessions and synchronized client updates.
+- `sound.js`: synthesized battle and interaction audio.
+- `api/rooms.js`, `lib/rooms.js`, `lib/room-store.js`: authoritative room API,
+  ownership, distributed locking, session validation, and persistent storage.
+- `scripts/build.js`, `vercel.json`: static output and Vercel function routing.

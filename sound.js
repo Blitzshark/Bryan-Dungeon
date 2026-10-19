@@ -29,6 +29,7 @@ class BattleAudio{
    else if(kind==='heavy'){this.noise(.27,600,.28);this.note(160,70,.28,.18,0,'triangle');}
    else if(kind==='menu'){this.note(660,880,.08,.1);}
    else{this.noise(.18,2800,.27);this.note(400,120,.12,.09,0,'triangle');}
+   if(['slash','heavy'].includes(kind))for(const offset of [0,.13,.26,.98,1.12])this.noise(.045,420,.07,offset);
   }catch{/* Audio must never prevent a turn from resolving. */}
  }
 }

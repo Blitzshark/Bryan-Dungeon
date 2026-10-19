@@ -1,0 +1,19 @@
+'use strict';
+const {createStore,RoomError}=require('../lib/room-store');
+const {RoomService}=require('../lib/rooms');
+let service;
+function getService(){return service||(service=new RoomService(createStore()));}
+function bearer(req){return String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');}
+module.exports=async function handler(req,res){
+ res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type','application/json; charset=utf-8');
+ try{
+  const rooms=getService();const url=new URL(req.url,'http://localhost');
+  if(req.method==='GET'&&url.searchParams.has('status')){if(rooms.store.kind==='shared-redis')await rooms.store.command(['PING']);return res.status(200).json({ok:true,storage:rooms.store.kind,maxPlayers:3});}
+  if(req.method==='GET')return res.status(200).json(await rooms.poll(url.searchParams.get('code'),bearer(req)));
+  if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'Use GET or POST.'});}
+  let input=req.body;if(typeof input==='string'){if(input.length>16384)throw new RoomError(413,'Request is too large.');try{input=JSON.parse(input);}catch{throw new RoomError(400,'Send a valid JSON request.');}}
+  if(!input||typeof input!=='object'||JSON.stringify(input).length>16384)throw new RoomError(400,'Send a small JSON request.');
+  const result=input.op==='create'?await rooms.create(input):input.op==='join'?await rooms.join(input):input.op==='command'?await rooms.command(input,bearer(req)):null;
+  if(!result)throw new RoomError(400,'Unknown room operation.');return res.status(200).json(result);
+ }catch(error){const status=error instanceof RoomError?error.status:500;return res.status(status).json({error:status===500?'The room service hit a problem. Please retry.':error.message});}
+};

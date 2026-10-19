@@ -1,55 +1,49 @@
-const {test}=require('node:test');
-const assert=require('node:assert/strict');
-const E=require('../campaign');
-function advanceTo(s,id){let count=0;while(s.phase==='battle'&&E.active(s).id!==id&&count++<60){E.active(s).side==='enemy'?E.enemyAct(s):E.act(s,{type:'focus'});}assert.equal(E.active(s)?.id,id);}
-function nextTurn(s,id){if(E.active(s).id===id)E.act(s,{type:'focus'});advanceTo(s,id);}
-test('three adventurers, eight encounters, deterministic speed-based initiative',()=>{
- const s=E.createRun('Bryan','warrior');assert.equal(E.CHAPTERS.length,8);assert.equal(s.party.length,3);assert.equal(s.stage,0);assert.equal(E.active(s).id,'rowan');assert.equal(s.enemies.length,2);assert.deepEqual(E.createRun('Bryan','warrior'),s);
- for(const job of ['warrior','ranger','mage'])assert.equal(E.createRun('Test',job).party[0].job,job);
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {E,playBattle,advanceTo,equipBest}=require('../test-support/helpers');
+test('three worlds each have nine encounters and a tenth boss, with diverse enemy rosters',()=>{
+ assert.equal(E.CHAPTERS.length,30);assert(Object.keys(E.ENEMIES).length>=35);assert(new Set(Object.values(E.ENEMIES).map(e=>e.kind)).size>=18);
+ for(let w=0;w<3;w++){const chapters=E.CHAPTERS.filter(c=>c.world===w);assert.equal(chapters.length,10);assert.deepEqual(chapters.map(c=>c.progress),[1,2,3,4,5,6,7,8,9,10]);assert.equal(chapters.filter(c=>c.boss).length,1);assert(chapters[9].boss);chapters.forEach(c=>c.enemies.forEach(type=>assert(E.ENEMIES[type])));}
+ const s=E.createRun('Bryan');assert.equal(s.party.length,3);assert.equal(E.active(s).id,'rowan');assert.deepEqual(E.createRun('Bryan'),s);
 });
-test('invalid actions and wrong-side actions cannot change state or consume turns',()=>{
- const s=E.createRun();let previous=JSON.stringify(s);assert.equal(E.enemyAct(s).ok,false);assert.equal(JSON.stringify(s),previous);
- for(const command of [{type:'skill',skill:'sunder',target:'enemy-0'},{type:'skill',skill:'strike',target:'hero'},{type:'potion',target:'hero'},{type:'revive',target:'hero'},{type:'made-up'}]){assert.equal(E.act(s,command).ok,false);assert.equal(JSON.stringify(s),previous);}
- s.party[1].mp=0;previous=JSON.stringify(s);assert.equal(E.act(s,{type:'skill',skill:'volley',target:'enemy-0'}).ok,false);assert.equal(JSON.stringify(s),previous);
+test('invalid and wrong-side actions do not consume resources or advance combat',()=>{
+ const s=E.createRun();for(const command of [{type:'skill',skill:'sunder',target:'enemy-0'},{type:'skill',skill:'strike',target:'hero'},{type:'potion',target:'hero'},{type:'revive',target:'hero'},{type:'bad'}]){const before=JSON.stringify(s);assert.equal(E.act(s,command).ok,false);assert.equal(JSON.stringify(s),before);}const before=JSON.stringify(s);assert.equal(E.enemyAct(s).ok,false);assert.equal(JSON.stringify(s),before);
 });
-test('exactly one action per fighter per round; planning never advances combat',()=>{
- const s=E.createRun(),initial=s.enemies.map(e=>e.hp),order=[...s.order],seen=[];
- while(s.round===1){const a=E.active(s);seen.push(a.id);assert.equal((a.side==='party'?E.act(s,{type:'focus'}):E.enemyAct(s)).ok,true);}
- assert.deepEqual(seen,order);assert.deepEqual(s.enemies.map(e=>e.hp),initial);assert.equal(s.round,2);
- const copy=JSON.stringify(s);for(let i=0;i<50;i++)E.active(s);assert.equal(JSON.stringify(s),copy);
+test('each fighter acts once per round and player turns wait indefinitely',()=>{
+ const s=E.createRun(),order=[...s.order],seen=[];while(s.round===1){const actor=E.active(s);seen.push(actor.id);assert((actor.side==='party'?E.act(s,{type:'focus'}):E.enemyAct(s)).ok);}assert.deepEqual(seen,order);const before=JSON.stringify(s);for(let i=0;i<100;i++)E.active(s);assert.equal(JSON.stringify(s),before);
 });
-test('skills damage targets, spend focus, and cool down on owner turns only',()=>{
- const s=E.createRun(),actor=E.active(s),mp=actor.mp,hps=s.enemies.map(e=>e.hp);assert.equal(E.act(s,{type:'skill',skill:'volley',target:'enemy-0'}).ok,true);assert.equal(actor.mp,mp-3);assert.equal(actor.cooldowns.volley,3);s.enemies.forEach((e,i)=>assert(e.hp<hps[i]));
- advanceTo(s,'rowan');assert.equal(actor.cooldowns.volley,2);const before=JSON.stringify(s);assert.equal(E.act(s,{type:'skill',skill:'volley',target:'enemy-0'}).ok,false);assert.equal(JSON.stringify(s),before);
- nextTurn(s,'rowan');assert.equal(actor.cooldowns.volley,1);nextTurn(s,'rowan');assert.equal(actor.cooldowns.volley,0);
+test('focus, guarding, skill costs, and turn-based cooldowns remain authoritative',()=>{
+ const s=E.createRun(),p=s.party[1],mp=p.mp;const result=E.act(s,{type:'skill',skill:'volley'});assert(result.ok);assert.equal(result.skill,'volley');assert.equal(p.mp,mp-3);assert.equal(p.cooldowns.volley,3);advanceTo(s,'rowan');assert.equal(p.cooldowns.volley,2);assert.equal(E.act(s,{type:'skill',skill:'volley'}).ok,false);E.act(s,{type:'focus'});assert(p.guard);assert.equal(p.mp,p.maxMp);advanceTo(s,'rowan');assert.equal(p.cooldowns.volley,1);assert.equal(p.guard,false);
 });
-test('focus restores resource and guards until the owner’s next turn',()=>{
- const a=E.createRun(),b=E.createRun();a.party[1].mp=0;E.act(a,{type:'focus'});assert.equal(a.party[1].mp,3);assert.equal(a.party[1].guard,true);
- advanceTo(a,'enemy-0');advanceTo(b,'enemy-0');a.seed=b.seed=12;a.party.forEach(p=>p.guard=true);b.party.forEach(p=>p.guard=false);
- const r1=E.enemyAct(a),r2=E.enemyAct(b);assert.equal(r1.events[0].target,r2.events[0].target);assert.equal(r1.events[0].amount,Math.round(r2.events[0].amount*.5));advanceTo(a,'rowan');assert.equal(a.party[1].guard,false);
+test('tonics, revival, poison, and enemy healing have distinct effects',()=>{
+ const s=E.createRun();s.party[0].hp-=45;const n=s.potions;assert(E.act(s,{type:'potion',target:'hero'}).ok);assert.equal(s.potions,n-1);assert.equal(s.party[0].hp,s.party[0].maxHp-5);advanceTo(s,'mira');s.party[0].hp=0;assert(E.act(s,{type:'revive',target:'hero'}).ok);assert.equal(s.party[0].hp,Math.ceil(s.party[0].maxHp/2));
+ const spider=E.createRun();spider.enemies[0].behavior='poison';advanceTo(spider,'enemy-0');const hit=E.enemyAct(spider);const target=E.unit(spider,hit.events[0].target);assert.equal(target.status.poison,2);advanceTo(spider,target.id);const tick=E.act(spider,{type:'focus'});assert(tick.events.some(e=>e.status==='poison'));assert.equal(target.status.poison,1);
+ const healer=E.createRun();healer.enemies[0].behavior='heal';healer.enemies[1].hp=3;advanceTo(healer,'enemy-0');const heal=E.enemyAct(healer);assert.equal(heal.skill,'mend');assert(heal.events.some(e=>e.type==='heal'));assert(healer.enemies[1].hp>3);
 });
-test('items heal or revive valid allies and consume one action',()=>{
- const s=E.createRun();s.party[0].hp-=45;const count=s.potions;assert.equal(E.act(s,{type:'potion',target:'hero'}).ok,true);assert.equal(s.potions,count-1);assert.equal(s.party[0].hp,s.party[0].maxHp-5);assert.notEqual(E.active(s).id,'rowan');
- advanceTo(s,'mira');s.party[0].hp=0;const embers=s.embers;assert.equal(E.act(s,{type:'revive',target:'hero'}).ok,true);assert.equal(s.embers,embers-1);assert.equal(s.party[0].hp,Math.ceil(s.party[0].maxHp*.5));
+test('every victory leads to a campfire with loot, rest, shopping and equipment',()=>{
+ const s=E.createRun();playBattle(s);assert.equal(s.phase,'camp');assert.equal(s.history.length,1);assert.equal(s.inventory.length,1);assert.equal(E.act(s,{type:'focus'}).ok,false);const item=s.inventory[0],base=E.stats(s,s.party[0]);assert(E.campAction(s,{type:'equip',item:item.id,hero:'hero'}).ok);const stats=E.stats(s,s.party[0]);assert.equal(stats.atk,base.atk+item.atk);assert.equal(stats.def,base.def+item.def);assert.equal(E.campAction(s,{type:'sell',item:item.id}).ok,false);assert(E.campAction(s,{type:'unequip',item:item.id}).ok);const gold=s.gold;assert(E.campAction(s,{type:'sell',item:item.id}).ok);assert.equal(s.gold,gold+item.price);assert.equal(s.inventory.length,0);
+ const p=s.party[0];p.hp=1;p.status.poison=2;assert(E.campAction(s,{type:'rest'}).ok);assert.equal(p.hp,p.maxHp);assert.deepEqual(p.status,{});assert.equal(E.campAction(s,{type:'rest'}).ok,false);const count=s.potions;assert(E.buyTonic(s));assert.equal(s.potions,count+1);
 });
-test('fallen units are skipped; defeat offers a full-health retry of the same encounter',()=>{
- const s=E.createRun();s.party[0].hp=0;E.act(s,{type:'focus'});assert.equal(E.active(s).id,'mira');E.act(s,{type:'focus'});assert.notEqual(E.active(s).id,'hero');s.party.forEach(p=>p.hp=1);s.enemies.forEach(e=>e.atk=10000);
- for(let i=0;i<20&&s.phase==='battle';i++){E.active(s).side==='enemy'?E.enemyAct(s):E.act(s,{type:'focus'});}assert.equal(s.phase,'defeat');const stage=s.stage;assert.equal(E.retry(s),true);assert.equal(s.stage,stage);s.party.forEach(p=>assert.equal(p.hp,p.maxHp));assert(s.potions>=2);
+test('gear upgrades consume gold, increase stats and stop at three upgrades',()=>{
+ const s=E.createRun();playBattle(s);s.gold=300;const item=s.inventory[0],initial=item.atk+item.def;for(let i=0;i<3;i++)assert(E.campAction(s,{type:'upgrade',item:item.id}).ok);assert(item.atk+item.def>initial);assert.equal(s.gold,300-25-45-65);assert.equal(E.campAction(s,{type:'upgrade',item:item.id}).ok,false);
 });
-test('save round trips include enemy turns; malformed and old saves are rejected',()=>{
- const s=E.createRun();advanceTo(s,'enemy-0');assert.deepEqual(E.restore(JSON.stringify(s)),s);assert.equal(E.restore('{broken'),null);assert.equal(E.restore({version:1}),null);const broken=JSON.parse(JSON.stringify(s));broken.party[0].hp=NaN;assert.equal(E.restore(broken),null);
+test('full thirty-encounter campaign is winnable, camps appear thirty times, bosses unlock worlds',()=>{
+ const s=E.createRun('Campaign tester'),worlds=[],bosses=[];let camps=0,total=0;
+ for(let stage=0;stage<30;stage++){
+  total+=playBattle(s);assert.notEqual(s.phase,'defeat','failed stage '+stage);assert.equal(s.phase,'camp');camps++;assert.equal(s.stage,stage);if(E.CHAPTERS[stage].boss){bosses.push(stage+1);assert.equal(s.reward.boss,true);assert(s.inventory.filter(i=>s.reward.loot.includes(i.id)).every(i=>i.rarity==='epic'));}
+  E.campAction(s,{type:'rest'});equipBest(s);assert(E.travel(s));if(s.phase==='story')assert(E.choose(s,'accept'));if(stage===9||stage===19){worlds.push(E.CHAPTERS[s.stage].world);assert.equal(E.CHAPTERS[s.stage].progress,1);}
+ }
+ assert.equal(s.phase,'complete');assert.equal(s.history.length,30);assert.equal(camps,30);assert.deepEqual(bosses,[10,20,30]);assert.deepEqual(worlds,[1,2]);assert.equal(s.party[0].level,16);assert(total>150);
 });
-function playBattle(s){let turns=0;while(s.phase==='battle'&&turns++<500){const a=E.active(s);if(a.side==='enemy'){assert(E.enemyAct(s).ok);continue;}const weak=E.living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0],fallen=s.party.find(p=>p.hp<=0);let command;
- if(fallen&&s.embers)command={type:'revive',target:fallen.id};else if(weak.hp<weak.maxHp*.4&&s.potions)command={type:'potion',target:weak.id};else if(a.id==='mira'&&weak.hp<weak.maxHp*.6&&a.mp>=3&&!a.cooldowns.mend)command={type:'skill',skill:'mend'};
- else{const skill=E.CLASSES[a.job].skill,def=E.SKILLS[skill],enemies=E.living(s,'enemy').sort((a,b)=>a.hp-b.hp),ready=a.mp>=def.cost&&!a.cooldowns[skill];command=a.mp<def.cost?{type:'focus'}:{type:'skill',skill:ready?skill:'strike',target:enemies[0].id};}const r=E.act(s,command);assert.equal(r.ok,true,r.error);
- }assert(turns<500);return turns;}
-test('the full eight-encounter campaign is winnable with legal actions and story choices',()=>{
- const s=E.createRun('Campaign tester','warrior');let total=0,stories=0;
- for(let i=0;i<8;i++){total+=playBattle(s);assert.notEqual(s.phase,'defeat','failed encounter '+(i+1));assert.equal(s.stage,i);assert(s.reward.gold>0);if(i<7){assert.equal(s.phase,'victory');const gold=s.gold;assert.equal(E.act(s,{type:'focus'}).ok,false);assert.equal(s.gold,gold);E.travel(s);if(s.phase==='story'){stories++;assert.equal(E.choose(s,'accept'),true);}}}
- assert.equal(stories,2);assert.equal(s.phase,'complete');assert.equal(s.history.length,8);assert.equal(s.party[0].job,'rogue');assert.equal(s.party[0].level,5);assert(total>30);
- const alt=E.createRun();alt.phase='story';alt.stage=1;alt.choice='stranger';const hp=alt.party[0].maxHp;E.choose(alt,'decline');assert.equal(alt.party[0].job,'warrior');assert.equal(alt.party[0].maxHp,hp+8);alt.phase='story';alt.stage=4;alt.choice='shrine';const gold=alt.gold,embers=alt.embers;E.choose(alt,'decline');assert.equal(alt.gold,gold+50);assert.equal(alt.embers,embers+1);
+test('defeat retries the current encounter without discarding loot',()=>{
+ const s=E.createRun();s.party.forEach(p=>p.hp=1);s.enemies.forEach(e=>e.atk=999);while(s.phase==='battle')E.active(s).side==='enemy'?E.enemyAct(s):E.act(s,{type:'focus'});assert.equal(s.phase,'defeat');assert(E.retry(s));assert.equal(s.stage,0);s.party.forEach(p=>assert.equal(p.hp,p.maxHp));assert.equal(s.phase,'battle');
+});
+test('saves round trip camp state and migrate the previous eight-encounter campaign',()=>{
+ const s=E.createRun();playBattle(s);assert.deepEqual(E.restore(JSON.stringify(s)),s);const old=E.createRun();old.version=4;old.stage=4;delete old.inventory;delete old.stories;const restored=E.restore(old);assert(restored);assert.equal(restored.version,5);assert.equal(restored.stage,10);assert.deepEqual(restored.inventory,[]);old.stage=7;old.phase='complete';const finished=E.restore(old);assert.equal(finished.stage,19);assert.equal(finished.phase,'camp');assert(E.travel(finished));assert.equal(finished.stage,20);assert.equal(E.restore('{broken'),null);
 });
 
-test('camp supplies can be bought only after victory with sufficient gold',()=>{const s=E.createRun();assert.equal(E.buyTonic(s),false);s.phase='victory';s.gold=19;assert.equal(E.buyTonic(s),false);s.gold=24;const count=s.potions;assert.equal(E.buyTonic(s),true);assert.equal(s.gold,4);assert.equal(s.potions,count+1);assert.equal(E.buyTonic(s),false);});
-
-test('resolved actions carry exact presentation cues without changing turn rules',()=>{const s=E.createRun();const result=E.act(s,{type:'skill',skill:'volley',target:'enemy-0'});assert.equal(result.action,'skill');assert.equal(result.skill,'volley');assert.equal(result.actor,'rowan');assert(result.events.every(e=>e.source==='rowan'&&e.type==='damage'&&typeof e.guarded==='boolean'));assert.equal(E.active(s).id,'mira');const focused=E.act(s,{type:'focus'});assert.equal(focused.action,'focus');assert.equal(focused.events[0].type,'focus');assert.equal(E.active(s).id,'hero');});
+test('armored, charging, sweeping, and draining enemies use different actions',()=>{
+ const guard=E.createRun();guard.enemies[0].behavior='guard';advanceTo(guard,'enemy-0');const brace=E.enemyAct(guard);assert.equal(brace.action,'focus');assert.equal(guard.enemies[0].guard,true);
+ const charge=E.createRun();charge.enemies[0].behavior='charge';advanceTo(charge,'enemy-0');E.enemyAct(charge);assert.equal(charge.enemies[0].charging,true);advanceTo(charge,'enemy-0');charge.party.forEach(p=>p.guard=false);const heavy=E.enemyAct(charge);assert.equal(heavy.events[0].amount,Math.round(charge.enemies[0].atk*1.8));assert.equal(charge.enemies[0].charging,false);
+ const sweep=E.createRun();sweep.enemies[0].behavior='sweep';sweep.enemies[0].turns=1;advanceTo(sweep,'enemy-0');assert.equal(E.enemyAct(sweep).events.filter(e=>e.type==='damage').length,3);
+ const drain=E.createRun();drain.enemies[0].behavior='drain';drain.enemies[0].hp=1;advanceTo(drain,'enemy-0');const leech=E.enemyAct(drain);assert(leech.events.some(e=>e.type==='heal'));assert(drain.enemies[0].hp>1);
+});
