@@ -240,3 +240,23 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - Synthesized audio includes footsteps, portal swells, story chimes, campfire
   rest tones, attack-specific accents and a subtle echo. The sound button
   controls these effects as well as combat audio.
+
+### Loot, confirmations and hit feedback
+
+- **Sell junk** sells every unequipped item for its listed price and preserves
+  all equipped gear. In online rooms only the host sells the shared bag.
+- Gear displays Common, Rare or Epic rarity, enchantments and its linked weapon
+  technique. Keen adds critical chance, Precise improves accuracy, Mighty adds
+  attack and Sturdy adds armor.
+- Humans choose equipment first and press **Confirm equipment**. After every
+  online human confirms, bots equip the strongest remaining gear and confirm.
+  Solo confirmation does the same for both companions. Camp changes revoke
+  confirmation; the party host leads travel once everyone is ready.
+- Player and enemy hits have an 8% miss chance and 15% critical chance before
+  equipment modifiers. Crits multiply raw damage by 1.6 and show a yellow marker.
+  Damage/healing numbers can be toggled with **Settings (⚙)** and are remembered
+  on the device. Miss labels and the yellow impact mark remain visible.
+- Defeated enemies dissolve into ash. Universe Cleave burns them in purple fire
+  before the dust disperses; its cosmic cutscene and guaranteed damage remain.
+- The third world blends void and hell: obsidian stone, violet rifts and floating
+  fragments, glowing lava fissures, and ember particles.
