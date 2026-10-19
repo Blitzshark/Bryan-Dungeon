@@ -19,7 +19,7 @@ function encounter(s){if(s.mode!=='raid')return CHAPTERS[s.stage];const level=s.
 function raidBossStats(level){return {hp:120+60*level+Math.round(12*Math.pow(level,1.3)),atk:10+5*level+Math.floor(level/5)*2};}
 const RARITIES={common:{name:'Common',color:'#b4c5a1'},rare:{name:'Rare',color:'#8fc4df'},epic:{name:'Epic',color:'#c2a1e6'}};
 const CLASSES={warrior:{name:'Vanguard',hp:88,mp:6,atk:13,speed:6,color:'#d5aa73',skill:'sunder'},ranger:{name:'Wayfarer',hp:72,mp:8,atk:12,speed:9,color:'#91ad85',skill:'volley'},mage:{name:'Arcanist',hp:65,mp:10,atk:11,speed:7,color:'#ac9bc8',skill:'ember'},rogue:{name:'Nightblade',hp:78,mp:8,atk:15,speed:10,color:'#a29ac2',skill:'shadow'}};
-const SKILLS={strike:{name:'Strike',cost:0,cd:0,description:'A reliable hit. No focus cost.',mult:1},sunder:{name:'Sundering blow',cost:2,cd:2,description:'A heavy strike for 170% damage.',mult:1.7},volley:{name:'Scatter shot',cost:3,cd:2,description:'Hit every enemy for 85% damage.',mult:.85,all:true},ember:{name:'Ember arc',cost:3,cd:2,description:'Burn every enemy for 105% damage.',mult:1.05,all:true},shadow:{name:'Hidden blade',cost:2,cd:2,description:'A precise strike for 190% damage.',mult:1.9},mend:{name:'Mend',cost:3,cd:2,description:'Restore 30 health to the weakest ally.',heal:30}};
+const SKILLS={universe:{name:'Universe cleave',cost:0,cd:0,description:'Bryan cuts through the universe. 10,000,000 damage to every enemy.',all:true,mult:1},strike:{name:'Strike',cost:0,cd:0,description:'A reliable hit. No focus cost.',mult:1},sunder:{name:'Sundering blow',cost:2,cd:2,description:'A heavy strike for 170% damage.',mult:1.7},volley:{name:'Scatter shot',cost:3,cd:2,description:'Hit every enemy for 85% damage.',mult:.85,all:true},ember:{name:'Ember arc',cost:3,cd:2,description:'Burn every enemy for 105% damage.',mult:1.05,all:true},shadow:{name:'Hidden blade',cost:2,cd:2,description:'A precise strike for 190% damage.',mult:1.9},mend:{name:'Mend',cost:3,cd:2,description:'Restore 30 health to the weakest ally.',heal:30}};
 const clone=value=>JSON.parse(JSON.stringify(value));
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,cooldowns:{},guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign'){
@@ -73,7 +73,7 @@ function act(s,command){
   if(!target||target.side!=='party'||target.hp>0)return {ok:false,error:'Choose a fallen ally.'};
   s.embers--;target.hp=Math.ceil(target.maxHp*.5);events.push({type:'heal',target:target.id,amount:target.hp});note(s,actor.name+' brings '+target.name+' back to the fight.');
  }else if(command.type==='skill'){
-  const allowed=['strike',CLASSES[actor.job].skill,...(actor.id==='mira'?['mend']:[])];
+  const allowed=[...(actor.name.trim().toLowerCase()==='bryan'?['universe']:[]),'strike',CLASSES[actor.job].skill,...(actor.id==='mira'?['mend']:[])];
   const key=command.skill,skill=SKILLS[key];if(!skill||!allowed.includes(key))return {ok:false,error:'That technique is not available.'};
   if(actor.mp<skill.cost)return {ok:false,error:'Not enough focus. Use Focus to recover.'};
   if(actor.cooldowns[key]>0)return {ok:false,error:'That technique is recovering.'};
@@ -81,10 +81,20 @@ function act(s,command){
   if(!skill.heal&&!skill.all&&(!target||target.side!=='enemy'||target.hp<=0))return {ok:false,error:'Choose a standing enemy.'};
   actor.mp-=skill.cost;if(skill.cd)actor.cooldowns[key]=skill.cd+1;
   if(skill.heal){const ally=living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];const amount=Math.min(skill.heal,ally.maxHp-ally.hp);ally.hp+=amount;events.push({type:'heal',target:ally.id,amount});note(s,actor.name+' mends '+ally.name+' for '+amount+'.');}
+  else if(key==='universe'){living(s,'enemy').forEach(t=>{t.hp=Math.max(0,t.hp-10000000);events.push({type:'damage',target:t.id,source:actor.id,amount:10000000,guarded:false});});note(s,actor.name+' cleaves the universe. 10,000,000 damage to every enemy.');}
   else{(skill.all?living(s,'enemy'):[target]).forEach(t=>damage(s,actor,t,stats(s,actor).atk*skill.mult,events));}
  }else return {ok:false,error:'Choose an action.'};
  poisonTick(s,actor,events);
  const result={ok:true,actor:actor.id,action:command.type,skill:command.skill||null,events};endTurn(s);return result;
+}
+function botAct(s){
+ const a=active(s);if(!a||a.side!=='party')return {ok:false,error:'Not a companion turn.'};
+ const weak=living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0],fallen=s.party.find(p=>p.hp<=0);let command;
+ if(fallen&&s.embers)command={type:'revive',target:fallen.id};
+ else if(weak.hp<weak.maxHp*.4&&s.potions)command={type:'potion',target:weak.id};
+ else if(a.id==='mira'&&weak.hp<weak.maxHp*.65&&a.mp>=3&&!a.cooldowns.mend)command={type:'skill',skill:'mend'};
+ else{const key=CLASSES[a.job].skill,target=living(s,'enemy').sort((a,b)=>a.hp-b.hp)[0]?.id;command=a.mp<SKILLS[key].cost?{type:'focus'}:{type:'skill',skill:a.cooldowns[key]?'strike':key,target};}
+ return act(s,command);
 }
 function enemyAct(s){
  const actor=active(s);if(!actor||actor.side!=='enemy')return {ok:false,error:'Not an enemy turn.'};
@@ -159,5 +169,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });

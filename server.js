@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('node:path');
 const app = express();
-app.use('/api/rooms',express.json({limit:'16kb'}),require('./api/rooms'));
+app.use('/api/rooms',express.json({limit:'16kb'}),express.text({type:'text/plain',limit:'16kb'}),require('./api/rooms'));
 app.use('/api',(req,res)=>res.status(404).json({error:'Unknown API endpoint.'}));
 app.get('/health', (req, res) => res.json({ ok: true, game: 'campaign', version: 5 }));
 app.get('/play', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

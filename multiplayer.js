@@ -2,7 +2,7 @@
 'use strict';
 const KEY='hollow-road-room-v5',SERVER_KEY='hollow-road-server';
 class OnlineParty{
- constructor(){this.server=null;this.discovery=null;this.connectionVersion=0;this.preference='';try{this.preference=localStorage.getItem(SERVER_KEY)||'';}catch{}this.session=null;this.room=null;this.timer=null;this.inFlight=false;this.closed=false;this.lastEvent=null;this.onUpdate=()=>{};this.onError=()=>{};try{const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');if(saved?.code&&saved?.token)this.session=saved;}catch{}}
+ constructor(){this.server=null;this.discovery=null;this.connectionVersion=0;this.preference='';try{this.preference=localStorage.getItem(SERVER_KEY)||'';}catch{}this.session=null;this.room=null;this.timer=null;this.inFlight=false;this.closed=false;this.lastEvent=null;this.onUpdate=()=>{};this.onError=()=>{};try{const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');if(saved?.code&&saved?.token)this.session=saved;}catch{}window.addEventListener?.('pagehide',()=>this.depart());}
  get serverPreference(){return this.preference;}
  setServer(value){
   if(this.room)throw Error('Leave your current room before changing servers.');
@@ -32,7 +32,12 @@ class OnlineParty{
  schedule(){clearTimeout(this.timer);if(this.closed||!this.session)return;this.timer=setTimeout(()=>this.poll(),1200);}
  async poll(){if(this.closed||!this.session||this.inFlight){this.schedule();return;}try{const data=await this.request(null,this.session.code);if(!this.closed)this.accept(data);}catch(error){this.onError(error);if([401,404].includes(error.status)){this.stop();return;}}finally{this.schedule();}}
  async send(action){if(this.inFlight||!this.room)throw Error('Wait for the party to finish syncing.');this.inFlight=true;try{const data=await this.request({op:'command',code:this.session.code,version:this.room.version,requestId:crypto.randomUUID(),action});if(data.left){this.stop(true);return data;}this.accept(data);return data;}catch(error){this.poll().catch(()=>{});throw error;}finally{this.inFlight=false;this.schedule();}}
- controls(hero){const room=this.room;if(!room)return true;const owner=room.members.find(m=>m.heroId===hero);return !owner?room.yourId===room.hostId:owner.id===room.yourId||(!owner.online&&room.yourId===room.hostId);}
+ depart(){
+  if(!this.session)return;const session=this.session,url=(this.server??session.server??'')+'/api/rooms',body=JSON.stringify({op:'depart',code:session.code,token:session.token});
+  this.stop(true);try{if(navigator.sendBeacon?.(url,new Blob([body],{type:'text/plain'})))return;}catch{}
+  try{fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body,keepalive:true}).catch(()=>{});}catch{}
+ }
+ controls(hero){const room=this.room;if(!room)return true;const owner=room.members.find(m=>m.heroId===hero);if(room.started&&room.state.phase==='battle'&&(!owner||!owner.online))return false;return !owner?room.yourId===room.hostId:owner.id===room.yourId||(!owner.online&&room.yourId===room.hostId);}
  ready(){return !this.room||Date.now()+(this.clockOffset||0)>=this.room.readyAt;}
  stop(forget=false){this.closed=true;clearTimeout(this.timer);if(forget){this.session=null;sessionStorage.removeItem(KEY);}this.room=null;}
 }

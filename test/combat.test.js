@@ -47,3 +47,7 @@ test('armored, charging, sweeping, and draining enemies use different actions',(
  const sweep=E.createRun();sweep.enemies[0].behavior='sweep';sweep.enemies[0].turns=1;advanceTo(sweep,'enemy-0');assert.equal(E.enemyAct(sweep).events.filter(e=>e.type==='damage').length,3);
  const drain=E.createRun();drain.enemies[0].behavior='drain';drain.enemies[0].hp=1;advanceTo(drain,'enemy-0');const leech=E.enemyAct(drain);assert(leech.events.some(e=>e.type==='heal'));assert(drain.enemies[0].hp>1);
 });
+test('Universe cleave belongs only to Bryan and deals exactly ten million to every living enemy',()=>{
+ for(const name of ['Bryan','bryan','  BRYAN  ']){const s=E.createRun(name);s.order=['hero',...s.order.filter(id=>id!=='hero')];s.cursor=0;s.enemies[0].guard=true;const result=E.act(s,{type:'skill',skill:'universe'});assert.equal(result.ok,true);assert.equal(result.events.length,2);assert(result.events.every(e=>e.amount===10000000&&!e.guarded));assert(s.enemies.every(e=>e.hp===0));assert.equal(s.phase,'camp');assert(E.restore(s));}
+ const s=E.createRun('Other');s.order=['hero',...s.order.filter(id=>id!=='hero')];s.cursor=0;const before=JSON.stringify(s);assert.equal(E.act(s,{type:'skill',skill:'universe'}).ok,false);assert.equal(JSON.stringify(s),before);
+});

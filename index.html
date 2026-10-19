@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#131c1b"><meta name="description" content="A block-world campaign RPG. Assemble your party, explore the Greenwood, and defeat the Hollow King. Every battle is turn based.">
 <title>Bryan’s Dungeon — The Hollow Road</title>
-<link rel="stylesheet" href="styles.css?v=8">
-<script defer src="campaign.js?v=8"></script><script defer src="scene.js?v=8"></script><script defer src="sound.js?v=8"></script><script defer src="multiplayer.js?v=8"></script><script defer src="game.js?v=8"></script>
+<link rel="stylesheet" href="styles.css?v=9">
+<script defer src="campaign.js?v=9"></script><script defer src="scene.js?v=9"></script><script defer src="sound.js?v=9"></script><script defer src="multiplayer.js?v=9"></script><script defer src="cosmic.js?v=9"></script><script defer src="game.js?v=9"></script>
 </head>
 <body>
 <canvas id="world" aria-label="Block-world battle arena. Use the enemy cards to select a target."></canvas>
@@ -31,6 +31,6 @@
 </section>
 <div class="modal-backdrop" id="modal" hidden><section class="modal panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close icon-button" id="modal-close" aria-label="Close dialog">×</button><div id="modal-content"></div></section></div>
 <div class="toast" id="toast" role="status" hidden></div>
-<div id="damage-layer" aria-hidden="true"></div>
+<canvas id="universe-cutscene" class="universe-cutscene" aria-label="Universe cleave cutscene: Earth, galaxy, universe, explosion" hidden></canvas><div id="damage-layer" aria-hidden="true"></div>
 <noscript>This campaign needs JavaScript. Enable JavaScript and reload to play.</noscript>
 </body></html>

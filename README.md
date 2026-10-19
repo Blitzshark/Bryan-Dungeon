@@ -12,15 +12,20 @@ Hollow Depths. There are 35 enemy types with distinct silhouettes and behaviors.
 - Browse existing public lobbies, or create a campaign/raid room. Choose public
   visibility to appear in the browser, or invite-only for a private party.
 - Create a room, copy the invite link, and send it to up to two friends.
-- The host controls their adventurer and any unclaimed companions. Friends own
-  their assigned adventurer’s turns. The host starts the campaign.
+- Each player controls their adventurer. Bots automatically take turns for empty
+  character slots, using attacks, healing, revives and focus. The host starts
+  the campaign. The invite strip is hidden during matches.
 - Every encounter ends at a campfire. Rest, sort loot, equip or upgrade gear,
   sell unequipped items, and buy healing tonics or revival embers.
 - In online rooms, everyone online must ready up before the host travels onward.
-- Disconnected characters can be controlled by the host after 15 seconds. If the
-  host disconnects, an active member can become host after 30 seconds. Reloading
-  the same browser tab lets a player rejoin their authenticated room session.
-- Room data expires after 24 hours without updates. Solo saves are local to this
+- Closing or navigating away from the creator’s tab deletes the party. Other
+  players return to the title. Guest departures free a slot for a bot. The
+  browser sends a version-independent authenticated keepalive/beacon; if that
+  request is lost, the party expires after the creator misses 45 seconds of
+  heartbeats. Refreshing the creator’s page also closes the party. Offline
+  characters receive bot turns after 15 seconds while the party is still alive.
+- Storage has a 24-hour cleanup TTL, but creator leases prevent closed parties
+  from being rejoined. Solo saves are local to this
   browser. The earlier eight-encounter saves migrate without erasing progress.
 
 ## Vercel hosting
@@ -106,10 +111,21 @@ Focus restores 3 focus and halves incoming damage until the next turn. Poison
 lasts two actions; armored enemies guard; healers aid their allies; chargers
 telegraph heavy attacks; some enemies drain life or sweep the party.
 
-Melee fighters walk to the target, swing, and retreat. Archers draw and release
+Melee fighters walk to the target, swing, and retreat. Enemies flash red on
+impact and damage counters float above them. Archers draw and release
 projectiles; casters raise their staff and cast bolts. Hits, healing, guard,
 poison, and campfires have effects. Sounds are synthesized locally. Reduced
 motion keeps actions readable without walking or particle movement.
+
+Name inputs support select-all, delete, and replacement. Dragging selected text
+outside the input does not dismiss the setup dialog.
+
+An adventurer named **Bryan** (case insensitive) gains **Universe cleave** in
+the Fight menu. Its nine-second cutscene zooms from Earth to galaxies and the
+universe, then cuts and explodes for exactly **10,000,000 damage to every
+living enemy**. It works in solo and online, checks the name on the server,
+and reserves the full cinematic before subsequent turns or travel. Reduced
+motion uses fixed framing without a fast camera zoom.
 
 Mouse/touch supports every action. Keyboard: 1–3 switch tabs; Q strikes; W uses
 the active character’s technique; E mends with Mira; arrows select targets; H
@@ -121,6 +137,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - `scene.js`: block-world arenas, enemy models, campfire, walking and VFX.
 - `game.js`: battle menus, camp UI, room lobby, progression and local saving.
 - `multiplayer.js`: authenticated room sessions and synchronized client updates.
+- `cosmic.js`: Earth-to-universe cinematic and final explosion.
 - `sound.js`: synthesized battle and interaction audio.
 - `api/rooms.js`, `lib/rooms.js`, `lib/room-store.js`: authoritative room API,
   ownership, distributed locking, session validation, and persistent storage.

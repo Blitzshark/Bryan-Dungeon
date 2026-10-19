@@ -19,8 +19,9 @@ class BattleAudio{
  }
  play(kind,impact=false,guarded=false){
   try{if(!this.ready())return;
-   if(impact){if(guarded){this.note(880,420,.13,.22);this.noise(.08,2200,.15);}else{this.noise(kind==='heavy'?.2:.11,kind==='magic'?1800:800,.45);this.note(kind==='heavy'?105:175,45,.16,.28,0,'triangle');}return;}
-   if(kind==='arrow'){this.note(640,210,.13,.25,0,'triangle');this.noise(.14,3600,.19);}
+   if(impact){if(kind==='cosmic'){this.noise(1.2,900,.6);this.note(90,20,1.4,.4,0,'triangle');return;}if(guarded){this.note(880,420,.13,.22);this.noise(.08,2200,.15);}else{this.noise(kind==='heavy'?.2:.11,kind==='magic'?1800:800,.45);this.note(kind==='heavy'?105:175,45,.16,.28,0,'triangle');}return;}
+   if(kind==='cosmic'){[110,165,220,330,440].forEach((f,i)=>this.note(f,f*1.8,1.8,.12,i*.7,'sine'));this.noise(.65,2600,.2,5.6);}
+   else if(kind==='arrow'){this.note(640,210,.13,.25,0,'triangle');this.noise(.14,3600,.19);}
    else if(kind==='magic'){[392,587,784].forEach((f,i)=>this.note(f,f*1.8,.23,.13,i*.045));this.noise(.23,1400,.1);}
    else if(kind==='heal'){[523,659,784,1047].forEach((f,i)=>this.note(f,f,.25,.15,i*.07));}
    else if(kind==='focus'){this.note(220,330,.4,.17);this.note(440,660,.32,.1,.06);}

@@ -97,7 +97,7 @@ class CampaignScene{
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
  this.bodyTransform={x,z,angle:this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2};
  const armLift=pose.gesture*.3;
- const color=flash?'#ead9be':unit.color,skin=unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d';
+ const color=flash?'#ff3d48':unit.color,skin=unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d';
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
   this.box(x,y+.02,z,.8,.5,.75,color);this.box(x,y+.52,z,.54,.15,.5,shade(color,1.1));this.box(x-.16,y+.3,z+.39,.09,.08,.02,'#253e2b');this.box(x+.13,y+.3,z+.39,.09,.08,.02,'#253e2b');
  }else if(unit.kind==='rat'){
@@ -106,11 +106,11 @@ class CampaignScene{
   const bob=this.reduced?0:Math.sin(time/650+index)*.08;this.box(x,y+.6+bob,z,.5,.6,.5,color);this.box(x,y+.45+bob,z,.25,.15,.25,shade(color,.8));this.box(x-.12,y+.9+bob,z+.26,.07,.08,.02,'#e1f9dc');this.box(x+.12,y+.9+bob,z+.26,.07,.08,.02,'#e1f9dc');
  }else{
   const big=unit.kind==='golem'?1.35:unit.kind==='king'?1.65:1;const Y=h=>y+h*big;
-  const armor=unit.kind==='king'?'#555f56':unit.kind==='skeleton'?'#aaac9b':unit.job==='mage'||unit.kind==='mage'?'#625976':color;
+  const armor=flash?'#ff3d48':unit.kind==='king'?'#555f56':unit.kind==='skeleton'?'#aaac9b':unit.job==='mage'||unit.kind==='mage'?'#625976':color;
   this.box(x-.16*big,Y(.02+Math.max(0,pose.stride)),z+pose.stride,.26*big,.5*big,.3*big,'#303c34');this.box(x+.16*big,Y(.02+Math.max(0,-pose.stride)),z-pose.stride,.26*big,.5*big,.3*big,'#303c34');
   this.box(x,Y(.52),z,.62*big,.66*big,.38*big,armor);this.box(x,Y(.51),z,.65*big,.07*big,.42*big,'#887751');
   this.box(x-.44*big,Y(.55),z-pose.stride,.24*big,.61*big,.28*big,armor);this.box(x+.44*big,Y(.55+armLift),z+pose.stride,.24*big,.61*big,.28*big,armor);
-  this.box(x,Y(1.19),z,.48*big,.46*big,.45*big,flash?'#f1e2cc':skin);
+  this.box(x,Y(1.19),z,.48*big,.46*big,.45*big,flash?'#ff5960':skin);
   const hair=unit.id==='hero'?'#594b3d':unit.id==='rowan'?'#b4ae95':unit.id==='mira'?'#393c3b':unit.kind==='king'?'#454f47':'#514c40';
   if(unit.kind!=='skeleton'&&unit.kind!=='golem'){this.box(x,Y(1.56),z-.025*big,.53*big,.17*big,.48*big,hair);this.box(x-.22*big,Y(1.35),z-.05*big,.1*big,.3*big,.4*big,hair);}
   this.box(x-.11*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');this.box(x+.1*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');
@@ -165,8 +165,8 @@ class CampaignScene{
  play(result){
  const now=performance.now(),actor=this.state&&DungeonCampaign.unit(this.state,result.actor);
  const support=['focus','potion','revive'].includes(result.action)||result.skill==='mend';
- const style=support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'?'heavy':'slash';
- const duration=this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=this.reduced?80:['slash','heavy'].includes(style)?720:450;
+ const style=result.skill==='universe'?'cosmic':support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'?'heavy':'slash';
+ const duration=result.skill==='universe'?9000:this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=result.skill==='universe'?7000:this.reduced?80:['slash','heavy'].includes(style)?720:450;
  this.animations.push({actor:result.actor,target:result.events?.[0]?.target,style,at:now,duration});
  for(const event of result.events||[])this.effects.push({...event,style,at:now+impactAt,start:now,duration});
  return {duration,impactAt,style};
