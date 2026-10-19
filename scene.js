@@ -17,7 +17,7 @@ class CampaignScene{
  if(this.bodyTransform){this.orientedBox(x,y,z,w,h,d,color,top);return;}const a=x-w/2,b=z-d/2,p=(xx,yy,zz)=>this.project(xx,yy,zz);this.polygon([p(a,y,b+d),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a,y+h,b+d)],shade(color,.83));this.polygon([p(a+w,y,b),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a+w,y+h,b)],shade(color,.65));this.polygon([p(a,y+h,b),p(a+w,y+h,b),p(a+w,y+h,b+d),p(a,y+h,b+d)],top||shade(color,1.13));}
  orientedBox(x,y,z,w,h,d,color,top){
  const t=this.bodyTransform,cos=Math.cos(t.angle),sin=Math.sin(t.angle);
- const point=(dx,dy,dz)=>{const px=x+dx-t.x,pz=z+dz-t.z;return this.project(t.x+px*cos+pz*sin,y+dy,t.z-px*sin+pz*cos);};
+ const point=(dx,dy,dz)=>{let xx=x+dx,yy=y+dy,zz=z+dz;const part=this.partTransform;if(part){const py=yy-part.y,pz=zz-part.z,pc=Math.cos(part.angle),ps=Math.sin(part.angle);yy=part.y+py*pc-pz*ps;zz=part.z+py*ps+pz*pc;}const px=xx-t.x,pz=zz-t.z;return this.project(t.x+px*cos+pz*sin,yy,t.z-px*sin+pz*cos);};
  const faces=[
   {n:[0,1],v:[[-w/2,0,d/2],[w/2,0,d/2],[w/2,h,d/2],[-w/2,h,d/2]]},
   {n:[0,-1],v:[[w/2,0,-d/2],[-w/2,0,-d/2],[-w/2,h,-d/2],[w/2,h,-d/2]]},
@@ -28,17 +28,17 @@ class CampaignScene{
  this.polygon([point(-w/2,h,-d/2),point(w/2,h,-d/2),point(w/2,h,d/2),point(-w/2,h,d/2)],top||shade(color,1.13));
  }
  poseFor(unit,index,time){
- const pos=this.positionFor(unit,index),anim=this.animations.find(a=>a.actor===unit.id&&time>=a.at&&time-a.at<a.duration);let x=pos.x,z=pos.z,y=0,gesture=0,stride=0;
+ const pos=this.positionFor(unit,index),anim=this.animations.find(a=>a.actor===unit.id&&time>=a.at&&time-a.at<a.duration);let x=pos.x,z=pos.z,y=0,gesture=0,stride=0,swing=0,facing=null;
  if(unit.hp&&!this.reduced)y=Math.sin(time/750+index)*.018;
  if(anim&&!this.reduced){const target=this.positions.get(anim.target),progress=(time-anim.at)/anim.duration;
   if(target&&['slash','heavy'].includes(anim.style)){
    const dx=target.worldX-pos.x,dz=target.worldZ-pos.z,distance=Math.max(.01,Math.hypot(dx,dz));
    const approach=progress<.36?progress/.36:progress<.65?1:Math.max(0,(1-progress)/.35),amount=(approach*approach*(3-2*approach))*Math.max(0,1-.95/distance);
    const walking=progress<.36||progress>.65;stride=walking?Math.sin(progress*18*Math.PI)*.15:0;
-   x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.36)/.29))*Math.PI);
+   facing=Math.atan2(dx,dz);x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.36)/.29))*Math.PI);const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);};swing=progress<.44?-.9*ease((progress-.34)/.1):progress<.51?-.9+2.5*ease((progress-.44)/.07):1.6*(1-ease((progress-.55)/.15));x+=dx/distance*Math.sin(swing)*.16;z+=dz/distance*Math.sin(swing)*.16;
   }else {gesture=Math.sin(progress*Math.PI);x+=(unit.side==='party'?1:-1)*gesture*.1;y+=gesture*.025;}
  }
- return {x,z,y,gesture,stride,anim};
+ return {x,z,y,gesture,stride,swing,facing,anim};
  }
  shadow(x,z,w=1,d=.6,alpha=.25){const p=this.project(x,.015,z),c=this.paint;c.save();c.translate(p.x,p.y);c.scale(1,.38);c.beginPath();c.ellipse(0,0,w*this.scale,d*this.scale,0,0,Math.PI*2);c.fillStyle=`rgba(5,14,9,${alpha})`;c.fill();c.restore();}
  tree(x,z,size,seed){const p=palette[this.biome],h=3.2*size;this.shadow(x+.6,z+.8,1.8*size,1.4*size,.24);this.box(x,0,z,.42*size,h,.46*size,'#554738');this.box(x+.32*size,h*.4,z,.7*size,.22*size,.22*size,'#554738');this.box(x-.38*size,h*.55,z,.9*size,.2*size,.22*size,'#554738');for(let k=0;k<6;k++){const dx=(seeded(seed+k)-.5)*2.1*size,dz=(seeded(seed+50+k)-.5)*2*size;this.box(x+dx,h*.63+seeded(seed+20+k)*1.1*size,z+dz,1.6*size,.9*size,1.5*size,p.leaf[k%p.leaf.length]);}}
@@ -90,13 +90,13 @@ class CampaignScene{
  positionFor(unit,index){if(this.camp){return [{x:-2.2,z:1.3},{x:0,z:3},{x:2.2,z:1.3}][index]||{x:0,z:0};}const side=unit.side==='party'?-1:1;const roster=unit.side==='party'?this.state?.party:this.state?.enemies;const count=roster?.length||3;return {x:side*(3.3+(index%2)*.2),z:(index-(count-1)/2)*(count>3?1.8:2.4)};}
  actor(unit,index,time){const pos=this.positionFor(unit,index),pose=this.poseFor(unit,index,time);let {x,z,y}=pose;let flash=false;
  const hit=this.effects.find(e=>e.target===unit.id&&e.type==='damage'&&time>=e.at&&time-e.at<360);
- if(hit){flash=time-hit.at<130;if(!this.reduced)x+=Math.sin((time-hit.at)/35)*.045;}
+ if(hit){flash=time-hit.at<220;if(!this.reduced)x+=Math.sin((time-hit.at)/35)*.045;}
  if(!unit.hp){const death=this.effects.find(e=>e.target===unit.id&&e.type==='damage');y=-.6*(death?Math.max(0,Math.min(1,(time-death.at)/450)):1);}
  this.shadow(x,z,unit.kind==='king'?1:.64,.5,unit.hp?.32:.15);
  const selected=this.selected===unit.id,active=this.state&&DungeonCampaign.active(this.state)?.id===unit.id;
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
- this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2};
- const armLift=pose.gesture*.3;
+ this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
+ const armLift=pose.swing?0:pose.gesture*.3;
  const look=unit.appearance||{},color=flash?'#ff3d48':look.clothes||unit.color,skin=look.skin|| (unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d');
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
   this.box(x,y+.02,z,.8,.5,.75,color);this.box(x,y+.52,z,.54,.15,.5,shade(color,1.1));this.box(x-.16,y+.3,z+.39,.09,.08,.02,'#253e2b');this.box(x+.13,y+.3,z+.39,.09,.08,.02,'#253e2b');
@@ -109,7 +109,7 @@ class CampaignScene{
   const armor=look.clothes?color:flash?'#ff3d48':unit.kind==='king'?'#555f56':unit.kind==='skeleton'?'#aaac9b':unit.job==='mage'||unit.kind==='mage'?'#625976':color;
   this.box(x-.16*big,Y(.02+Math.max(0,pose.stride)),z+pose.stride,.26*big,.5*big,.3*big,look.pants||'#303c34');this.box(x+.16*big,Y(.02+Math.max(0,-pose.stride)),z-pose.stride,.26*big,.5*big,.3*big,look.pants||'#303c34');
   this.box(x,Y(.52),z,.62*big,.66*big,.38*big,armor);this.box(x,Y(.51),z,.65*big,.07*big,.42*big,'#887751');
-  this.box(x-.44*big,Y(.55),z-pose.stride,.24*big,.61*big,.28*big,armor);this.box(x+.44*big,Y(.55+armLift),z+pose.stride,.24*big,.61*big,.28*big,armor);
+  this.box(x-.44*big,Y(.55),z-pose.stride,.24*big,.61*big,.28*big,armor);this.partTransform=pose.swing?{y:Y(1.08),z,angle:pose.swing}:null;this.box(x+.44*big,Y(.55+armLift),z+pose.stride,.24*big,.61*big,.28*big,armor);this.partTransform=null;
   this.box(x,Y(1.19),z,.48*big,.46*big,.45*big,flash?'#ff5960':skin);
   const hair=look.hairColor|| (unit.id==='hero'?'#594b3d':unit.id==='rowan'?'#b4ae95':unit.id==='mira'?'#393c3b':unit.kind==='king'?'#454f47':'#514c40');
   if(unit.kind!=='skeleton'&&unit.kind!=='golem'&&look.hair!=='bald'){this.box(x,Y(1.56),z-.025*big,.53*big,.17*big,.48*big,hair);this.box(x-.22*big,Y(1.35),z-.05*big,.1*big,.3*big,.4*big,hair);}
@@ -117,12 +117,13 @@ class CampaignScene{
   if(look.face==='smile')this.box(x,Y(1.27),z+.235*big,.15*big,.025*big,.02,'#6f4f42');if(look.face==='fierce')for(const side of [-1,1])this.box(x+side*.1*big,Y(1.46),z+.24*big,.1*big,.03*big,.02,'#47352d');if(look.face==='scar')this.box(x+.13*big,Y(1.31),z+.24*big,.025*big,.21*big,.02,'#ac6457');if(unit.race==='elf')for(const side of [-1,1])this.box(x+side*.29*big,Y(1.4),z,.16,.11,.11,skin);if(unit.race==='dwarf')this.box(x,Y(1.11),z+.24,.38,.23,.13,hair);if(unit.race==='dragonborn')for(const side of [-1,1])this.box(x+side*.2,Y(1.67),z,.09,.25,.1,'#dcc591');
   this.box(x-.11*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');this.box(x+.1*big,Y(1.39),z+.23*big,.055*big,.045*big,.025*big,'#35372d');
   if(unit.kind==='king'){for(let i=-1;i<=1;i++)this.box(x+i*.22*big,Y(1.65),z,.12*big,.24*big,.12*big,'#c5ad68');this.box(x,Y(1.58),z,.56*big,.1*big,.5*big,'#b29b57');}
+  this.partTransform=pose.swing?{y:Y(1.08),z,angle:pose.swing}:null;
   const held=unit.side==='party'&&this.state?DungeonCampaign.weaponFor(this.state,unit).style:null;
   if(held==='magic'||!held&&(unit.job==='mage'||unit.kind==='mage')){this.box(x+.6*big,Y(.02+armLift),z,.07*big,1.35*big,.07*big,'#8e7854');this.box(x+.6*big,Y(1.35+armLift),z,.19*big,.22*big,.19*big,'#c8bc8b');}
   else if(held==='arrow'||!held&&(unit.job==='ranger'||unit.kind==='archer')){this.box(x+.62*big,Y(.45),z,.07*big,.8*big,.1*big,'#b6a273');this.box(x+.56*big,Y(.5),z,.18*big,.06*big,.07*big,'#c6b98b');}
-  else {this.box(x+.55*big,Y(.63+armLift),z+.04*big,.08*big,.75*big,.08*big,'#b7c4bd');this.box(x+.55*big,Y(.58+armLift),z,.32*big,.08*big,.1*big,'#b5a16c');if(unit.side==='party')this.box(x-.62*big,Y(.48),z,.12*big,.56*big,.46*big,shade(color,.8));}
+  else {this.box(x+.55*big,Y(.63+armLift),z+.04*big,.08*big,.75*big,.08*big,'#b7c4bd');this.box(x+.55*big,Y(.58+armLift),z,.32*big,.08*big,.1*big,'#b5a16c');this.partTransform=null;if(unit.side==='party')this.box(x-.62*big,Y(.48),z,.12*big,.56*big,.46*big,shade(color,.8));}
  }
- this.bodyTransform=null;
+ this.partTransform=null;this.bodyTransform=null;
  if(unit.guard&&unit.hp){const c=this.paint,p=this.project(x,1.95,z);c.fillStyle='#b8d4d3';c.font='12px Arial';c.textAlign='center';c.fillText('◇',p.x,p.y);}
  const labelHeight={king:3.1,golem:2.7,stag:3.5,treant:3.2,demon:2.5,gargoyle:2.3,bat:1.9,mushroom:1.4,mimic:1.4,beetle:1,spider:.95,wolf:1.55,boar:1.7,crystal:2,skull:1.65,specter:2.1,slime:.95,rat:.95,wisp:1.5}[unit.kind]||1.95;const point=this.project(x,labelHeight,z);this.positions.set(unit.id,{x:point.x,y:point.y,worldX:pos.x,worldZ:pos.z,groundY:this.project(x,0,z).y,facing:unit.side==='party'?1:-1});
  if(!this.title){const c=this.paint,w=Math.max(48,this.scale*1.12);c.font='600 '+Math.max(7,Math.min(10,this.scale*.17))+'px Arial';c.textAlign='center';c.shadowColor='#102217';c.shadowBlur=5;c.fillStyle=unit.hp?'#e4e8d3':'#9a9e88';c.fillText(unit.name,point.x,point.y);c.shadowBlur=0;c.fillStyle='#142016';c.fillRect(point.x-w/2,point.y+6,w,4);c.fillStyle=unit.side==='party'?'#9fbd7a':'#c87969';c.fillRect(point.x-w/2,point.y+6,w*(unit.hp/unit.maxHp),4);if(active){c.fillStyle='#e1d2a2';c.beginPath();c.moveTo(point.x,point.y-17);c.lineTo(point.x-4,point.y-23);c.lineTo(point.x+4,point.y-23);c.fill();}}
@@ -168,7 +169,7 @@ class CampaignScene{
  play(result){
  const now=performance.now(),actor=this.state&&DungeonCampaign.unit(this.state,result.actor);
  const support=['focus','potion','revive'].includes(result.action)||!!DungeonCampaign.SKILLS[result.skill]?.heal;
- const style=result.skill==='universe'?'cosmic':DungeonCampaign.SKILLS[result.skill]?.style||(actor?.side==='party'&&this.state&&DungeonCampaign.weaponFor(this.state,actor).skill===result.skill?DungeonCampaign.weaponFor(this.state,actor).style:null)|| (support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'||DungeonCampaign.SKILLS[result.skill]?.ultimate?'heavy':'slash');
+ const style=result.skill==='universe'?'cosmic':result.skill==='strike'&&actor?.side==='party'?DungeonCampaign.weaponFor(this.state,actor).style:DungeonCampaign.SKILLS[result.skill]?.style||(actor?.side==='party'&&this.state&&DungeonCampaign.weaponFor(this.state,actor).skill===result.skill?DungeonCampaign.weaponFor(this.state,actor).style:null)|| (support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'||DungeonCampaign.SKILLS[result.skill]?.ultimate?'heavy':'slash');
  const duration=result.skill==='universe'?10000:this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=result.skill==='universe'?9000:this.reduced?80:['slash','heavy'].includes(style)?720:450;
  const primary=result.events?.find(e=>e.type==='damage'&&e.source===result.actor&&e.target!==result.actor)||result.events?.[0];
  this.animations.push({actor:result.actor,target:primary?.target,style,at:now,duration});

@@ -112,7 +112,9 @@ lasts two actions; armored enemies guard; healers aid their allies; chargers
 telegraph heavy attacks; some enemies drain life or sweep the party.
 
 Melee fighters walk to the target, swing, and retreat. Enemies flash red on
-impact and damage counters float above them. Archers draw and release
+impact and damage counters float above them. Melee swings rotate the weapon
+and striking arm, including a wind-up, follow-through, and return to formation.
+Basic strikes follow the equipped weapon, including for spellcaster classes. Archers draw and release
 projectiles; casters raise their staff and cast bolts. Hits, healing, guard,
 poison, and campfires have effects. Sounds are synthesized locally. Reduced
 motion keeps actions readable without walking or particle movement.
@@ -135,7 +137,10 @@ framing rather than a fast zoom.
 - **WASD**, arrow keys, clicking the floor, or the touch direction pad move your
   character through the Wandering Ember. The hearth, idle NPCs, tables, rugs,
   and quartermaster are rendered locally. Nearby visitors appear through the
-  same shared backend as rooms. An unavailable backend leaves a usable offline
+  same shared backend as rooms. Other players are slightly translucent (86%
+  opacity); local characters and NPCs stay opaque. Timestamped movement samples
+  are interpolated with a short buffer, smooth facing, and bounded prediction
+  during missing updates. An unavailable backend leaves a usable offline
   tavern and shop with a visible connection status.
 - Walk to **Alden behind the bar** and press **E** or **Talk to Alden**. Buy and
   equip classes, weapon types, and races. Your profile starts with **150 welcome
@@ -173,6 +178,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - `campaign.js`: seeded combat, randomized companions, abilities, worlds and loot.
 - `hero-options.js`: profiles, appearance validation, classes/races/weapons and shop.
 - `tavern.js`, `lib/tavern.js`: walkable inn, shop, shared visitor presence.
+- `motion.js`: buffered remote-player interpolation and smooth turns.
 - `scene.js`: block-world arenas, enemy models, campfire, walking and VFX.
 - `game.js`: battle menus, camp UI, room lobby, progression and local saving.
 - `multiplayer.js`: authenticated room sessions and synchronized client updates.
