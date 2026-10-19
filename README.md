@@ -8,7 +8,9 @@ Hollow Depths. There are 35 enemy types with distinct silhouettes and behaviors.
 
 ## Playing
 
-- Begin a solo journey, or choose **Play with friends** on the Vercel site.
+- Begin a solo journey, or choose **Play with friends** inside the game.
+- Browse existing public lobbies, or create a campaign/raid room. Choose public
+  visibility to appear in the browser, or invite-only for a private party.
 - Create a room, copy the invite link, and send it to up to two friends.
 - The host controls their adventurer and any unclaimed companions. Friends own
   their assigned adventurer’s turns. The host starts the campaign.
@@ -41,8 +43,30 @@ variables; do not add them to browser JavaScript. See `.env.example` for names.
 If Redis is missing, online room creation returns a clear setup message. Solo
 play still works. Vercel does **not** fall back to unreliable process memory.
 
-GitHub Pages can host the solo campaign, but it cannot run the online room API.
-The invite link must use the same Vercel website for every player.
+GitHub Pages hosts both solo modes and connects to the shared room backend
+inside the game. The client tries a same-origin API first, then the project's
+Vercel branch domain. Players never need to open a hosting dashboard. The API
+allows cross-origin JSON requests with bearer tokens; credentials stay on the
+server. Public listings show only party names, mode, occupancy and progress.
+Inactive parties disappear from listings after 30 seconds; invite-only rooms
+are never listed. Listings refresh every four seconds.
+
+Any Node/Express host can run `npm start` for shared rooms without Vercel. Local
+development uses memory; production requires the Redis REST variables above.
+To use another backend for a static frontend, define `window.HOLLOW_ROAD_SERVER`
+before `multiplayer.js`. All players must use the same backend. Shared online
+play always requires a reachable server; static files alone cannot share rooms.
+
+## Endless raid
+
+Choose **Endless raid** for solo, or select it when creating an online room.
+Each victory goes to camp and unlocks the next boss. Six boss forms rotate
+through three arenas; boss health and attack strictly increase each wave.
+Every boss drops two epic items whose base stats and tier grow with raid level.
+Party levels, healing tonics and gold rewards also scale. Equip, upgrade, sell,
+rest and buy supplies at every campfire. There is no final raid wave.
+Solo raids and campaigns use separate saves; starting one does not replace the
+other. Online raids use the same turn ownership and ready checks as campaigns.
 
 ## Development and checks
 

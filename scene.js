@@ -9,7 +9,7 @@ class CampaignScene{
  this.scale=this.title?Math.min(this.width/(this.width<650?13:19),this.height/13):Math.min(this.width/(this.width<650?12.5:16.5),this.height/10.3,Math.max(12,(this.height-270)/6.2));
  this.cx=this.width*(this.title?.65:this.camp&&this.width>800?.29:.5);this.cy=this.title?this.height*.57:this.camp?(this.height*(this.width>800?.54:.30)):Math.min(this.height*.52,this.height-(this.width<650?185:170)-16-this.scale*2.1);this.dirty=true;}
 
- setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.CHAPTERS[state.stage].biome:'forest',camp=state?.phase==='camp';if(this.biome!==biome||this.title!==title||this.camp!==camp){this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
+ setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp';if(this.biome!==biome||this.title!==title||this.camp!==camp){this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
  project(x,y,z){return {x:this.cx+(x-z*.57)*this.scale,y:this.cy+(x*.27+z*.47-y)*this.scale};}
  polygon(points,color,stroke){const c=this.paint;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.6;c.stroke();}}
  plane(x,z,w,d,color){this.polygon([this.project(x,0,z),this.project(x+w,0,z),this.project(x+w,0,z+d),this.project(x,0,z+d)],color);}

@@ -5,10 +5,12 @@ let service;
 function getService(){return service||(service=new RoomService(createStore()));}
 function bearer(req){return String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');}
 module.exports=async function handler(req,res){
+ res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');if(req.method==='OPTIONS')return res.status(204).end();
  res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type','application/json; charset=utf-8');
  try{
   const rooms=getService();const url=new URL(req.url,'http://localhost');
   if(req.method==='GET'&&url.searchParams.has('status')){if(rooms.store.kind==='shared-redis')await rooms.store.command(['PING']);return res.status(200).json({ok:true,storage:rooms.store.kind,maxPlayers:3});}
+  if(req.method==='GET'&&url.searchParams.has('list'))return res.status(200).json(await rooms.list(url.searchParams.get('mode')));
   if(req.method==='GET')return res.status(200).json(await rooms.poll(url.searchParams.get('code'),bearer(req)));
   if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'Use GET or POST.'});}
   let input=req.body;if(typeof input==='string'){if(input.length>16384)throw new RoomError(413,'Request is too large.');try{input=JSON.parse(input);}catch{throw new RoomError(400,'Send a valid JSON request.');}}

@@ -14,14 +14,17 @@ const layouts=[
 ];
 const titles=[['The Greenwood','Webbed Trail','The Hunting Grounds','Outlaw Crossing','Spore Hollow','The Root Circle','The Walking Grove','The Broken Bridge','The Briar Gate','The Briar Sovereign'],['Below the Keep','A Chest in the Dark','The Silent Watch','The Gutter Roost','The Bone Chapel','The Cinder Kennel','The False Treasury','The Chain Gallery','The Warden’s Door','The Iron Warden'],['Into the Rift','The Veil Crossing','The Crystal Watch','A Crack in the World','The Oracle’s Chamber','The Hungry Road','The Obsidian Gate','The Last Descent','The Throne Approach','The Hollow King']];
 const CHAPTERS=WORLDS.flatMap((world,w)=>layouts[w].map((enemies,p)=>({name:titles[w][p],subtitle:p===9?'WORLD BOSS · '+world.name:'Progression '+(p+1)+' of 10 · '+world.name,biome:world.biome,world:w,progress:p+1,boss:p===9,enemies})));
+const RAID_BOSSES=['briar','warden','king','treant','gargoyle','demon'];
+function encounter(s){if(s.mode!=='raid')return CHAPTERS[s.stage];const level=s.raidLevel,type=RAID_BOSSES[(level-1)%RAID_BOSSES.length],world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:WORLDS[world].biome,world,progress:level,boss:true,enemies:[type]};}
+function raidBossStats(level){return {hp:120+60*level+Math.round(12*Math.pow(level,1.3)),atk:10+5*level+Math.floor(level/5)*2};}
 const RARITIES={common:{name:'Common',color:'#b4c5a1'},rare:{name:'Rare',color:'#8fc4df'},epic:{name:'Epic',color:'#c2a1e6'}};
 const CLASSES={warrior:{name:'Vanguard',hp:88,mp:6,atk:13,speed:6,color:'#d5aa73',skill:'sunder'},ranger:{name:'Wayfarer',hp:72,mp:8,atk:12,speed:9,color:'#91ad85',skill:'volley'},mage:{name:'Arcanist',hp:65,mp:10,atk:11,speed:7,color:'#ac9bc8',skill:'ember'},rogue:{name:'Nightblade',hp:78,mp:8,atk:15,speed:10,color:'#a29ac2',skill:'shadow'}};
 const SKILLS={strike:{name:'Strike',cost:0,cd:0,description:'A reliable hit. No focus cost.',mult:1},sunder:{name:'Sundering blow',cost:2,cd:2,description:'A heavy strike for 170% damage.',mult:1.7},volley:{name:'Scatter shot',cost:3,cd:2,description:'Hit every enemy for 85% damage.',mult:.85,all:true},ember:{name:'Ember arc',cost:3,cd:2,description:'Burn every enemy for 105% damage.',mult:1.05,all:true},shadow:{name:'Hidden blade',cost:2,cd:2,description:'A precise strike for 190% damage.',mult:1.9},mend:{name:'Mend',cost:3,cd:2,description:'Restore 30 health to the weakest ally.',heal:30}};
 const clone=value=>JSON.parse(JSON.stringify(value));
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,cooldowns:{},guard:false};}
-function createRun(name='Adventurer',job='warrior'){
+function createRun(name='Adventurer',job='warrior',mode='campaign'){
  if(!CLASSES[job]||job==='rogue')job='warrior';
- const s={version:5,phase:'battle',stage:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:9417,inventory:[],campRested:false,stories:[]};
+ const s={version:5,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:9417,inventory:[],campRested:false,stories:[]};
  startBattle(s);return s;
 }
 function living(s,side){return (side==='party'?s.party:s.enemies).filter(u=>u.hp>0);}
@@ -31,8 +34,9 @@ function note(s,text){s.log.push(text);s.log=s.log.slice(-30);}
 function nextRandom(s){s.seed=(s.seed*1664525+1013904223)>>>0;return s.seed/4294967296;}
 function makeOrder(s){return [...living(s,'party'),...living(s,'enemy')].sort((a,b)=>b.speed-a.speed||(a.id<b.id?-1:1)).map(u=>u.id);}
 function startBattle(s){
- const chapter=CHAPTERS[s.stage];s.phase='battle';s.round=1;s.reward=null;s.choice=null;
+ const chapter=encounter(s);s.phase='battle';s.round=1;s.reward=null;s.choice=null;
  s.enemies=chapter.enemies.map((type,i)=>{const d=ENEMIES[type],scale=1+chapter.world*.15+(chapter.progress-1)*.035;return {...d,id:'enemy-'+i,side:'enemy',maxHp:Math.round(d.hp*scale),hp:Math.round(d.hp*scale),atk:Math.round(d.atk*scale),mp:0,maxMp:0,guard:false,cooldowns:{},status:{},enemyType:type};});
+ if(s.mode==='raid'){const boss=s.enemies[0],power=raidBossStats(s.raidLevel);Object.assign(boss,{hp:power.hp,maxHp:power.hp,atk:power.atk,boss:true});}
  s.party.forEach(p=>{p.guard=false;p.cooldowns={};p.mp=p.maxMp;p.status={};});
  s.order=makeOrder(s);s.cursor=0;s.log=[];note(s,chapter.name+' — battle begins.');beginTurn(s);
 }
@@ -40,11 +44,12 @@ function beginTurn(s){const actor=active(s);if(!actor)return;actor.guard=false;f
 function checkEnd(s){
  if(!living(s,'party').length){s.phase='defeat';note(s,'The party has fallen. The road is not over.');return true;}
  if(!living(s,'enemy').length){
-  const gold=24+s.stage*11,xp=20+s.stage*8;s.gold+=gold;s.xp+=xp;s.potions+=1;
-  const level=1+Math.floor((s.stage+1)/2);let leveled=false;
+  const gold=s.mode==='raid'?40+22*s.raidLevel:24+s.stage*11,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;s.gold+=gold;s.xp+=xp;s.potions+=1;
+  if(s.mode==='raid')s.raidBest=Math.max(s.raidBest,s.raidLevel);
+  const level=s.mode==='raid'?s.raidLevel+1:1+Math.floor((s.stage+1)/2);let leveled=false;
   s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}p.hp=Math.min(p.maxHp,Math.max(p.hp,1)+Math.round(p.maxHp*.35));p.mp=p.maxMp;});
   const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;
-  s.reward={gold,xp,potion:1,leveled,boss:CHAPTERS[s.stage].boss,loot:loot.map(i=>i.id)};s.history.push(CHAPTERS[s.stage].name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
+  s.reward={gold,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
  }
  return false;
 }
@@ -86,7 +91,7 @@ function enemyAct(s){
  const targets=living(s,'party'),target=targets[Math.floor(nextRandom(s)*targets.length)],events=[];actor.turns=(actor.turns||0)+1;
  let skill=['mage','wisp','skull','crystal','specter','imp'].includes(actor.kind)?'ember':actor.kind==='archer'?'volley':actor.boss||['golem','treant','demon','boar'].includes(actor.kind)?'sunder':'strike';
  const injured=living(s,'enemy').filter(e=>e.hp<e.maxHp*.7).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
- if(actor.behavior==='heal'&&injured&&actor.turns%2){const amount=Math.min(18+CHAPTERS[s.stage].world*8,injured.maxHp-injured.hp);injured.hp+=amount;events.push({type:'heal',target:injured.id,amount});note(s,actor.name+' restores '+amount+' health to '+injured.name+'.');skill='mend';}
+ if(actor.behavior==='heal'&&injured&&actor.turns%2){const amount=Math.min(18+encounter(s).world*8,injured.maxHp-injured.hp);injured.hp+=amount;events.push({type:'heal',target:injured.id,amount});note(s,actor.name+' restores '+amount+' health to '+injured.name+'.');skill='mend';}
  else if(actor.behavior==='guard'&&actor.turns%3===1){actor.guard=true;events.push({type:'focus',target:actor.id,amount:0});note(s,actor.name+' braces behind its armor.');skill='guard';}
  else if(actor.behavior==='charge'&&actor.turns%3===1){actor.charging=true;events.push({type:'focus',target:actor.id,amount:0});note(s,actor.name+' is charging a heavy attack. Guard before its next turn!');skill='guard';}
  else {
@@ -99,14 +104,14 @@ function enemyAct(s){
  poisonTick(s,actor,events);
  const result={ok:true,actor:actor.id,action:skill==='guard'?'focus':'enemy',skill,events};endTurn(s);return result;
 }
-function poisonTick(s,actor,events){if(actor.status?.poison&&actor.hp>0){const amount=Math.min(actor.hp,3+CHAPTERS[s.stage].world*2);actor.hp-=amount;actor.status.poison--;events.push({type:'damage',target:actor.id,source:actor.id,amount,guarded:false,status:'poison'});note(s,actor.name+' takes '+amount+' poison damage.');}}
-function tonicHeal(s){return 40+Math.floor(s.stage/10)*20;}
+function poisonTick(s,actor,events){if(actor.status?.poison&&actor.hp>0){const amount=Math.min(actor.hp,3+encounter(s).world*2);actor.hp-=amount;actor.status.poison--;events.push({type:'damage',target:actor.id,source:actor.id,amount,guarded:false,status:'poison'});note(s,actor.name+' takes '+amount+' poison damage.');}}
+function tonicHeal(s){return s.mode==='raid'?40+s.raidLevel*8:40+Math.floor(s.stage/10)*20;}
 function stats(s,p){const gear=(s.inventory||[]).filter(i=>i.owner===p.id);return {atk:p.atk+gear.reduce((n,i)=>n+i.atk,0),def:gear.reduce((n,i)=>n+i.def,0)};}
 function rollLoot(s){
- const boss=CHAPTERS[s.stage].boss,count=boss?2:1,tier=1+Math.floor(s.stage/10);return Array.from({length:count},(_,i)=>{
+ const boss=encounter(s).boss,count=boss?2:1,tier=s.mode==='raid'?s.raidLevel:1+Math.floor(s.stage/10);return Array.from({length:count},(_,i)=>{
   const r=nextRandom(s),slot=['weapon','armor','charm'][Math.floor(nextRandom(s)*3)],rarity=boss?'epic':r>.77?'rare':'common',quality=rarity==='epic'?3:rarity==='rare'?2:1;
   const names={weapon:['Traveler’s Blade','Ashwood Edge','Riftforged Steel'],armor:['Ironbark Vest','Keepkeeper Mail','Obsidian Mantle'],charm:['Mossbound Charm','Lantern Sigil','Hollow Star']};
-  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:names[slot][tier-1],slot,rarity,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?quality:0,price:10+tier*quality*8,owner:null,upgrades:0};
+  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:tier-1]+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:10+tier*quality*8,owner:null,upgrades:0};
  });
 }
 function campAction(s,command){
@@ -125,6 +130,7 @@ function campAction(s,command){
 }
 function travel(s){
  if(s.phase!=='camp')return false;
+ if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===CHAPTERS.length-1){s.phase='complete';return true;}
  if([1,14].includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':'shrine';return true;}
  s.stage++;startBattle(s);return true;
@@ -141,8 +147,10 @@ function buyTonic(s){return campAction(s,{type:'buy-tonic'}).ok;}
 function retry(s){if(s.phase!=='defeat')return false;s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;});s.potions=Math.max(2,s.potions);startBattle(s);return true;}
 function restore(value){
  try{const s=typeof value==='string'?JSON.parse(value):clone(value);
- if(s?.version===4){s.version=5;s.stage=s.phase==='story'&&s.choice==='shrine'?14:s.stage<4?s.stage:s.stage<7?s.stage+6:19;s.inventory=[];s.campRested=false;s.stories=[];if(['victory','complete'].includes(s.phase)){s.phase='camp';s.reward=s.reward||{gold:0,xp:0};s.reward.loot=[];s.reward.boss=CHAPTERS[s.stage].boss;}s.party.forEach(p=>p.status={});}
+ if(s?.version===4){s.version=5;s.stage=s.phase==='story'&&s.choice==='shrine'?14:s.stage<4?s.stage:s.stage<7?s.stage+6:19;s.inventory=[];s.campRested=false;s.stories=[];if(['victory','complete'].includes(s.phase)){s.phase='camp';s.reward=s.reward||{gold:0,xp:0};s.reward.loot=[];s.reward.boss=encounter(s).boss;}s.party.forEach(p=>p.status={});}
  if(!s||s.version!==5||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CHAPTERS.length||!['battle','camp','story','defeat','complete'].includes(s.phase))return null;
+ s.mode=s.mode||'campaign';s.raidLevel=s.raidLevel||1;s.raidBest=s.raidBest||0;
+ if(!['campaign','raid'].includes(s.mode)||!Number.isSafeInteger(s.raidLevel)||s.raidLevel<1||!Number.isSafeInteger(s.raidBest)||s.raidBest<0)return null;
  if(!Array.isArray(s.inventory)||!Array.isArray(s.stories))return null;
  if(!Array.isArray(s.party)||s.party.length!==3||!Array.isArray(s.enemies)||!Array.isArray(s.order)||!Array.isArray(s.log)||!Array.isArray(s.history))return null;
  const all=[...s.party,...s.enemies];if(all.some(p=>!p||!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.hp<0||p.hp>p.maxHp||!p.cooldowns))return null;
@@ -151,5 +159,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
