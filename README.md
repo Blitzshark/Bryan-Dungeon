@@ -191,3 +191,17 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - `api/rooms.js`, `lib/rooms.js`, `lib/room-store.js`: authoritative room API,
   ownership, distributed locking, session validation, and persistent storage.
 - `scripts/build.js`, `vercel.json`: static output and Vercel function routing.
+
+### Combat and camp update
+
+- Regular campaign enemies have 65% more health and 25% more attack. World
+  bosses fight alone with larger health pools; the Hollow King has over 1,400 HP.
+  Raid bosses keep their separate endless scaling.
+- Eight optional decisions appear between fights across the 30-stage campaign.
+- Melee attacks walk into contact, wind up, hit, and return. The attack keeps
+  its target location even when position history is unavailable, and walking
+  remains visible with reduced motion (without foot bobbing).
+- At camp, choose a character and press **Equip best gear**, or directly equip
+  an item with its stat comparison visible. Upgrade and sell are under each
+  item's expandable controls. Traveling automatically fully heals the party.
+  Online players can only equip characters they control.

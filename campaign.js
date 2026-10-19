@@ -8,9 +8,9 @@ const ENEMIES={
  crystal:{name:'Fractured Crystal',hp:63,atk:16,speed:3,color:'#b69ad6',kind:'crystal',behavior:'guard'},imp:{name:'Ember Imp',hp:48,atk:15,speed:10,color:'#bf826e',kind:'imp',behavior:'poison'},shade:{name:'Veil Stalker',hp:68,atk:17,speed:9,color:'#8a8aa8',kind:'specter',behavior:'drain'},voidslime:{name:'Void Slime',hp:77,atk:15,speed:3,color:'#a48bc9',kind:'slime',behavior:'poison'},hellhound:{name:'Rift Hound',hp:82,atk:19,speed:9,color:'#9783a2',kind:'wolf',behavior:'pounce'},sentinel:{name:'Obsidian Sentinel',hp:108,atk:19,speed:3,color:'#727c91',kind:'golem',behavior:'guard'},oracle:{name:'Blind Oracle',hp:72,atk:17,speed:6,color:'#bf9db8',kind:'mage',behavior:'heal'},demon:{name:'Rift Brute',hp:120,atk:22,speed:3,color:'#9e7376',kind:'demon',behavior:'sweep'},king:{name:'THE HOLLOW KING',hp:320,atk:27,speed:5,color:'#7d8798',kind:'king',boss:true,behavior:'sweep'}
 };
 const layouts=[
- [['slime','slime'],['rat','spider','rat'],['wolf','beetle'],['archer','bandit','slime'],['boar','mushroom','spider'],['shaman','wolf','beetle'],['treant','wisp','mushroom'],['archer','boar','spider'],['golem','shaman','wolf'],['briar','beetle','wisp']],
- [['skeleton','bat','ratkin'],['mimic','skull'],['armor','skeleton','mage'],['gargoyle','bat','bat'],['acolyte','ratkin','revenant'],['hound','skull','mage'],['mimic','armor','bat'],['revenant','acolyte','gargoyle'],['armor','mage','hound'],['warden','skeleton','skull']],
- [['voidslime','imp','crystal'],['shade','hellhound','wisp'],['sentinel','oracle'],['demon','imp','imp'],['crystal','shade','oracle'],['hellhound','demon','voidslime'],['sentinel','imp','oracle'],['demon','shade','crystal'],['sentinel','oracle','hellhound'],['king','crystal','shade']]
+ [['slime','slime'],['rat','spider','rat'],['wolf','beetle'],['archer','bandit','slime'],['boar','mushroom','spider'],['shaman','wolf','beetle'],['treant','wisp','mushroom'],['archer','boar','spider'],['golem','shaman','wolf'],['briar']],
+ [['skeleton','bat','ratkin'],['mimic','skull'],['armor','skeleton','mage'],['gargoyle','bat','bat'],['acolyte','ratkin','revenant'],['hound','skull','mage'],['mimic','armor','bat'],['revenant','acolyte','gargoyle'],['armor','mage','hound'],['warden']],
+ [['voidslime','imp','crystal'],['shade','hellhound','wisp'],['sentinel','oracle'],['demon','imp','imp'],['crystal','shade','oracle'],['hellhound','demon','voidslime'],['sentinel','imp','oracle'],['demon','shade','crystal'],['sentinel','oracle','hellhound'],['king']]
 ];
 const titles=[['The Greenwood','Webbed Trail','The Hunting Grounds','Outlaw Crossing','Spore Hollow','The Root Circle','The Walking Grove','The Broken Bridge','The Briar Gate','The Briar Sovereign'],['Below the Keep','A Chest in the Dark','The Silent Watch','The Gutter Roost','The Bone Chapel','The Cinder Kennel','The False Treasury','The Chain Gallery','The Warden’s Door','The Iron Warden'],['Into the Rift','The Veil Crossing','The Crystal Watch','A Crack in the World','The Oracle’s Chamber','The Hungry Road','The Obsidian Gate','The Last Descent','The Throne Approach','The Hollow King']];
 const CHAPTERS=WORLDS.flatMap((world,w)=>layouts[w].map((enemies,p)=>({name:titles[w][p],subtitle:p===9?'WORLD BOSS · '+world.name:'Progression '+(p+1)+' of 10 · '+world.name,biome:world.biome,world:w,progress:p+1,boss:p===9,enemies})));
@@ -45,7 +45,7 @@ function nextRandom(s){s.seed=(s.seed*1664525+1013904223)>>>0;return s.seed/4294
 function makeOrder(s){return [...living(s,'party'),...living(s,'enemy')].sort((a,b)=>b.speed-a.speed||(a.id<b.id?-1:1)).map(u=>u.id);}
 function startBattle(s){
  const chapter=encounter(s);s.phase='battle';s.round=1;s.reward=null;s.choice=null;
- s.enemies=chapter.enemies.map((type,i)=>{const d=ENEMIES[type],scale=1+chapter.world*.15+(chapter.progress-1)*.035;return {...d,id:'enemy-'+i,side:'enemy',maxHp:Math.round(d.hp*scale),hp:Math.round(d.hp*scale),atk:Math.round(d.atk*scale),mp:0,maxMp:0,guard:false,cooldowns:{},status:{},enemyType:type};});
+ s.enemies=chapter.enemies.map((type,i)=>{const d=ENEMIES[type],scale=1+chapter.world*.15+(chapter.progress-1)*.035;return {...d,id:'enemy-'+i,side:'enemy',maxHp:Math.round(d.hp*scale*(d.boss?(chapter.world===2?2.8:2.4):1.65)),hp:Math.round(d.hp*scale*(d.boss?(chapter.world===2?2.8:2.4):1.65)),atk:Math.round(d.atk*scale*(d.boss?(chapter.world===2?1.65:1.4):1.25)),mp:0,maxMp:0,guard:false,cooldowns:{},status:{},enemyType:type};});
  if(s.mode==='raid'){const boss=s.enemies[0],power=raidBossStats(s.raidLevel);Object.assign(boss,{hp:power.hp,maxHp:power.hp,atk:power.atk,boss:true});}
  s.party.forEach(p=>{p.guard=false;p.cooldowns={};p.mp=p.maxMp;p.status={};});
  s.order=makeOrder(s);s.cursor=0;s.log=[];note(s,chapter.name+' — battle begins.');beginTurn(s);
@@ -142,7 +142,10 @@ function rollLoot(s){
 function campAction(s,command){
  if(s.phase!=='camp')return {ok:false,error:'Return to the campfire first.'};
  const item=s.inventory.find(i=>i.id===command.item),hero=s.party.find(p=>p.id===command.hero);
- if(command.type==='equip'){
+ if(command.type==='equip-best'){
+  if(!hero)return {ok:false,error:'Choose an adventurer.'};
+  for(const slot of ['weapon','armor','charm']){const candidates=s.inventory.filter(i=>i.slot===slot&&(!i.owner||i.owner===hero.id)).sort((a,b)=>(b.atk+b.def)-(a.atk+a.def)),best=candidates[0],current=s.inventory.find(i=>i.slot===slot&&i.owner===hero.id);if(best&&best.atk+best.def>(current?current.atk+current.def:slot==='weapon'?(P.WEAPONS[hero.weapon]?.atk||0):0)){if(current)current.owner=null;best.owner=hero.id;}}
+ }else if(command.type==='equip'){
   if(!item||!hero)return {ok:false,error:'Choose a piece of gear and an adventurer.'};
   s.inventory.filter(i=>i.owner===hero.id&&i.slot===item.slot).forEach(i=>i.owner=null);item.owner=hero.id;
  }else if(command.type==='unequip'){if(!item)return {ok:false,error:'Gear not found.'};item.owner=null;}
@@ -155,9 +158,10 @@ function campAction(s,command){
 }
 function travel(s){
  if(s.phase!=='camp')return false;
+ if(!s.campRested)campAction(s,{type:'rest'});
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===CHAPTERS.length-1){s.phase='complete';return true;}
- if([1,14].includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':'shrine';return true;}
+ if([1,4,7,11,14,17,22,26].includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.stage===1?'stranger':s.stage===14?'shrine':'crossroads';return true;}
  s.stage++;startBattle(s);return true;
 }
 function choose(s,choice){
@@ -165,6 +169,7 @@ function choose(s,choice){
  if(s.choice==='stranger'){
   if(choice==='accept'){const p=s.party[0],c=CLASSES.rogue;p.job='rogue';p.atk+=3;p.speed=c.speed;p.color=c.color;p.maxMp=Math.max(p.maxMp,8);}
   else s.party.forEach(p=>{p.maxHp+=8;p.hp=Math.min(p.maxHp,p.hp+8);});
+ }else if(s.choice==='crossroads'){if(choice==='accept'){s.potions+=2;s.gold+=35;}else s.party.forEach(p=>{p.atk+=1;p.maxHp+=6;p.hp=Math.min(p.maxHp,p.hp+6);});
  }else if(choice==='accept')s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;});else{s.gold+=50;s.embers++;}
  s.stories.push(s.stage);s.stage++;startBattle(s);return true;
 }

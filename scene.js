@@ -35,12 +35,12 @@ class CampaignScene{
  poseFor(unit,index,time){
  const pos=this.positionFor(unit,index),anim=this.animations.find(a=>a.actor===unit.id&&time>=a.at&&time-a.at<a.duration);let x=pos.x,z=pos.z,y=0,gesture=0,stride=0,swing=0,facing=null;
  if(unit.hp&&!this.reduced)y=Math.sin(time/750+index)*.018;
- if(anim&&!this.reduced){const target=this.positions.get(anim.target),progress=(time-anim.at)/anim.duration;
+ if(anim){const target=anim.destination||this.positions.get(anim.target),progress=(time-anim.at)/anim.duration;
   if(target&&['slash','heavy'].includes(anim.style)){
    const dx=target.worldX-pos.x,dz=target.worldZ-pos.z,distance=Math.max(.01,Math.hypot(dx,dz));
-   const approach=progress<.36?progress/.36:progress<.65?1:Math.max(0,(1-progress)/.35),amount=(approach*approach*(3-2*approach))*Math.max(0,1-.95/distance);
-   const walking=progress<.36||progress>.65;stride=walking?Math.sin(progress*18*Math.PI)*.15:0;
-   facing=Math.atan2(dx,dz);x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.36)/.29))*Math.PI);const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);};swing=progress<.44?-.9*ease((progress-.34)/.1):progress<.51?-.9+2.5*ease((progress-.44)/.07):1.6*(1-ease((progress-.55)/.15));x+=dx/distance*Math.sin(swing)*.16;z+=dz/distance*Math.sin(swing)*.16;
+   const approach=progress<.42?progress/.42:progress<.72?1:Math.max(0,(1-progress)/.28),amount=(approach*approach*(3-2*approach))*Math.max(0,1-.7/distance);
+   const walking=progress<.42||progress>.72;stride=walking&&!this.reduced?Math.sin(progress*18*Math.PI)*.15:0;
+   facing=Math.atan2(dx,dz);x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.42)/.30))*Math.PI);const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);};swing=progress<.54?-.9*ease((progress-.42)/.12):progress<.61?-.9+2.5*ease((progress-.54)/.07):1.6*(1-ease((progress-.65)/.1));x+=dx/distance*Math.sin(swing)*.16;z+=dz/distance*Math.sin(swing)*.16;
   }else {gesture=Math.sin(progress*Math.PI);x+=(unit.side==='party'?1:-1)*gesture*.1;y+=gesture*.025;}
  }
  return {x,z,y,gesture,stride,swing,facing,anim};
@@ -176,9 +176,10 @@ class CampaignScene{
  const now=performance.now(),actor=this.state&&DungeonCampaign.unit(this.state,result.actor);
  const support=['focus','potion','revive'].includes(result.action)||!!DungeonCampaign.SKILLS[result.skill]?.heal;
  const style=result.skill==='universe'?'cosmic':result.skill==='strike'&&actor?.side==='party'?DungeonCampaign.weaponFor(this.state,actor).style:DungeonCampaign.SKILLS[result.skill]?.style||(actor?.side==='party'&&this.state&&DungeonCampaign.weaponFor(this.state,actor).skill===result.skill?DungeonCampaign.weaponFor(this.state,actor).style:null)|| (support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'||DungeonCampaign.SKILLS[result.skill]?.ultimate?'heavy':'slash');
- const duration=result.skill==='universe'?10000:this.reduced?300:['slash','heavy'].includes(style)?1500:1100,impactAt=result.skill==='universe'?9000:this.reduced?80:['slash','heavy'].includes(style)?720:450;
+ const duration=result.skill==='universe'?10000:['slash','heavy'].includes(style)?1500:this.reduced?300:1100,impactAt=result.skill==='universe'?9000:['slash','heavy'].includes(style)?885:this.reduced?80:450;
  const primary=result.events?.find(e=>e.type==='damage'&&e.source===result.actor&&e.target!==result.actor)||result.events?.[0];
- this.animations.push({actor:result.actor,target:primary?.target,style,at:now,duration});
+ const targetUnit=this.state&&DungeonCampaign.unit(this.state,primary?.target),roster=targetUnit?.side==='party'?this.state.party:this.state?.enemies,targetIndex=roster?.findIndex(p=>p.id===primary?.target),destination=targetUnit?this.positionFor(targetUnit,targetIndex):null;
+ this.animations.push({actor:result.actor,target:primary?.target,destination:destination?{worldX:destination.x,worldZ:destination.z}:null,style,at:now,duration});
  for(const event of result.events||[])this.effects.push({...event,style,at:now+impactAt,start:now,duration});
  return {duration,impactAt,style};
  }

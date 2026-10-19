@@ -5,7 +5,7 @@ const SAVE='bryan-hollow-road-v4',RAID_SAVE='bryan-hollow-road-raid-v1',PROFILE_
 let pendingBuild=false,profile=P.freshProfile();try{const raw=localStorage.getItem(PROFILE_SAVE);if(raw)profile=P.profile(JSON.parse(raw));}catch{}
 function persistProfile(){try{localStorage.setItem(PROFILE_SAVE,JSON.stringify(profile));}catch{}}
 function creditRun(){if(!state)return;const id=state.runId||'legacy-'+state.mode,total=state.tavernGold||0,old=profile.credits[id]||0;if(total>old){const gain=total-old;profile.coins+=gain+(state.party.find(p=>p.id===(room?.heroId||'hero'))?.race==='human'?Math.floor(gain*.1):0);profile.credits[id]=total;persistProfile();}}
-let state=null,saved=null,savedRaid=null,lobbyTimer=null,tab='fight',target=null,itemMode=null,busy=false,paused=false,enemyTimer=null,animationTimer=null,toastTimer=null,selectedClass='warrior',soundOn=true,logOpen=true,impactTimer=null,lastOutcome=null,room=null,remoteVersion=0,campTab='loot',campSort='rarity',campSelected=null,campHero='hero',networkErrorAt=0,roomReadyTimer=null;
+let state=null,saved=null,savedRaid=null,lobbyTimer=null,tab='fight',target=null,itemMode=null,busy=false,paused=false,enemyTimer=null,animationTimer=null,toastTimer=null,selectedClass='warrior',soundOn=true,logOpen=true,impactTimer=null,lastOutcome=null,room=null,remoteVersion=0,campTab='loot',campHero='hero',networkErrorAt=0,roomReadyTimer=null;
 try{saved=E.restore(localStorage.getItem(SAVE));savedRaid=E.restore(localStorage.getItem(RAID_SAVE));soundOn=localStorage.getItem(SAVE+'-sound')!=='off';}catch{}
 try{if(saved&&!localStorage.getItem(PROFILE_SAVE)){const hero=saved.party[0];profile=P.profile({...profile,name:hero.name,job:hero.job,classes:[...profile.classes,hero.job],race:hero.race,weapon:hero.weapon,appearance:hero.appearance});persistProfile();}}catch{}
 const tavern=new CozyTavern({online,getProfile:()=>profile,onProfile:next=>{profile=P.profile(next);persistProfile();},onClose:()=>{hideModal();if(state&&$('title-screen').hidden){render();scheduleEnemy();}else scene.setState(null,true);},onCustomize:customizeScreen,onShop:shopScreen,notify});
@@ -115,29 +115,27 @@ for(const b of document.querySelectorAll('[data-camp-tab]'))b.onclick=()=>{campT
 function renderCamp(){
  const chapter=E.encounter(state),reward=state.reward||{},isHost=!room||room.yourId===room.hostId;
  $('camp-eyebrow').textContent=state.mode==='raid'?'RAID BOSS '+state.raidLevel+' DEFEATED · GEAR TIER '+state.raidLevel:E.WORLDS[chapter.world].name.toUpperCase()+' · '+chapter.progress+'/10 CLEARED';
- $('camp-summary').textContent=(state.mode==='raid'?'A stronger boss awaits. Equip your new gear. ':chapter.boss?'Boss defeated. A new road is open. ':'Another fight behind you. ')+(reward.gold?'+'+reward.gold+' gold · +'+reward.xp+' XP · New gear recovered.':'Sort your gear before you set out.');
+ $('camp-summary').textContent=(state.mode==='raid'?'A stronger boss awaits. Equip your new gear. ':chapter.boss?'Boss defeated. A new road is open. ':'Another fight behind you. ')+(reward.gold?'+'+reward.gold+' gold · +'+reward.xp+' XP · New gear recovered.':'Loot is already in your bag.');
  $('camp-gold').textContent=state.gold;
  $('camp-party-summary').replaceChildren(...state.party.map(p=>{const row=element('div',{class:'camp-party-pill'});row.append(element('span',{},p.name),element('b',{},p.hp+' / '+p.maxHp+' HP'));return row;}));
  document.querySelectorAll('[data-camp-tab]').forEach(b=>b.classList.toggle('active',b.dataset.campTab===campTab));
  const content=$('camp-content'),scroll=content.scrollTop;content.replaceChildren();
  if(campTab==='loot'){
-  const toolbar=element('div',{class:'loot-toolbar'});toolbar.append(element('span',{},state.inventory.length+' pieces of gear'));
-  const sort=element('select',{'aria-label':'Sort loot'});for(const [value,label]of [['rarity','Rarity'],['slot','Equipment slot'],['value','Sell value']]){const option=element('option',{value},label);option.selected=value===campSort;sort.append(option);}sort.onchange=()=>{campSort=sort.value;renderCamp();};toolbar.append(sort);content.append(toolbar);
-  const rank={epic:3,rare:2,common:1},items=[...state.inventory].sort((a,b)=>campSort==='rarity'?rank[b.rarity]-rank[a.rarity]||b.price-a.price:campSort==='slot'?a.slot.localeCompare(b.slot):b.price-a.price);
-  if(!items.some(i=>i.id===campSelected))campSelected=items[0]?.id;
-  const list=element('div',{class:'loot-list'});
-  items.forEach(item=>{const owner=state.party.find(p=>p.id===item.owner),b=element('button',{class:'loot-item '+(item.id===campSelected?'selected':''),onclick:()=>{campSelected=item.id;renderCamp();}});b.style.setProperty('--rarity',E.RARITIES[item.rarity].color);b.append(element('span',{class:'loot-symbol'},item.slot==='weapon'?'⚔':item.slot==='armor'?'◇':'✦'));const copy=element('span');copy.append(element('strong',{},item.name+(item.upgrades?' +'+item.upgrades:'')),element('small',{},E.RARITIES[item.rarity].name+' '+item.slot+(item.slot==='weapon'?' · '+E.SKILLS[(P.WEAPONS[item.weaponKey]||P.WEAPONS.sword).skill].name:'')+(item.tier?' · Tier '+item.tier:'')+(owner?' · '+owner.name:'')));b.append(copy,element('span',{class:'loot-stats'},'+'+item.atk+' ATK / +'+item.def+' ARM'));list.append(b);});content.append(list);
-  if(!items.length)content.append(element('p',{class:'skill-note'},'The fire is warm. Gear drops after every victory.'));
-  const item=state.inventory.find(i=>i.id===campSelected);
-  if(item){
-   const details=element('div',{class:'gear-details'}),select=element('select',{'aria-label':'Equip gear on adventurer'});
-   state.party.forEach(p=>{const option=element('option',{value:p.id},p.name);option.selected=p.id===campHero;option.disabled=!!room&&!online.controls(p.id);select.append(option);});select.onchange=()=>campHero=select.value;
-   if(room&&!online.controls(campHero))campHero=room.heroId;select.value=campHero;
-   details.append(select);const equip=element('button',{onclick:()=>campChange({type:'equip',item:item.id,hero:select.value})},'Equip');details.append(equip);
-   if(item.owner){const unequip=element('button',{onclick:()=>campChange({type:'unequip',item:item.id})},'Unequip');unequip.disabled=!!room&&!online.controls(item.owner);details.append(unequip);}
-   const upgrade=element('button',{onclick:()=>campChange({type:'upgrade',item:item.id})},item.upgrades>=3?'Max upgrade':'Upgrade · '+(25+item.upgrades*20)+' gold');upgrade.disabled=item.upgrades>=3||state.gold<25+item.upgrades*20||!!(room&&item.owner&&!online.controls(item.owner));details.append(upgrade);
-   const sell=element('button',{onclick:()=>campChange({type:'sell',item:item.id})},'Sell · '+item.price+' gold');sell.disabled=!!item.owner;details.append(sell);content.append(details);
-  }
+  if(room&&!online.controls(campHero))campHero=room.heroId;
+  const picker=element('div',{class:'camp-character-picker'});
+  state.party.forEach(p=>{const b=element('button',{class:p.id===campHero?'primary':'',onclick:()=>{campHero=p.id;renderCamp();}},p.name);b.disabled=!!room&&!online.controls(p.id);picker.append(b);});content.append(picker);
+  const selected=state.party.find(p=>p.id===campHero)||state.party[0],currentStats=E.stats(state,selected);
+  content.append(element('p',{class:'skill-note'},selected.name+' · '+currentStats.atk+' attack · '+currentStats.def+' armor. Choose gear below, or let us pick the strongest.'));
+  content.append(element('button',{class:'primary equip-best',onclick:()=>campChange({type:'equip-best',hero:selected.id})},'Equip best gear for '+selected.name));
+  const items=state.inventory.filter(i=>!i.owner||i.owner===selected.id).sort((a,b)=>(reward.loot||[]).includes(b.id)-(reward.loot||[]).includes(a.id)||(b.atk+b.def)-(a.atk+a.def));
+  const list=element('div',{class:'simple-gear-list'});
+  for(const item of items){const current=state.inventory.find(i=>i.owner===selected.id&&i.slot===item.slot),equipped=item.owner===selected.id,attack=item.atk-(current?.atk||(item.slot==='weapon'?P.WEAPONS[selected.weapon]?.atk||0:0)),armor=item.def-(current?.def||0),card=element('article',{class:'simple-gear-card'}),copy=element('div');
+   copy.append(element('strong',{},item.name),element('small',{},(equipped?'✓ Equipped':(reward.loot||[]).includes(item.id)?'NEW LOOT':'In your bag')+' · '+item.slot+' · +'+item.atk+' attack / +'+item.def+' armor'));
+   if(!equipped)copy.append(element('small',{class:attack+armor>0?'gear-improvement':''},'Compared with worn gear: '+(attack>=0?'+':'')+attack+' attack, '+(armor>=0?'+':'')+armor+' armor'));
+   const equip=element('button',{onclick:()=>campChange({type:'equip',item:item.id,hero:selected.id})},equipped?'Equipped':'Equip');equip.disabled=equipped;card.append(copy,equip);
+   const more=element('details'),summary=element('summary',{},'Upgrade / sell');more.append(summary);const tools=element('div',{class:'gear-details'}),upgrade=element('button',{onclick:()=>campChange({type:'upgrade',item:item.id})},item.upgrades>=3?'Fully upgraded':'Upgrade · '+(25+item.upgrades*20)+' gold');upgrade.disabled=item.upgrades>=3||state.gold<25+item.upgrades*20;tools.append(upgrade);
+   if(equipped)tools.append(element('button',{onclick:()=>campChange({type:'unequip',item:item.id})},'Remove gear'));else tools.append(element('button',{onclick:()=>campChange({type:'sell',item:item.id})},'Sell · '+item.price+' gold'));more.append(tools);card.append(more);list.append(card);
+  }content.append(list);if(!items.length)content.append(element('p',{class:'skill-note'},'No spare gear yet. Gear is collected automatically after every victory.'));
  }else if(campTab==='party'){
   state.party.forEach(p=>{const stats=E.stats(state,p),card=element('div',{class:'camp-hero'});card.append(element('h3',{},p.name+' · '+E.CLASSES[p.job].name),element('p',{},'Level '+p.level+' · '+p.hp+'/'+p.maxHp+' HP · '+stats.atk+' attack · '+stats.def+' armor'));for(const slot of ['weapon','armor','charm']){const item=state.inventory.find(i=>i.owner===p.id&&i.slot===slot);card.append(element('small',{},slot.toUpperCase()+': '+(item?item.name:'Not equipped')));}content.append(card);});
  }else{
@@ -145,11 +143,11 @@ function renderCamp(){
   const tonic=actionButton('Healing tonic · 20 gold',state.potions+' in bag · heals '+E.tonicHeal(state)+' HP','✚',()=>campChange({type:'buy-tonic'}),state.gold<20,true),ember=actionButton('Revival ember · 80 gold',state.embers+' in bag · revive a fallen ally','✧',()=>campChange({type:'buy-ember'}),state.gold<80,true);content.append(tonic,ember);
  }
  content.scrollTop=scroll;
- $('camp-rest').textContent=state.campRested?'Party rested':'Rest · fully heal party';$('camp-rest').disabled=state.campRested;$('camp-rest').onclick=()=>campChange({type:'rest'});
+ $('camp-rest').textContent=state.campRested?'Party rested':'Heal everyone · free';$('camp-rest').disabled=state.campRested;$('camp-rest').onclick=()=>campChange({type:'rest'});
  $('camp-ready').hidden=!room;
  if(room){const me=room.members.find(m=>m.id===room.yourId),allReady=room.members.filter(m=>m.online).every(m=>m.ready);$('camp-ready').textContent=me?.ready?'✓ Ready':'Ready up';$('camp-ready').onclick=()=>sendRoom({type:'ready'});$('camp-continue').disabled=!isHost||!allReady;}
  else $('camp-continue').disabled=false;
- $('camp-continue').textContent=state.mode==='raid'?'Challenge raid boss '+(state.raidLevel+1)+' ↗':state.stage===29?'Finish the campaign ↗':chapter.boss?'Enter '+E.WORLDS[chapter.world+1].name+' ↗':'Next encounter ↗';$('camp-continue').onclick=travelCamp;
+ $('camp-continue').textContent=state.mode==='raid'?'Challenge raid boss '+(state.raidLevel+1)+' ↗':state.stage===29?'Finish the campaign ↗':chapter.boss?'Enter '+E.WORLDS[chapter.world+1].name+' ↗':'Heal & next encounter ↗';$('camp-continue').onclick=travelCamp;
  const next=E.CHAPTERS[state.stage+1],raidPower=E.raidBossStats(state.raidLevel+1);$('camp-next').textContent=state.mode==='raid'?'NEXT BOSS: '+raidPower.hp+' HP · '+raidPower.atk+' ATK · Tier '+(state.raidLevel+1)+' gear'+(room?' · Everyone must ready up.':''):room?'Everyone online must ready up. The host leads the party onward.':next?'UP NEXT: '+next.name+' · '+next.progress+'/10 in '+E.WORLDS[next.world].name:'Three worlds cleared. Take a breath before going home.';
 }
 function renderRoomStrip(){
@@ -211,6 +209,7 @@ function outcome(){
   showModal('<div class="eyebrow">THREE WORLDS · CAMPAIGN COMPLETE</div><h2>The road is<br>yours again.</h2><p>Thirty encounters behind you. Three bosses defeated. Your party has carried the fire all the way home.</p><div class="reward-grid"><div><strong>'+state.history.length+'</strong><span>ENCOUNTERS</span></div><div><strong>'+state.gold+'</strong><span>GOLD RECOVERED</span></div><div><strong>'+state.party[0].level+'</strong><span>PARTY LEVEL</span></div></div><div class="modal-buttons"><button class="primary" id="travel-next">Return to title</button></div>',true);$('travel-next').onclick=()=>room?leaveOnline():returnTitle();
  }else if(state.phase==='story'){
   const stranger=state.choice==='stranger';
+  if(state.choice==='crossroads'){showModal('<div class=eyebrow>A CHANCE MEETING</div><h2>Fellow travelers.</h2><p>A caravan has stopped beside the road. Share their supplies, or spend the evening practicing together.</p><div class=story-options><button id=story-accept>Accept supplies<small>+2 healing tonics and +35 gold</small></button><button id=story-decline>Train together<small>Everyone gains +1 attack and +6 maximum health</small></button></div>',true);$('story-accept').onclick=()=>storyChoice('accept');$('story-decline').onclick=()=>storyChoice('decline');if(room&&room.yourId!==room.hostId){$('story-accept').disabled=true;$('story-decline').disabled=true;}return;}
   showModal('<div class="story-layout"><div class="story-art '+(stranger?'':'shrine')+'" aria-hidden="true"></div><div><div class="eyebrow">A MOMENT BETWEEN BATTLES</div><h2>'+(stranger?'The strange<br>traveler.':'An ember<br>in the dark.')+'</h2><p>'+(stranger?'“Hey. Been watching you for a while. You’ve got potential. The sort that gets people into trouble.” The traveler turns a narrow blade in the light. “Want to learn a different way?”':'A small flame burns beneath the Keep. The inscription reads: “Leave your burdens, or carry the light onward.” Your companions wait by the steps. The choice is yours.')+'</p><div class="story-options"><button id="story-accept">'+(stranger?'Learn the way of the hidden blade':'Rest at the old shrine')+'<small>'+(stranger?'Your adventurer becomes a Nightblade. +3 attack, higher speed, and Hidden blade.':'Restore the entire party’s health and focus.')+'</small></button><button id="story-decline">'+(stranger?'Keep your path. Share what you learned.':'Take the ember with you')+'<small>'+(stranger?'Keep your class. Every party member gains +8 maximum health.':'+50 gold and one revival ember.')+'</small></button></div></div></div>',true);
   $('story-accept').onclick=()=>storyChoice('accept');$('story-decline').onclick=()=>storyChoice('decline');if(room&&room.yourId!==room.hostId){$('story-accept').disabled=true;$('story-decline').disabled=true;$('modal-content').append(element('p',{},'The party host is choosing the next path.'));}
  }else if(state.phase==='defeat'){
