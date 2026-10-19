@@ -1,15 +1,21 @@
 (function(){
 'use strict';
-const KEY='hollow-road-room-v5';
+const KEY='hollow-road-room-v5',SERVER_KEY='hollow-road-server';
 class OnlineParty{
- constructor(){this.server=null;this.discovery=null;this.session=null;this.room=null;this.timer=null;this.inFlight=false;this.closed=false;this.lastEvent=null;this.onUpdate=()=>{};this.onError=()=>{};try{const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');if(saved?.code&&saved?.token)this.session=saved;}catch{}}
+ constructor(){this.server=null;this.discovery=null;this.connectionVersion=0;this.preference='';try{this.preference=localStorage.getItem(SERVER_KEY)||'';}catch{}this.session=null;this.room=null;this.timer=null;this.inFlight=false;this.closed=false;this.lastEvent=null;this.onUpdate=()=>{};this.onError=()=>{};try{const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');if(saved?.code&&saved?.token)this.session=saved;}catch{}}
+ get serverPreference(){return this.preference;}
+ setServer(value){
+  if(this.room)throw Error('Leave your current room before changing servers.');
+  const raw=String(value||'').trim();let server='';if(raw){let url;try{url=new URL(raw);}catch{throw Error('Paste the full game website link, beginning with https://.');}if(url.username||url.password||!['https:','http:'].includes(url.protocol)||url.protocol==='http:'&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error('Use a public HTTPS game link. Do not enter a dashboard link or credentials.');if(url.hostname==='vercel.com')throw Error('Use the game link ending in .vercel.app, not the Vercel dashboard link.');server=url.origin;}
+  this.preference=server;this.connectionVersion++;try{if(server)localStorage.setItem(SERVER_KEY,server);else localStorage.removeItem(SERVER_KEY);}catch{}this.server=null;this.discovery=null;
+ }
  async connect(){
   if(this.server!==null)return;
   if(this.discovery)return this.discovery;
-  this.discovery=(async()=>{const configured=window.HOLLOW_ROAD_SERVER,servers=[...(configured?[String(configured).replace(/\/$/,'')]:[]),'','https://bryan-basement-git-main-bryanwei1228-8505s-projects.vercel.app'];let problem;
-   for(const server of [...new Set(servers)]){try{const response=await fetch(server+'/api/rooms?status=1',{cache:'no-store',signal:AbortSignal.timeout(5000)});if(!(response.headers.get('content-type')||'').includes('application/json'))continue;const data=await response.json();if(!response.ok){problem=data.error;continue;}if(data.ok){this.server=server;return;}}catch{}}
-   throw Error(problem||'The shared room server is unavailable. Solo campaign and raids still work.');})();
-  try{await this.discovery;}finally{this.discovery=null;}
+  const version=this.connectionVersion;const attempt=(async()=>{const configured=this.serverPreference||window.HOLLOW_ROAD_SERVER,servers=configured?[String(configured).replace(/\/$/,'')]:['','https://bryan-basement-git-main-bryanwei1228-8505s-projects.vercel.app'];const problems=[];
+   for(const server of [...new Set(servers)]){try{const response=await fetch(server+'/api/rooms?status=1',{cache:'no-store',signal:AbortSignal.timeout(5000)});const host=server?new URL(server).host:location.host;if([401,403].includes(response.status)){problems.push(host+': access restricted. Use your public production game link.');continue;}if(!(response.headers.get('content-type')||'').includes('application/json')){problems.push(host+': room API not found.');continue;}const data=await response.json();if(!response.ok){problems.push(host+': '+(data.error||'Server error '+response.status));continue;}if(data.ok){if(version!==this.connectionVersion)throw Error('Connection settings changed.');this.server=server;return;}problems.push(host+': room API is not ready.');}catch{problems.push((server||location.origin)+': could not connect.');}}
+   throw Error(problems.join(' ')+' Retry, or set your deployed game link below.');})();
+  this.discovery=attempt;try{await attempt;}finally{if(this.discovery===attempt)this.discovery=null;}
  }
  async request(body=null,code=null,query='status=1'){
   await this.connect();const headers={'Content-Type':'application/json'};if((code||body?.op==='command')&&this.session?.token)headers.Authorization='Bearer '+this.session.token;

@@ -8,7 +8,7 @@ Hollow Depths. There are 35 enemy types with distinct silhouettes and behaviors.
 
 ## Playing
 
-- Begin a solo journey, or choose **Play with friends** inside the game.
+- Begin a solo journey, choose **Create room**, or **Browse lobbies** inside the game.
 - Browse existing public lobbies, or create a campaign/raid room. Choose public
   visibility to appear in the browser, or invite-only for a private party.
 - Create a room, copy the invite link, and send it to up to two friends.
@@ -54,12 +54,17 @@ are never listed. Listings refresh every four seconds.
 Any Node/Express host can run `npm start` for shared rooms without Vercel. Local
 development uses memory; production requires the Redis REST variables above.
 To use another backend for a static frontend, define `window.HOLLOW_ROAD_SERVER`
-before `multiplayer.js`. All players must use the same backend. Shared online
+before `multiplayer.js`, or use **Use my deployed game server** in the room
+screen and paste the public HTTPS game link. The saved server choice applies
+to this browser; all players must use the same backend. The Create Room button
+can retry after a failed connection, with a separate Retry connection action.
+A deployment alone does not configure shared storage; a missing Redis binding
+or protected deployment is reported on the room screen. Shared online
 play always requires a reachable server; static files alone cannot share rooms.
 
 ## Endless raid
 
-Choose **Endless raid** for solo, or select it when creating an online room.
+Open the **☰ menu → Endless raid** for solo, or select it when creating an online room.
 Each victory goes to camp and unlocks the next boss. Six boss forms rotate
 through three arenas; boss health and attack strictly increase each wave.
 Every boss drops two epic items whose base stats and tier grow with raid level.
