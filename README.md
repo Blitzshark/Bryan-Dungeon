@@ -104,8 +104,8 @@ battles, campfire interactions, mobile layouts, and every creature mesh.
 
 ## Combat and controls
 
-Each living fighter gets one action per round in speed order. Party turns wait
-for player input. Enemies take individual server-driven turns in online rooms.
+Each living fighter gets one action per round in speed order. Human players
+have 20 seconds to choose; AI companions act automatically. Enemies take individual server-driven turns in online rooms.
 Strike is free; stronger skills cost focus and recover on the owner’s turns.
 Focus restores 3 focus and halves incoming damage until the next turn. Poison
 lasts two actions; armored enemies guard; healers aid their allies; chargers
@@ -117,7 +117,7 @@ and striking arm, including a wind-up, follow-through, and return to formation.
 Basic strikes follow the equipped weapon, including for spellcaster classes. Archers draw and release
 projectiles; casters raise their staff and cast bolts. Hits, healing, guard,
 poison, and campfires have effects. Sounds are synthesized locally. Reduced
-motion keeps actions readable without walking or particle movement.
+motion reduces bobbing and camera movement while retaining readable melee approaches.
 
 Name inputs support select-all, delete, and replacement. Dragging selected text
 outside the input does not dismiss the setup dialog.
@@ -131,9 +131,9 @@ framing rather than a fast zoom.
 
 ## Tavern, characters and abilities
 
-- Press **Tavern** in the header or **Menu → Visit the tavern**. Solo combat
-  pauses while visiting. Online rooms continue synchronizing; other players may
-  need to wait for your character’s turn while you are away.
+- Press **Tavern** from the title screen or at camp. Tavern visits are blocked
+  during combat. Visitors exchange movement updates about every 200 ms, with
+  a short adaptive interpolation buffer; network/database latency still applies.
 - **WASD**, arrow keys, clicking the floor, or the touch direction pad move your
   character through the Wandering Ember. The hearth, idle NPCs, tables, rugs,
   and quartermaster are rendered locally. Nearby visitors appear through the
@@ -205,3 +205,17 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   an item with its stat comparison visible. Upgrade and sell are under each
   item's expandable controls. Traveling automatically fully heals the party.
   Online players can only equip characters they control.
+
+### Timed turns and attack presentation
+
+- You control your own adventurer; solo AI companions choose and perform their
+  actions automatically. Online friends retain control of their characters.
+- Player turns and story choices have a visible 20-second countdown. Expiry
+  chooses a random legal action or path. Online deadlines are stored and
+  resolved once by the shared server, including when a late command arrives.
+- Health bars and defeated poses update at impact instead of when an attack
+  is selected. Gameplay state remains authoritative during the visual wind-up.
+- `combat-fx.js` defines attack-specific motion, palette and effects: crescents,
+  spinning cleaves, piercing arrows, lightning, ice shards, flame plumes and
+  magic charge circles. Charged class/race ultimates add brief cinematic camera
+  movement and framing. Universe Cleave keeps its separate cosmic cutscene.

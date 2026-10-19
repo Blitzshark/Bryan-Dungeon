@@ -41,8 +41,9 @@ class CampaignScene{
    const approach=progress<.42?progress/.42:progress<.72?1:Math.max(0,(1-progress)/.28),amount=(approach*approach*(3-2*approach))*Math.max(0,1-.7/distance);
    const walking=progress<.42||progress>.72;stride=walking&&!this.reduced?Math.sin(progress*18*Math.PI)*.15:0;
    facing=Math.atan2(dx,dz);x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.42)/.30))*Math.PI);const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);};swing=progress<.54?-.9*ease((progress-.42)/.12):progress<.61?-.9+2.5*ease((progress-.54)/.07):1.6*(1-ease((progress-.65)/.1));x+=dx/distance*Math.sin(swing)*.16;z+=dz/distance*Math.sin(swing)*.16;
-  }else {gesture=Math.sin(progress*Math.PI);x+=(unit.side==='party'?1:-1)*gesture*.1;y+=gesture*.025;}
+  }else if(anim.style==='magic'){gesture=Math.sin(Math.min(1,progress/.6)*Math.PI/2);y+=this.reduced?0:Math.sin(progress*Math.PI)*.14;}else {gesture=Math.sin(progress*Math.PI);x+=(unit.side==='party'?1:-1)*gesture*.1;y+=gesture*.025;}
  }
+ if(anim&&!this.reduced){const p=(time-anim.at)/anim.duration,motion=CombatVFX.profile(anim.skill,anim.style).motion,hit=Math.max(0,Math.sin(Math.max(0,Math.min(1,(p-.42)/.3))*Math.PI));if(motion==='leap')y+=hit*.55;if(motion==='spin'&&facing!==null)facing+=hit*Math.PI*2;if(motion==='thrust')swing*=.4;if(motion==='dash')y+=hit*.08;}
  return {x,z,y,gesture,stride,swing,facing,anim};
  }
  shadow(x,z,w=1,d=.6,alpha=.25){const p=this.project(x,.015,z),c=this.paint;c.save();c.translate(p.x,p.y);c.scale(1,.38);c.beginPath();c.ellipse(0,0,w*this.scale,d*this.scale,0,0,Math.PI*2);c.fillStyle=`rgba(5,14,9,${alpha})`;c.fill();c.restore();}
@@ -98,11 +99,12 @@ class CampaignScene{
  if(hit){flash=time-hit.at<220;if(!this.reduced)x+=Math.sin((time-hit.at)/35)*.045;}
  if(!unit.hp){const death=this.effects.find(e=>e.target===unit.id&&e.type==='damage');y=-.6*(death?Math.max(0,Math.min(1,(time-death.at)/450)):1);}
  this.shadow(x,z,unit.kind==='king'?1:.64,.5,unit.hp?.32:.15);
+ if(pose.anim?.style==='magic')this.casting(x,y,z,time,pose.anim);
  const selected=this.selected===unit.id,active=this.state&&DungeonCampaign.active(this.state)?.id===unit.id;
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
  // Sort body surfaces together so belts, arms and hair cannot paint over nearer torsos.
  this.actorPolygons=[];this.bodyTransform={x,z,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
- const armLift=pose.swing?0:pose.gesture*.3;
+ const armLift=pose.swing?0:pose.gesture*(pose.anim?.style==='magic'?.6:.3);
  const look=unit.appearance||{},color=flash?'#ff3d48':look.clothes||unit.color,skin=look.skin|| (unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d');
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
   this.box(x,y+.02,z,.8,.5,.75,color);this.box(x,y+.52,z,.54,.15,.5,shade(color,1.1));this.box(x-.16,y+.3,z+.39,.09,.08,.02,'#253e2b');this.box(x+.13,y+.3,z+.39,.09,.08,.02,'#253e2b');
@@ -179,16 +181,22 @@ class CampaignScene{
  const duration=result.skill==='universe'?10000:['slash','heavy'].includes(style)?1500:this.reduced?300:1100,impactAt=result.skill==='universe'?9000:['slash','heavy'].includes(style)?885:this.reduced?80:450;
  const primary=result.events?.find(e=>e.type==='damage'&&e.source===result.actor&&e.target!==result.actor)||result.events?.[0];
  const targetUnit=this.state&&DungeonCampaign.unit(this.state,primary?.target),roster=targetUnit?.side==='party'?this.state.party:this.state?.enemies,targetIndex=roster?.findIndex(p=>p.id===primary?.target),destination=targetUnit?this.positionFor(targetUnit,targetIndex):null;
- this.animations.push({actor:result.actor,target:primary?.target,destination:destination?{worldX:destination.x,worldZ:destination.z}:null,style,at:now,duration});
+ this.animations.push({actor:result.actor,target:primary?.target,destination:destination?{worldX:destination.x,worldZ:destination.z}:null,style,skill:result.skill||result.action,ultimate:!!(DungeonCampaign.SKILLS[result.skill]?.ultimate||DungeonCampaign.SKILLS[result.skill]?.raceUltimate),impactAt,at:now,duration});
  for(const event of result.events||[])this.effects.push({...event,style,at:now+impactAt,start:now,duration});
  return {duration,impactAt,style};
+ }
+ casting(x,y,z,time,anim){
+ const c=this.paint,progress=Math.min(1,(time-anim.at)/anim.duration),ground=this.project(x,.03,z),orb=this.project(x+.6,y+1.85,z);c.save();c.strokeStyle=CombatVFX.profile(anim.skill,anim.style).color;c.fillStyle='#dfe6ff';c.globalAlpha*=Math.sin(progress*Math.PI);c.lineWidth=2;
+ c.beginPath();c.ellipse(ground.x,ground.y,this.scale*.8,this.scale*.34,0,0,Math.PI*2);c.stroke();
+ for(let i=0;i<6;i++){const a=i*Math.PI/3+(this.reduced?0:time/450),radius=this.scale*(.2+progress*.25),px=orb.x+Math.cos(a)*radius,py=orb.y+Math.sin(a)*radius*.7;c.beginPath();c.moveTo(px-3,py);c.lineTo(px+3,py);c.moveTo(px,py-3);c.lineTo(px,py+3);c.stroke();}
+ c.shadowColor='#8fa3ff';c.shadowBlur=20;c.beginPath();c.arc(orb.x,orb.y,Math.max(2,this.scale*.1*Math.sin(progress*Math.PI)),0,Math.PI*2);c.fill();c.restore();
  }
  drawEffects(time){
  const c=this.paint;
  for(const e of this.effects){
   const target=this.positions.get(e.target),source=this.positions.get(e.source);if(!target)continue;
   const elapsed=time-e.at,progress=Math.max(0,Math.min(1,elapsed/580));
-  const color=e.status==='poison'?'#b5d979':e.style==='magic'?'#f0a765':e.style==='arrow'?'#e2d2a2':e.style==='heal'?'#bfe9a1':e.style==='focus'?'#9dd6e3':'#ffe7c0';
+  const color=e.status==='poison'?'#b5d979':e.style==='magic'?'#b6bfff':e.style==='arrow'?'#e2d2a2':e.style==='heal'?'#bfe9a1':e.style==='focus'?'#9dd6e3':'#ffe7c0';
   const tx=target.x,ty=target.y+this.scale*.65;
   c.save();c.lineCap='round';c.lineJoin='round';
   if(!this.reduced&&source&&['arrow','magic'].includes(e.style)&&elapsed<0){
@@ -218,13 +226,13 @@ class CampaignScene{
  }
 
  point(id){return this.positions.get(id);}
- frame(time){const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.drawImage(this.cache,0,0,this.width,this.height);
+ frame(time){const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.save();const cinematic=this.animations.find(a=>a.ultimate&&a.style!=='cosmic'&&time>=a.at&&time-a.at<a.duration);if(cinematic&&!this.reduced){const p=(time-cinematic.at)/cinematic.duration,subject=this.point(p<.4?cinematic.actor:cinematic.target)||{x:this.width/2,y:this.height/2},zoom=1+Math.sin(p*Math.PI)*.1;c.translate(this.width/2,this.height*.45);c.scale(zoom,zoom);c.translate(-this.width/2-(subject.x-this.width/2)*Math.sin(p*Math.PI)*.1,-this.height*.45);}c.drawImage(this.cache,0,0,this.width,this.height);
  let units=this.state?(this.camp?[...this.state.party]:[...this.state.party,...this.state.enemies]):[];
  if(this.title){units=[{id:'hero',name:'',hp:88,maxHp:88,side:'party',job:'warrior',color:'#baa47a',kind:'humanoid'},{id:'rowan',name:'',hp:70,maxHp:70,side:'party',job:'ranger',color:'#879b73',kind:'humanoid'},{id:'mira',name:'',hp:65,maxHp:65,side:'party',job:'mage',color:'#9a91b1',kind:'humanoid'}];}
  const entries=units.map(u=>{const list=u.side==='party'?(this.state?.party||units):this.state.enemies;const index=list.findIndex(p=>p.id===u.id);const p=this.positionFor(u,index);return {u,index,depth:this.poseFor(u,index,time).x*.27+this.poseFor(u,index,time).z*.47};}).sort((a,b)=>a.depth-b.depth);
  entries.forEach(({u,index})=>this.actor(u,index,time));
  if(this.camp)this.drawCampfire(time);
- this.drawEffects(time);
+ this.drawEffects(time);CombatVFX.draw(this,time);c.restore();
  this.effects=this.effects.filter(e=>time-e.at<700);this.animations=this.animations.filter(a=>time-a.at<a.duration);
  if(!this.reduced){c.fillStyle=this.biome==='forest'?'#d3e2a333':'#ead69e33';for(let i=0;i<18;i++){const x=(seeded(i+10)*this.width+Math.sin(time/5000+i)*18),y=(seeded(i+20)*this.height-time/110*(.2+seeded(i+30)))%this.height;c.fillRect(x,y<0?y+this.height:y,i%3===0?2:1,i%3===0?2:1);}}
  requestAnimationFrame(this.frame);

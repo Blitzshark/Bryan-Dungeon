@@ -44,7 +44,7 @@ function note(s,text){s.log.push(text);s.log=s.log.slice(-30);}
 function nextRandom(s){s.seed=(s.seed*1664525+1013904223)>>>0;return s.seed/4294967296;}
 function makeOrder(s){return [...living(s,'party'),...living(s,'enemy')].sort((a,b)=>b.speed-a.speed||(a.id<b.id?-1:1)).map(u=>u.id);}
 function startBattle(s){
- const chapter=encounter(s);s.phase='battle';s.round=1;s.reward=null;s.choice=null;
+ const chapter=encounter(s);s.decisionKey=null;s.decisionEndsAt=null;s.phase='battle';s.round=1;s.reward=null;s.choice=null;
  s.enemies=chapter.enemies.map((type,i)=>{const d=ENEMIES[type],scale=1+chapter.world*.15+(chapter.progress-1)*.035;return {...d,id:'enemy-'+i,side:'enemy',maxHp:Math.round(d.hp*scale*(d.boss?(chapter.world===2?2.8:2.4):1.65)),hp:Math.round(d.hp*scale*(d.boss?(chapter.world===2?2.8:2.4):1.65)),atk:Math.round(d.atk*scale*(d.boss?(chapter.world===2?1.65:1.4):1.25)),mp:0,maxMp:0,guard:false,cooldowns:{},status:{},enemyType:type};});
  if(s.mode==='raid'){const boss=s.enemies[0],power=raidBossStats(s.raidLevel);Object.assign(boss,{hp:power.hp,maxHp:power.hp,atk:power.atk,boss:true});}
  s.party.forEach(p=>{p.guard=false;p.cooldowns={};p.mp=p.maxMp;p.status={};});
@@ -98,6 +98,11 @@ function act(s,command){
  if(!SKILLS[command.skill]?.ultimate)actor.charge=Math.min(100,(actor.charge||0)+25);if(!SKILLS[command.skill]?.raceUltimate)actor.raceCharge=Math.min(100,(actor.raceCharge||0)+25);
  poisonTick(s,actor,events);
  const result={ok:true,actor:actor.id,action:command.type,skill:command.skill||null,events};endTurn(s);return result;
+}
+function randomAct(s){
+ const actor=active(s);if(!actor||actor.side!=='party')return {ok:false,error:'Not a player turn.'};const enemies=living(s,'enemy'),choices=[{type:'focus'}];
+ for(const key of abilities(s,actor)){const skill=SKILLS[key];if(actor.mp<skill.cost||actor.cooldowns[key]>0||skill.ultimate&&(actor.charge||0)<100||skill.raceUltimate&&(actor.raceCharge||0)<100)continue;if(skill.heal||skill.all)choices.push({type:'skill',skill:key});else for(const target of enemies)choices.push({type:'skill',skill:key,target:target.id});}
+ return act(s,choices[Math.floor(nextRandom(s)*choices.length)]);
 }
 function botAct(s){
  const a=active(s);if(!a||a.side!=='party')return {ok:false,error:'Not a companion turn.'};
@@ -190,5 +195,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
