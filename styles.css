@@ -41,3 +41,5 @@
 .damage-number.critical{color:#ffe168!important;text-shadow:0 0 12px #ffb72e,0 2px 4px #241705;font-weight:900}.damage-number.miss{color:#d6d7e2;font-size:16px}
 .title-bottom{pointer-events:none}
 .critical-scene{position:fixed;inset:0;width:100vw;height:100dvh;z-index:60;background:#10121b;pointer-events:auto}#damage-layer{position:fixed;inset:0;z-index:75;overflow:visible}.damage-number{font-size:clamp(32px,4vw,58px);white-space:nowrap;animation:damage 1.4s ease-out forwards}.damage-number.miss{font-size:clamp(25px,4vw,46px);font-weight:900;color:#f4f3ff;background:#35242ee8;border:2px solid #ffb3ae;padding:8px 14px;white-space:nowrap;text-shadow:0 2px 4px #000}
+/* Reduced motion must preserve hit feedback until its timed DOM removal. */
+@media(prefers-reduced-motion:reduce){.damage-number{animation:none!important;opacity:1;transform:translate(-50%,-10px)}}
