@@ -6,7 +6,7 @@ class OnlineParty{
  get serverPreference(){return this.preference;}
  setServer(value){
   if(this.room)throw Error('Leave your current room before changing servers.');
-  const raw=String(value||'').trim();let server='';if(raw){let url;try{url=new URL(raw);}catch{throw Error('Paste the full game website link, beginning with https://.');}if(url.username||url.password||!['https:','http:'].includes(url.protocol)||url.protocol==='http:'&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error('Use a public HTTPS game link. Do not enter a dashboard link or credentials.');if(url.hostname==='vercel.com')throw Error('Use the game link ending in .vercel.app, not the Vercel dashboard link.');server=url.origin;}
+  const raw=String(value||'').trim();let server='';if(raw){let url;try{url=new URL(raw);}catch{throw Error('Paste the full game website link, beginning with https://.');}if(url.username||url.password||!['https:','http:'].includes(url.protocol)||url.protocol==='http:'&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error('Use a public HTTPS game link. Do not enter a dashboard link or credentials.');if(url.hostname==='railway.com')throw Error('Use your public .up.railway.app game link, not the Railway dashboard link.');if(url.hostname==='vercel.com')throw Error('Use the game link ending in .vercel.app, not the Vercel dashboard link.');server=url.origin;}
   this.preference=server;this.connectionVersion++;try{if(server)localStorage.setItem(SERVER_KEY,server);else localStorage.removeItem(SERVER_KEY);}catch{}this.server=null;this.discovery=null;
  }
  async connect(){

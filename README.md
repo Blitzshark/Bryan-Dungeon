@@ -53,7 +53,7 @@ Inactive parties disappear from listings after 30 seconds; invite-only rooms
 are never listed. Listings refresh every four seconds.
 
 Any Node/Express host can run `npm start` for shared rooms without Vercel. Local
-development uses memory; production requires the Redis REST variables above.
+development uses memory; Vercel requires the Redis REST variables above. Railway supports native `REDIS_URL` and a single-server memory fallback; see [RAILWAY.md](RAILWAY.md).
 To use another backend for a static frontend, define `window.HOLLOW_ROAD_SERVER`
 before `multiplayer.js`, or use **Use my deployed game server** in the room
 screen and paste the public HTTPS game link. The saved server choice applies
@@ -85,7 +85,7 @@ npm test
 npm run build
 ```
 
-The local server defaults to port 3000 (`PORT` can override it). Root and `/play`
+The local server defaults to port 8080 (`PORT` can override it). Root and `/play`
 serve the game. `/api/rooms?status=1` reports online-room readiness. Development
 uses a clearly identified in-memory room store, shared by browsers connected to
 that local server. Restarting the development server clears local online rooms.

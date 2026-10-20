@@ -70,6 +70,19 @@ class CampaignScene{
   [[-5,-3,1.1],[5,-3,.8],[5,4,1.3],[-5,4,.7],[-2,-5,.7],[2,5,.6]].forEach(a=>this.rock(...a));
   for(let i=0;i<16;i++){const x=-6+rand(i+44)*12,z=-5+rand(i+17)*10;if(Math.abs(x)>4||Math.abs(z)>4){this.box(x,0,z,.15,.25,.13,'#91a263');if(i%3===0)this.box(x,.25,z,.14,.12,.15,'#c4b382');}}
   this.box(-5.3,0,2.5,.16,1.3,.16,'#65543b');this.box(-5.3,.9,2.5,.7,.32,.14,'#9f8960');
+  }else if(this.biome==='crypt'){
+  // A cavern suspended above a black chasm: no forest terraces or ocean sediment.
+  this.plane(-18,-15,36,30,'#090c13');
+  this.plane(-6,-4.8,12,10,'#414454');
+  for(let i=-6;i<7;i++){this.box(i,.01,-5.1,.96,.25,.8,'#626274');this.box(i,.01,5.1,.96,.25,.8,'#626274');}
+  for(const side of [-1,1])for(let i=0;i<10;i++){
+   const x=side*(7+rand(i+side+8)*3),z=-8+i*1.7,h=2+rand(i+80)*4;
+   this.box(x,-1,z,1.3,h,1.5,'#292d40');this.box(x+.15,h-1,z,.65,.9,.7,'#46465d');
+   this.box(x,6,z,.5,1+rand(i+50)*2,.5,'#303448');
+   if(i%3===0){this.box(side*5.7,.1,z,.5,.4,.5,'#666575');this.candle(side*5.7,z,.5);}
+  }
+  for(let i=0;i<7;i++){this.box(-1.5+i*.5,0,-6.8,.4,.12,2.8,'#777181');}
+  for(let i=0;i<10;i++){const x=-5+rand(i+200)*10,z=-4+rand(i+230)*8;if(Math.abs(x)>4||Math.abs(z)>3.5){this.box(x,.04,z,.25,.15,.7,'#b2ab9d');this.box(x,.15,z,.45,.1,.12,'#b2ab9d');}}
  }else{
   for(let i=-7;i<8;i++){this.box(i,.05,-6.8,.98,3.8,.75,(this.biome==='throne'?'#392738':'#555a4d'));if(i%3===0)this.box(i,0,-6.1,.6,4.6,.7,'#686e5a');}
   for(let i=-6;i<7;i++){this.box(-7,.02,i,.75,2.8,.98,(this.biome==='throne'?'#2b2032':'#50594a'));}
