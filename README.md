@@ -2,9 +2,9 @@
 
 A turn-based, block-world campaign for solo play or a party of up to three online
 players. Three worlds contain ten encounters each. The tenth encounter in every
-world is a boss: the Briar Sovereign, the Iron Warden, and the Hollow King.
+world is a boss: the Briar Sovereign, the Iron Warden, and the Triune Abyss.
 Defeating the forest boss opens the Ashen Dungeon; the second boss opens the
-Hollow Depths. There are 35 enemy types with distinct silhouettes and behaviors.
+Hollow Depths. A second three-section campaign continues into the Brass Tempest, Drowned Observatory, and Shattered Orrery. Every enemy has at least two named attacks.
 
 ## Playing
 
@@ -70,11 +70,11 @@ play always requires a reachable server; static files alone cannot share rooms.
 ## Endless raid
 
 Open the **☰ menu → Endless raid** for solo, or select it when creating an online room.
-Each victory goes to camp and unlocks the next boss. Six boss forms rotate
-through three arenas; boss health and attack strictly increase each wave.
+Each victory goes to camp and unlocks the next boss. Three exclusive giant entities rotate
+through three arenas, each with 55 attacks; boss health and attack strictly increase each wave.
 Every boss drops two epic items whose base stats and tier grow with raid level.
 Party levels, healing tonics and gold rewards also scale. Equip, upgrade, sell,
-rest and buy supplies at every campfire. There is no final raid wave.
+and buy supplies at every campfire. A party wipe ends the survival run; there is no final raid wave.
 Solo raids and campaigns use separate saves; starting one does not replace the
 other. Online raids use the same turn ownership and ready checks as campaigns.
 
@@ -114,7 +114,7 @@ telegraph heavy attacks; some enemies drain life or sweep the party.
 Melee fighters walk to the target, swing, and retreat. Enemies flash red on
 impact and damage counters float above them. Melee swings rotate the weapon
 and striking arm, including a wind-up, follow-through, and return to formation.
-Basic strikes follow the equipped weapon, including for spellcaster classes. Archers draw and release
+Each class has its own named, animated basic attack; purchased weapons provide separate Arts. Archers draw and release
 projectiles; casters raise their staff and cast bolts. Hits, healing, guard,
 poison, and campfires have effects. Sounds are synthesized locally. Reduced
 motion reduces bobbing and camera movement while retaining readable melee approaches.
@@ -132,8 +132,7 @@ framing rather than a fast zoom.
 ## Tavern, characters and abilities
 
 - Press **Tavern** from the title screen or at camp. Tavern visits are blocked
-  during combat. Visitors exchange movement updates about every 200 ms, with
-  a short adaptive interpolation buffer; network/database latency still applies.
+  during combat. Visitors exchange movement directly over WebRTC data channels at 30 Hz after authenticated HTTP signaling. STUN helps establish peer connections; no TURN relay is configured. Networks or browser policies that block direct traffic fall back to HTTP snapshots with smooth interpolation. Real network latency still applies.
 - **WASD**, arrow keys, clicking the floor, or the touch direction pad move your
   character through the Wandering Ember. The hearth, idle NPCs, tables, rugs,
   and quartermaster are rendered locally. Nearby visitors appear through the
@@ -148,7 +147,7 @@ framing rather than a fast zoom.
   gold**. Victories earn additional tavern gold, separate from the party’s camp
   bag. Reward credit is tracked per run so reloads do not award it twice.
 - There are **6 classes**, **5 races**, and **8 weapon types**. Every class and
-  race has its own ultimate; every weapon has its own attack. **Arts / 3** shows
+  race has its own ultimate; every weapon has its own attack. **Arts / 2** shows
   them. Ultimates require 100 charge: actions grant 25 and incoming hits grant
   15. Weapon techniques use focus and turn-based cooldowns. Loot weapons retain
   the technique of their weapon type.
@@ -173,7 +172,7 @@ framing rather than a fast zoom.
   validated within the shared visit. This is a cooperative game with local save
   files, not a server-held competitive economy or cross-device account system.
 
-Mouse/touch supports every action. Keyboard: 1–4 switch tabs (4 = Arts); Q strikes; W uses
+Mouse/touch supports every action. Keyboard: 1 / 2 / 3 switch Fight / Arts / Items; Q strikes; W uses
 the active character’s technique; E mends with a spellcaster; arrows select targets; H
 folds the bottom controls; Escape opens the menu. The music-note button mutes.
 
@@ -231,7 +230,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   earning no battle rewards for that stage. It is unavailable immediately
   before a mandatory boss, at the final camp, and in endless raids (use items).
   Only the online party host can commit this shared progression cost.
-- The Focus category is removed; Fight, Items and Arts use keys 1, 2 and 3.
+- The Focus category is removed; Fight, Arts and Items use keys 1, 2 and 3.
   Guard & focus remains a technique in Fight.
 - Story decisions play a short group scene showing supplies or practice.
   Entry and victory get marching scenes; world changes pass through a gate
@@ -261,23 +260,17 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - The third world blends void and hell: obsidian stone, violet rifts and floating
   fragments, glowing lava fissures, and ember particles.
 
-### Campaign II: The Lying Greenwood
+### Campaign II: Beyond the Broken Sky
 
-Complete the Greenwood, Ashen Dungeon and Hollow Depths, then choose
-**Enter the Lying Greenwood** on the completion screen. Existing completed
-saves can unlock it through **Continue**. Your party, health, equipment, gold
-and supplies carry forward; entering does not grant free healing.
+Complete the original three worlds and enter the Brass Tempest from the completion screen. Carried health, equipment, gold and supplies are preserved without free healing. The sequel contains 30 encounters across three ten-stage worlds: clockwork sky islands, a drowned observatory, and a broken cosmic engine. Each section ends in a solo boss. It uses the campaign save slot and supports shared online progression.
 
-The sequel contains ten new stages, three story stops, higher-tier gear and
-six new enemy types: Mirror Pilgrims, Briar Jesters, False Lanterns, Dream
-Moths, Hollow Marionettes and the solo Masked Sovereign boss. Illusion casters
-create translucent false images that absorb hits. **Guard & focus** exposes
-all images without relying on accuracy. Tricksters renew their images every
-third action, so revealing and timing attacks matters.
+### Ability cards, warp, and raid entities
 
-The sequel uses the campaign save slot, supports online parties, and requires
-the host to open the shared continuation. Raids and the original 30-stage
-campaign retain their separate progression rules.
+**Menu → Ability cards** and the tavern's **Ability cards** button open the collection. Buy cards using personal tavern gold and equip up to three. They appear under Fight. Builds apply at camp or on the next journey. Summon: Knight costs 3 focus, creates a medium-health armored companion with Taunt, and begins its four-turn recovery only when the knight dies. The knight acts automatically and persists between fights without free healing. Other cards provide a shield, burning lance, ice bloom, life siphon and meteor.
+
+Bryan can **Warp jump** from the battle bar to either campaign and any of its 30 encounters, with no rewards or healing. Online authorization uses the authenticated member's actual name.
+
+Endless Raid uses the Star-Eating Maw, Abyssal Cathedral, and World Furnace, which never appear in campaign rosters. Their 55-move repertoires cycle without repetition and mix direct hits, creature summons, three-round arena domains, hallucinations, and 7.4-second themed annihilation films. Inferno burns after actions, undertow drains focus, and gravity weakens party attacks. The status inspector explains effects and lists every enemy's repertoire. Reduced motion avoids flashing and rapid cinematic movement.
 
 Story choices use six distinct action sequences: the blade lesson, formation
 drill, wagon supply handoff, paired sparring, shrine medicine gathering and
