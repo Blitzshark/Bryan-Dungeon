@@ -18,7 +18,7 @@ class OnlineParty{
   this.discovery=attempt;try{await attempt;}finally{if(this.discovery===attempt)this.discovery=null;}
  }
  async request(body=null,code=null,query='status=1'){
-  await this.connect();const headers={'Content-Type':'application/json'};if((code||body?.op==='command')&&this.session?.token)headers.Authorization='Bearer '+this.session.token;
+  await this.connect();const headers={'Content-Type':'application/json'};if((code||body?.op==='command'||body?.code&&['chatSend','chatPoll'].includes(body.op))&&this.session?.token)headers.Authorization='Bearer '+this.session.token;
   let response;try{response=await fetch(this.server+(body?'/api/rooms':'/api/rooms?'+(code?'code='+encodeURIComponent(code):query)),{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(12000)});}catch{throw Error('Cannot reach the room server. Check your connection and retry.');}
   if(!(response.headers.get('content-type')||'').includes('application/json'))throw Error('The room server returned an invalid response. Try again shortly.');
   const data=await response.json();if(!response.ok){const e=Error(data.error||'The room request failed.');e.status=response.status;throw e;}return data;
@@ -31,7 +31,7 @@ class OnlineParty{
  async resume(){if(!this.session)throw Error('There is no room to resume in this browser tab.');this.closed=false;if(typeof this.session.server==='string')this.server=this.session.server;const data=await this.request(null,this.session.code);this.accept(data,true);this.schedule();return data;}
  schedule(){clearTimeout(this.timer);if(this.closed||!this.session)return;this.timer=setTimeout(()=>this.poll(),1200);}
  async poll(){if(this.closed||!this.session||this.inFlight){this.schedule();return;}try{const data=await this.request(null,this.session.code);if(!this.closed)this.accept(data);}catch(error){this.onError(error);if([401,404].includes(error.status)){this.stop();return;}}finally{this.schedule();}}
- async send(action){if(this.inFlight||!this.room)throw Error('Wait for the party to finish syncing.');this.inFlight=true;try{const data=await this.request({op:'command',code:this.session.code,version:this.room.version,requestId:crypto.randomUUID(),action});if(data.left){this.stop(true);return data;}this.accept(data);return data;}catch(error){this.poll().catch(()=>{});throw error;}finally{this.inFlight=false;this.schedule();}}
+ async send(action){if(this.inFlight||!this.room)throw Error('Wait for the party to finish syncing.');this.inFlight=true;try{const input={op:'command',code:this.session.code,version:this.room.version,requestId:crypto.randomUUID(),action};let data;for(let attempt=0;;attempt++){try{data=await this.request(input);break;}catch(error){if(action.type!=='choice'||error.status!==409||attempt>=3)throw error;await new Promise(resolve=>setTimeout(resolve,150+Math.random()*250));}}if(data.left){this.stop(true);return data;}this.accept(data);return data;}catch(error){this.poll().catch(()=>{});throw error;}finally{this.inFlight=false;this.schedule();}}
  depart(){
   if(!this.session)return;const session=this.session,url=(this.server??session.server??'')+'/api/rooms',body=JSON.stringify({op:'depart',code:session.code,token:session.token});
   this.stop(true);try{if(navigator.sendBeacon?.(url,new Blob([body],{type:'text/plain'})))return;}catch{}

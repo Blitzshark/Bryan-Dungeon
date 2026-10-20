@@ -345,3 +345,18 @@ Living Oathbound Knights are rendered at camp and in every travel/story transiti
 `routes.js` uses a separate seeded generator for area order, enemy groups, boss draws, variant stats, scene layouts and chance events. Combat and loot rolls do not consume the route generator. The opening moss encounter remains identical across seeds. Enemy stats scale by progression rather than their original campaign, so deep-sea creatures can appear early without late-game damage. Swift groups gain speed; armored groups gain health. Marine regions draw their own creatures and marine story cards. Raid-only entities never enter expedition rosters.
 
 The route is stored on the run and server-held online room. Continuing after the thirty-encounter checkpoint follows the same generated route through the remaining areas. Bryan's warp selector lists encounters 1–30 and 31–60 from that route. Existing saves pin their current encounter and randomize the future; malformed routes are rejected. New runs get new routes, while retries, saves, reloads and reconnects retain the existing draws.
+
+## Party choices, chat and unequipping
+
+Story encounters use one vote per connected player. Players can change their vote
+until everyone votes or the 20-second deadline. The highest count wins; ties and
+empty ballots are random. Bots follow the result. Simultaneous votes count even
+when players have slightly different room versions.
+
+Press `/` or tap **Chat /** to open chat, **Enter** to send, and **Escape** to close.
+Inside a party, messages stay within that authenticated room. Outside a party,
+public chat is shared by people connected to the same game server. Chat does not
+pause battle or voting timers. Messages are limited to 240 characters.
+
+At camp, equipped item cards have a direct **Unequip** button. Removed gear stays
+in the shared bag until it is equipped again, claimed by a companion, or sold.
