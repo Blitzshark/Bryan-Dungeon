@@ -1,6 +1,6 @@
 # Bryan’s Basement
 
-Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Each run follows nine fixed ten-encounter maps: Greenwood, Hollow Depths, Void & Hell, Coral Reef, Shipwrecks, Deep Sea, Cloud Gardens, Thunderhead Reach and Sunspire Zenith. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server.
+Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose any of three campaigns in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Cloud Gardens, Thunderhead Reach and Sunspire Zenith. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server.
 
 ## Playing
 

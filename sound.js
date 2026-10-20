@@ -21,7 +21,12 @@ class BattleAudio{
  play(kind,impact=false,guarded=false){
   try{if(!this.ready())return;
    if(impact){if(kind==='cosmic'){this.noise(1.2,900,.6);this.note(90,20,1.4,.4,0,'triangle');return;}if(guarded){this.note(880,420,.13,.22);this.noise(.08,2200,.15);}else{this.noise(kind==='heavy'?.2:.11,kind==='magic'?1800:800,.45);this.note(kind==='heavy'?105:175,45,.16,.28,0,'triangle');}return;}
-   if(kind==='portal'){this.noise(1.5,900,.2);[110,165,220,330,440,660].forEach((f,i)=>this.note(f,f*1.6,.8,.09,i*.16));return;}
+   if(kind==='gate'){this.note(85,35,1.5,.14,0,'sawtooth');for(let i=0;i<8;i++)this.noise(.07,450,.1,.2+i*.28);this.noise(1,240,.08,2.1);return;}
+   if(kind==='collapse'){for(let i=0;i<6;i++)this.noise(.2,1100-i*100,.1,.15+i*.13);this.note(130,25,1.6,.2,.85);this.noise(.5,170,.3,2.75);return;}
+   if(kind==='surface'){this.noise(1.2,550,.14);this.noise(.5,2200,.16,1.5);for(let i=0;i<4;i++)this.noise(.08,650,.12,1.9+i*.22);return;}
+   if(kind==='landfall'){for(let i=0;i<9;i++)this.noise(.06,i<4?650:1800,.09,i*.28);for(let i=0;i<4;i++)this.note(900+i*250,1300+i*100,.14,.04,1.5+i*.28);return;}
+   if(kind==='boss'){this.note(58,38,.7,.18);this.noise(.4,650,.14,1.1);this.note(160,80,.4,.1,1.5);return;}
+   if(['portal','crossing','sky-rise','storm-flight','sun-stairs'].includes(kind)){this.noise(1.5,900,.2);[110,165,220,330,440,660].forEach((f,i)=>this.note(f,f*1.6,.8,.09,i*.16));return;}
    else if(kind==='travel'){this.noise(.65,1300,.12);for(let i=0;i<6;i++)this.noise(.055,480,.12,i*.14);this.note(196,294,.6,.1);return;}
    else if(kind==='story'){[330,440,554,660].forEach((f,i)=>this.note(f,f,.35,.12,i*.12));this.noise(.2,1000,.05);return;}
    else if(kind==='rest'){this.noise(.8,500,.09);[262,330,392].forEach((f,i)=>this.note(f,f,.6,.1,i*.13));return;}

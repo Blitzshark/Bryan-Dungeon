@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.join(__dirname,'..'),out=path.join(root,'public');
-const assets=['styles.css','display.js','updates.js','ocean-content.js','ocean-visuals.js','content.js','raid-fx.js','tavern-live.js','hero-options.js','routes.js','campaign.js','scene.js','combat-fx.js','sound.js','multiplayer.js','cosmic.js','motion.js','tavern.js','face-editor.js','critical.js','knight.js','journey.js','game.js'];
+const assets=['styles.css','display.js','updates.js','ocean-content.js','ocean-visuals.js','content.js','raid-fx.js','tavern-live.js','hero-options.js','routes.js','campaign.js','scene.js','combat-fx.js','sound.js','multiplayer.js','cosmic.js','motion.js','tavern.js','face-editor.js','critical.js','knight.js','guardian.js','journey.js','game.js'];
 const indexPath=path.join(root,'index.html');let html=fs.readFileSync(indexPath,'utf8');
 const normalized=html.replace(/name="game-build" content="[^"]*"/,'name="game-build" content="BUILD"').replace(/\?v=[a-z0-9-]+/g,'?v=BUILD').replace(/(id="build-status"[^>]*>)Build [^<]+/,'$1Build BUILD');
 const hash=crypto.createHash('sha256').update(normalized);
