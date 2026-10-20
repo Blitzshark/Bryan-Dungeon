@@ -288,3 +288,19 @@ short contrast impact beat. Reduced motion omits the contrast beat and camera
 movement. An adventurer named **Bryan** (case-insensitive) always critically
 hits and never suffers a normal accuracy miss; false images can still absorb
 a hit. Universe Cleave remains exactly 10,000,000 damage per enemy.
+
+### Critical close-ups, clear counters and scarce shared gold
+
+- Critical hits use a dedicated 2.4-second close-up: wind-up, giant strike,
+  contrast impact frames and large yellow **CRITICAL HIT** beside the victim.
+  Numbers appear above the cinematic at the actual hit. The old hidden-number
+  preference resets to visible once; Settings can still disable numbers.
+- Misses show a large **MISS — NO DAMAGE** banner and the target dodges.
+  Categories now read **Fight / Arts / Items**, bound to **1 / 2 / 3**.
+- The first campaign has a total shared-gold minting budget of 200 across
+  victories, offerings and gear sales, even if all rewards are hoarded. Normal
+  victories award 4, bosses 12, and ordinary loot sells for 2–4. First-campaign
+  tonics cost 1, revival embers 6, and upgrades start at 5. Spending does not
+  refill that minting budget. Personal tavern funds remain separate.
+  The sequel and raids keep their own economies. Old first-campaign gold and
+  gear sale values migrate to the lower scale on save load.

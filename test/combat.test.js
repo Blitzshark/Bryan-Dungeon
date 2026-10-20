@@ -25,7 +25,7 @@ test('every victory leads to a campfire with loot, rest, shopping and equipment'
  const p=s.party[0];p.hp=1;p.status.poison=2;E.campAction(s,{type:'rest'});assert.equal(p.hp,p.maxHp);assert.deepEqual(p.status,{});assert.equal(E.campAction(s,{type:'rest'}).ok,false);const count=s.potions;assert(E.buyTonic(s));assert.equal(s.potions,count+1);
 });
 test('gear upgrades consume gold, increase stats and stop at three upgrades',()=>{
- const s=E.createRun();playBattle(s);s.gold=300;const item=s.inventory[0],initial=item.atk+item.def;for(let i=0;i<3;i++)assert(E.campAction(s,{type:'upgrade',item:item.id}).ok);assert(item.atk+item.def>initial);assert.equal(s.gold,300-25-45-65);assert.equal(E.campAction(s,{type:'upgrade',item:item.id}).ok,false);
+ const s=E.createRun();playBattle(s);s.gold=300;const item=s.inventory[0],initial=item.atk+item.def;for(let i=0;i<3;i++)assert(E.campAction(s,{type:'upgrade',item:item.id}).ok);assert(item.atk+item.def>initial);assert.equal(s.gold,300-5-8-11);assert.equal(E.campAction(s,{type:'upgrade',item:item.id}).ok,false);
 });
 test('full thirty-encounter campaign is winnable, camps appear thirty times, bosses unlock worlds',()=>{
  const s=E.createRun('Campaign tester'),worlds=[],bosses=[];let camps=0,total=0;

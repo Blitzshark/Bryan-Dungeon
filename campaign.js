@@ -30,7 +30,7 @@ function beginSequel(s){if(s.mode==='raid'||s.act===2||s.phase!=='complete'||s.s
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,race:'human',weapon:job==='ranger'?'bow':job==='mage'?'staff':'sword',charge:0,raceCharge:0,appearance:P.appearance({clothes:c.color}),cooldowns:{},guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
- const s={version:5,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
+ const s={version:5,economyVersion:2,goldEarned:0,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
  s.party[1]=companion(s,'rowan');s.party[2]=companion(s,'mira');if(options.profile)applyLoadout(s.party[0],options.profile);
  startBattle(s);return s;
 }
@@ -56,15 +56,17 @@ function startBattle(s){
  s.order=makeOrder(s);s.cursor=0;s.log=[];note(s,chapter.name+' — battle begins.');beginTurn(s);
 }
 function beginTurn(s){const actor=active(s);if(!actor)return;actor.guard=false;if(actor.side==='party'&&actor.race==='elf')actor.mp=Math.min(actor.maxMp,actor.mp+1);for(const k in actor.cooldowns)actor.cooldowns[k]=Math.max(0,actor.cooldowns[k]-1);}
+function campPrices(s){return s.mode!=='raid'&&s.act!==2?{tonic:1,ember:6,upgrade:5,step:3}:{tonic:20,ember:80,upgrade:25,step:20};}
+function grantGold(s,value){const first=s.mode!=='raid'&&s.act!==2,earned=s.goldEarned||0,amount=Math.max(0,Math.floor(first?Math.min(value,200-earned):value));s.gold=first?Math.min(200,s.gold+amount):s.gold+amount;s.goldEarned=earned+amount;return amount;}
 function checkEnd(s){
  if(!living(s,'party').length){s.phase='defeat';note(s,'The party has fallen. The road is not over.');return true;}
  if(!living(s,'enemy').length){
-  const gold=s.mode==='raid'?40+22*s.raidLevel:s.act===2?360+s.stage*35:24+s.stage*11,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;s.gold+=gold;s.tavernGold=(s.tavernGold||0)+gold;s.xp+=xp;s.potions+=1;
+  const gold=s.mode==='raid'?40+22*s.raidLevel:s.act===2?360+s.stage*35:encounter(s).boss?12:4,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;const received=grantGold(s,gold);s.tavernGold=(s.tavernGold||0)+received;s.xp+=xp;s.potions+=1;
   if(s.mode==='raid')s.raidBest=Math.max(s.raidBest,s.raidLevel);
   const level=s.mode==='raid'?s.raidLevel+1:s.act===2?17+Math.floor((s.stage+1)/2):1+Math.floor((s.stage+1)/2);let leveled=false;
   s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}});
   const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;s.campConfirmed=false;
-  s.reward={gold,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
+  s.reward={gold:received,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
  }
  return false;
 }
@@ -149,7 +151,7 @@ function rollLoot(s){
   const names={weapon:['Traveler’s Blade','Ashwood Edge','Riftforged Steel'],armor:['Ironbark Vest','Keepkeeper Mail','Obsidian Mantle'],charm:['Mossbound Charm','Lantern Sigil','Hollow Star']};
   const enchantment=nextRandom(s)<(boss?.75:.35)?['keen','precise','mighty','sturdy'][Math.floor(nextRandom(s)*4)]:null;
   const weaponKey=slot==='weapon'?Object.keys(P.WEAPONS)[Math.floor(nextRandom(s)*Object.keys(P.WEAPONS).length)]:null;
-  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:Math.min(2,tier-1)])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:weaponKey?P.WEAPONS[weaponKey].skill:null,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:10+tier*quality*8,owner:null,upgrades:0};
+  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:Math.min(2,tier-1)])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:weaponKey?P.WEAPONS[weaponKey].skill:null,atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:s.mode!=='raid'&&s.act!==2?1+quality:10+tier*quality*8,owner:null,upgrades:0};
  });
 }
 function gearPower(i){return i.atk+i.def+(i.enchantment==='mighty'||i.enchantment==='sturdy'?2:0);}
@@ -157,7 +159,7 @@ function finishCamp(s,botIds){if(s.phase!=='camp')return false;for(const hero of
 function campAction(s,command){
  if(s.phase!=='camp')return {ok:false,error:'Return to the campfire first.'};
  const item=s.inventory.find(i=>i.id===command.item),hero=s.party.find(p=>p.id===command.hero);
- if(command.type==='sell-junk'){const junk=s.inventory.filter(i=>!i.owner);s.gold+=junk.reduce((sum,i)=>sum+i.price,0);s.inventory=s.inventory.filter(i=>i.owner);s.campConfirmed=false;return {ok:true,sold:junk.length};}
+ if(command.type==='sell-junk'){const junk=s.inventory.filter(i=>!i.owner);grantGold(s,junk.reduce((sum,i)=>sum+i.price,0));s.inventory=s.inventory.filter(i=>i.owner);s.campConfirmed=false;return {ok:true,sold:junk.length};}
  if(command.type==='equip-best'){
   if(!hero)return {ok:false,error:'Choose an adventurer.'};
   for(const slot of ['weapon','armor','charm']){const candidates=s.inventory.filter(i=>i.slot===slot&&(!i.owner||i.owner===hero.id)).sort((a,b)=>gearPower(b)-gearPower(a)),best=candidates[0],current=s.inventory.find(i=>i.slot===slot&&i.owner===hero.id);if(best&&gearPower(best)>(current?gearPower(current):slot==='weapon'?(P.WEAPONS[hero.weapon]?.atk||0):0)){if(current)current.owner=null;best.owner=hero.id;}}
@@ -165,11 +167,11 @@ function campAction(s,command){
   if(!item||!hero)return {ok:false,error:'Choose a piece of gear and an adventurer.'};
   s.inventory.filter(i=>i.owner===hero.id&&i.slot===item.slot).forEach(i=>i.owner=null);item.owner=hero.id;
  }else if(command.type==='unequip'){if(!item)return {ok:false,error:'Gear not found.'};item.owner=null;}
- else if(command.type==='sell'){if(!item||item.owner)return {ok:false,error:'Unequip an item before selling it.'};s.gold+=item.price;s.inventory=s.inventory.filter(i=>i!==item);}
- else if(command.type==='upgrade'){if(!item)return {ok:false,error:'Choose gear to upgrade.'};const cost=25+item.upgrades*20;if(item.upgrades>=3||s.gold<cost)return {ok:false,error:item.upgrades>=3?'This item is fully upgraded.':'Not enough gold.'};s.gold-=cost;item.upgrades++;if(item.slot==='weapon')item.atk+=2;else item.def++;item.price+=10;}
+ else if(command.type==='sell'){if(!item||item.owner)return {ok:false,error:'Unequip an item before selling it.'};grantGold(s,item.price);s.inventory=s.inventory.filter(i=>i!==item);}
+ else if(command.type==='upgrade'){if(!item)return {ok:false,error:'Choose gear to upgrade.'};const prices=campPrices(s),cost=prices.upgrade+item.upgrades*prices.step;if(item.upgrades>=3||s.gold<cost)return {ok:false,error:item.upgrades>=3?'This item is fully upgraded.':'Not enough gold.'};s.gold-=cost;item.upgrades++;if(item.slot==='weapon')item.atk+=2;else item.def++;item.price+=10;}
  else if(command.type==='use-tonic'||command.type==='use-ember'){if(!hero)return {ok:false,error:'Choose an adventurer.'};if(command.type==='use-tonic'){if(!s.potions||hero.hp<=0||hero.hp>=hero.maxHp)return {ok:false,error:'Choose an injured standing adventurer with a tonic available.'};s.potions--;hero.hp=Math.min(hero.maxHp,hero.hp+tonicHeal(s));}else{if(!s.embers||hero.hp>0)return {ok:false,error:'Choose a fallen adventurer with an ember available.'};s.embers--;hero.hp=Math.ceil(hero.maxHp*.5);}}
  else if(command.type==='rest'){if(s.mode==='raid'||s.stage>=(s.act===2?9:29)||s.stage%10===8)return {ok:false,error:'No spare stage remains before this boss. Use healing items.'};if(s.campRested)return {ok:false,error:'Your party has already rested.'};s.party.forEach(p=>{p.hp=p.maxHp;p.mp=p.maxMp;p.status={};});s.campRested=true;s.restSpent=true;note(s,'Resting consumes the next stage. No battle rewards are earned.');}
- else if(command.type==='buy-tonic'||command.type==='buy-ember'){const price=command.type==='buy-tonic'?20:80;if(s.gold<price)return {ok:false,error:'Not enough gold.'};s.gold-=price;if(price===20)s.potions++;else s.embers++;}
+ else if(command.type==='buy-tonic'||command.type==='buy-ember'){const prices=campPrices(s),price=command.type==='buy-tonic'?prices.tonic:prices.ember;if(s.gold<price)return {ok:false,error:'Not enough gold.'};s.gold-=price;if(command.type==='buy-tonic')s.potions++;else s.embers++;}
  else return {ok:false,error:'Choose a camp action.'};
  s.campConfirmed=false;return {ok:true};
 }
@@ -185,8 +187,8 @@ function choose(s,choice){
  if(s.choice==='stranger'){
   if(choice==='accept'){const p=s.party[0],c=CLASSES.rogue;p.job='rogue';p.atk+=3;p.speed=c.speed;p.color=c.color;p.maxMp=Math.max(p.maxMp,8);}
   else s.party.forEach(p=>{p.maxHp+=8;});
- }else if(s.choice==='crossroads'){if(choice==='accept'){s.potions+=2;s.gold+=35;}else s.party.forEach(p=>{p.atk+=1;p.maxHp+=6;});
- }else if(choice==='accept'){s.potions+=3;}else{s.gold+=50;s.embers++;}
+ }else if(s.choice==='crossroads'){if(choice==='accept'){s.potions+=2;grantGold(s,s.act===2?35:5);}else s.party.forEach(p=>{p.atk+=1;p.maxHp+=6;});
+ }else if(choice==='accept'){s.potions+=3;}else{grantGold(s,s.act===2?50:8);s.embers++;}
  s.lastChoice={kind:s.choice,choice};s.stories.push(s.stage);s.stage+=s.restSpent?2:1;s.restSpent=false;startBattle(s);return true;
 }
 function buyTonic(s){return campAction(s,{type:'buy-tonic'}).ok;}
@@ -195,7 +197,7 @@ function restore(value){
  try{const s=typeof value==='string'?JSON.parse(value):clone(value);
  if(s?.version===4){s.version=5;s.stage=s.phase==='story'&&s.choice==='shrine'?14:s.stage<4?s.stage:s.stage<7?s.stage+6:19;s.inventory=[];s.campRested=false;s.campConfirmed=false;s.stories=[];if(['victory','complete'].includes(s.phase)){s.phase='camp';s.reward=s.reward||{gold:0,xp:0};s.reward.loot=[];s.reward.boss=encounter(s).boss;}s.party.forEach(p=>p.status={});}
  if(!s||s.version!==5||!Number.isInteger(s.stage)||s.stage<0||s.stage>=CHAPTERS.length||!['battle','camp','story','defeat','complete'].includes(s.phase))return null;
- s.mode=s.mode||'campaign';if(s.act!==undefined&&![1,2].includes(s.act))return null;if(s.act===2&&(s.mode==='raid'||s.stage>=SEQUEL.length))return null;s.raidLevel=s.raidLevel||1;s.raidBest=s.raidBest||0;
+ s.mode=s.mode||'campaign';if(s.economyVersion!==2&&s.mode!=='raid'&&s.act!==2){s.gold=Math.min(200,Math.floor(s.gold/20));s.goldEarned=s.gold;s.inventory?.forEach(i=>i.price=1+({common:1,rare:2,epic:3}[i.rarity]||1));}s.economyVersion=2;if(s.act!==undefined&&![1,2].includes(s.act))return null;if(s.act===2&&(s.mode==='raid'||s.stage>=SEQUEL.length))return null;s.raidLevel=s.raidLevel||1;s.raidBest=s.raidBest||0;
  if(!['campaign','raid'].includes(s.mode)||!Number.isSafeInteger(s.raidLevel)||s.raidLevel<1||!Number.isSafeInteger(s.raidBest)||s.raidBest<0)return null;
  if(!Array.isArray(s.inventory)||!Array.isArray(s.stories))return null;
  if(!Array.isArray(s.party)||s.party.length!==3||!Array.isArray(s.enemies)||!Array.isArray(s.order)||!Array.isArray(s.log)||!Array.isArray(s.history))return null;
@@ -206,5 +208,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,finishCamp,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
