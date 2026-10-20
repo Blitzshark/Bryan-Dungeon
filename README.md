@@ -304,3 +304,24 @@ a hit. Universe Cleave remains exactly 10,000,000 damage per enemy.
   refill that minting budget. Personal tavern funds remain separate.
   The sequel and raids keep their own economies. Old first-campaign gold and
   gear sale values migrate to the lower scale on save load.
+
+### Versions and device animation preferences
+
+Every build now derives a deterministic release ID from the game assets and
+server code. The ID appears in the bottom-left version button and Settings.
+The HTML and every asset use that same ID; building identical source twice
+keeps the same ID. `version.json` is checked without caching at startup, when
+the tab becomes visible, and once a minute. Updates show a badge rather than
+interrupting play. Vercel and the development server revalidate cached files.
+
+**Settings → Save & reload latest version** saves progress and reloads with
+a fresh page URL; it preserves local saves and appearance. Reloading closes
+an online party. Saves are specific to the website, so compare the website
+and build shown in Settings when two devices differ. Immutable old Vercel
+deployment links remain old deployments; use the current connected game URL.
+
+**Settings → Animations** supports device preference, full animations and
+reduced motion. Changes apply immediately to every scene and persist locally.
+Fire moves gently even in reduced mode, and enabled damage numbers stay
+visible; full mode enables camera motion and impact frames regardless of
+the operating-system preference.
