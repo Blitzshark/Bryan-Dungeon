@@ -1,6 +1,6 @@
-# Bryan’s Dungeon: The Hollow Road
+# Bryan’s Basement
 
-A turn-based, block-world expedition for solo play or a party of up to three online players. Only the opening two Moss Slimes are fixed. Every run generates a fresh sixty-encounter route: six shuffled areas, randomized enemy groups, variable bosses, chance-event placement and options, and different scenery. Areas retain readable biome labels; there are no separately named campaigns. Each tenth encounter is a boss and every fight ends at camp. The generated plan is saved and shared by online party members, so reloads and reconnects do not reroll the adventure.
+Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Each run follows nine fixed ten-encounter maps: Greenwood, Hollow Depths, Void & Hell, Coral Reef, Shipwrecks, Deep Sea, Cloud Gardens, Thunderhead Reach and Sunspire Zenith. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server.
 
 ## Playing
 
@@ -92,7 +92,7 @@ that local server. Restarting the development server clears local online rooms.
 Set Redis variables if you need persistent shared rooms in development. The game
 has no external frontend libraries, assets, sound downloads, or font requests.
 
-The tests cover generated sixty-encounter routes across many seeds, randomized bosses, campfires, equipment,
+The tests cover generated ninety-encounter routes across many seeds, randomized bosses, campfires, equipment,
 status effects, save migration, multiplayer ownership, concurrent enemy ticks,
 ready checks, reconnect handling, and the Redis REST/lock protocol. Browser
 validation additionally uses three isolated player sessions, actual shared

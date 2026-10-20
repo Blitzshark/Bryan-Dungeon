@@ -8,4 +8,4 @@ app.use('/api',(req,res)=>res.status(404).json({error:'Unknown API endpoint.'}))
 app.get('/health', (req, res) => res.json({ ok: true, game: 'campaign', version: 5 }));
 app.get('/play', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.use(express.static(__dirname, { dotfiles: 'deny', index: 'index.html' }));
-const server = app.listen(process.env.PORT || 8080, '0.0.0.0', () => console.log('Bryan’s Dungeon campaign listening on ' + server.address().port));
+const server = app.listen(process.env.PORT || 8080, '0.0.0.0', () => console.log('Bryan’s Basement campaign listening on ' + server.address().port));
