@@ -4,7 +4,7 @@ A turn-based, block-world campaign for solo play or a party of up to three onlin
 players. Three worlds contain ten encounters each. The tenth encounter in every
 world is a boss: the Briar Sovereign, the Iron Warden, and the Triune Abyss.
 Defeating the forest boss opens the Ashen Dungeon; the second boss opens the
-Hollow Depths. A second three-section campaign continues into the Brass Tempest, Drowned Observatory, and Shattered Orrery. Every enemy has at least two named attacks.
+Hollow Depths. A second three-section campaign continues into the Sunlit Reef, Sunken Fleet, and Hadal Trench. Every enemy has at least two named attacks.
 
 ## Playing
 
@@ -260,9 +260,11 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - The third world blends void and hell: obsidian stone, violet rifts and floating
   fragments, glowing lava fissures, and ember particles.
 
-### Campaign II: Beyond the Broken Sky
+### Campaign II: Beneath the Tide
 
-Complete the original three worlds and enter the Brass Tempest from the completion screen. Carried health, equipment, gold and supplies are preserved without free healing. The sequel contains 30 encounters across three ten-stage worlds: clockwork sky islands, a drowned observatory, and a broken cosmic engine. Each section ends in a solo boss. It uses the campaign save slot and supports shared online progression.
+Complete the original three worlds and choose **Dive beneath the tide**. The sequel is thirty underwater encounters across the Sunlit Reef, Sunken Fleet, and Hadal Trench. All seventeen marine species have new geometry; none of its encounter rosters reuse campaign-one enemies. Its solo bosses are the Coralback Matriarch (a giant reef crab), Keelbreaker (a wreck-armored kraken), and Hadal Devourer (a giant deep-sea anglerfish). Bright coral beds, broken ship hulls, and dark hydrothermal vents replace the original terrain, walls and props.
+
+Marine combat introduces Soaked (electric damage +30%), Ink (22% miss chance), and Pressure (1 focus lost after acting). Guard & focus clears ink and pressure. Nine underwater rescue, salvage and beacon choices replace caravan/training events. Marine weapon loot grants Brine Impaler, Stormline Harpoon, Inkveil Riposte or Bathyal Toll. Camps use an air-filled diving bell with a heater. Existing sequel saves keep their stage, party, equipment and living summons while migrating to the new content.
 
 ### Ability cards, warp, and raid entities
 
@@ -337,3 +339,7 @@ another character ID. Skip waits until the current animation finishes.
 Full animations are the default for a new browser; explicit saved motion preferences still apply. The decision countdown sits beside turn order, and fighter details open by clicking an initiative entry. The permanent name/race strip and action-deck footer are removed. Miss labels are compact and fade normally. Base critical chance is 3%, with Keen adding four percentage points.
 
 Summon: Knight reserves a synchronized 3.6-second arrival cutscene: a portal opens, the knight rises beneath a shield emblem, and every standing enemy displays a temporary exclamation mark and turns toward it. The most recently summoned living knight draws enemy attacks; when it dies, another living knight can take over Taunt.
+
+### Persistent summons
+
+Living Oathbound Knights are rendered at camp and in every travel/story transition, and retain their identity and current HP across battles and reloads. The camp summary shows their health and a tonic button, authorized to their summoner online. Paid stage-consuming rest also heals living summons. They scale with their owner's level without free healing; only death removes them and starts the card cooldown.

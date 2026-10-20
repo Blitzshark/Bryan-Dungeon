@@ -54,7 +54,7 @@ class CampaignScene{
  rock(x,z,s=1){this.shadow(x,z,s*.8,s*.5,.2);this.box(x,.02,z,s,.5*s,s*.8,palette[this.biome].rock);this.box(x-.18*s,.5*s,z,.68*s,.25*s,.5*s,shade(palette[this.biome].rock,1.04));}
  candle(x,z,y=0){this.box(x,y,z,.11,.3,.11,'#d7cb94');const p=this.project(x,y+.38,z),c=this.paint,g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*.85);g.addColorStop(0,'#f3d57c44');g.addColorStop(1,'#f3d57c00');c.fillStyle=g;c.fillRect(p.x-this.scale,p.y-this.scale,this.scale*2,this.scale*2);c.fillStyle='#ffe4a0';c.fillRect(p.x-1.6,p.y-3,3.2,6);}
  barrel(x,z){this.shadow(x,z,.45,.3);this.box(x,.03,z,.6,.7,.6,'#786144');for(const y of [.12,.55])this.box(x,y,z,.63,.07,.63,'#afa682');}
- background(){const old=this.paint,c=this.cache.getContext('2d');c.setTransform(this.dpr,0,0,this.dpr,0,0);this.paint=c;const p=palette[this.biome];c.fillStyle=p.sky;c.fillRect(0,0,this.width,this.height);const g=c.createLinearGradient(0,0,0,this.height);g.addColorStop(0,p.far);g.addColorStop(1,p.sky);c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
+ background(){const old=this.paint,c=this.cache.getContext('2d');c.setTransform(this.dpr,0,0,this.dpr,0,0);this.paint=c;if(window.OceanVisuals?.isOcean(this.biome)){OceanVisuals.background(this);this.dirty=false;this.paint=old;return;}const p=palette[this.biome];c.fillStyle=p.sky;c.fillRect(0,0,this.width,this.height);const g=c.createLinearGradient(0,0,0,this.height);g.addColorStop(0,p.far);g.addColorStop(1,p.sky);c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
  // An elevated tiled clearing, surrounded by a layered block-built world.
  for(let x=-17;x<18;x++)for(let z=-15;z<16;z++){
   const n=seeded(x*43+z*13),color=p.tile[Math.floor(n*p.tile.length)];
@@ -95,12 +95,12 @@ class CampaignScene{
  this.barrel(-3.8,-1.3);this.barrel(-4.2,-.6);this.box(3,.02,-1.6,.7,.5,.65,'#9f8256');this.box(3,.52,-1.6,.7,.15,.7,'#675639');
  this.box(-2.6,.02,-3.1,2.3,.15,1.9,'#484f38');for(let i=0;i<6;i++)this.box(-2.6,.17+i*.24,-3.1,2.3-i*.34,.25,1.9,'#829269');
  }
- drawCampfire(time){
+ drawCampfire(time){if(window.OceanVisuals?.isOcean(this.biome)){OceanVisuals.heater(this,time);return;}
  const c=this.paint,p=this.project(0,.55,0),g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*2.3);g.addColorStop(0,'#ffc56a44');g.addColorStop(1,'#ffc56a00');c.fillStyle=g;c.fillRect(p.x-this.scale*3,p.y-this.scale*3,this.scale*6,this.scale*6);
  for(let i=0;i<5;i++){const flicker=this.reduced?.97+Math.sin(time/450+i)*.04:.9+Math.sin(time/95+i*2)*.16;this.box((i-2)*.11,.15,Math.sin(i*2)*.12,.2,(.65-Math.abs(i-2)*.12)*flicker,.2,i%2?'#ffbb57':'#e57738');}
  if(!this.reduced){c.fillStyle='#ffe098';for(let i=0;i<8;i++){const t=(time/1800+i/8)%1,x=p.x+Math.sin(i*12+t*5)*this.scale*.35,y=p.y-t*this.scale*1.7;c.globalAlpha=1-t;c.fillRect(x,y,2,2);}c.globalAlpha=1;}
  }
- positionFor(unit,index){if(unit.summon)return {x:-1.1,z:({'hero':-2.4,'rowan':0,'mira':2.4}[unit.ownerId]??3.3)};if(unit.raidOnly)return {x:4.8,z:.5};if(this.camp){return [{x:-2.2,z:1.3},{x:0,z:3},{x:2.2,z:1.3}][index]||{x:0,z:0};}const side=unit.side==='party'?-1:1;const roster=unit.side==='party'?this.state?.party:this.state?.enemies;const count=roster?.length||3;return {x:side*(3.3+(index%2)*.2),z:(index-(count-1)/2)*(count>3?1.8:2.4)};}
+ positionFor(unit,index){if(unit.summon&&this.camp)return {x:3.7,z:2.7};if(unit.summon)return {x:-1.1,z:({'hero':-2.4,'rowan':0,'mira':2.4}[unit.ownerId]??3.3)};if(unit.raidOnly)return {x:4.8,z:.5};if(this.camp){return [{x:-2.2,z:1.3},{x:0,z:3},{x:2.2,z:1.3}][index]||{x:0,z:0};}const side=unit.side==='party'?-1:1;const roster=unit.side==='party'?this.state?.party:this.state?.enemies;const count=roster?.length||3;return {x:side*(3.3+(index%2)*.2),z:(index-(count-1)/2)*(count>3?1.8:2.4)};}
  actor(unit,index,time){let dying=false;if(unit.images>0&&unit.hp>0&&!unit.ghost){for(let i=0;i<unit.images;i++){this.paint.save();this.paint.globalAlpha*=.25;const title=this.title;this.title=true;this.actor({...unit,images:0,ghost:true,ghostX:(i?1:-1)*.8,ghostZ:.35},index,time);this.title=title;this.paint.restore();}}if(unit.side==='enemy'&&!unit.hp){const death=this.effects.findLast(e=>e.target===unit.id&&e.type==='damage');if(!death||time<death.at||time-death.at>700)return;this.paint.save();this.paint.globalAlpha*=Math.max(0,1-(time-death.at)/700);dying=true;}const pos=this.positionFor(unit,index),pose=this.poseFor(unit,index,time);let {x,z,y}=pose;let flash=false;
  const hit=this.effects.find(e=>e.target===unit.id&&e.type==='damage'&&time>=e.at&&time-e.at<360);
  const missed=this.effects.find(e=>e.target===unit.id&&e.type==='miss'&&time>=e.at&&time-e.at<360);if(missed&&!this.reduced){const dodge=Math.sin((time-missed.at)/360*Math.PI)*.35;x+=dodge;z-=dodge*.4;}
@@ -141,13 +141,14 @@ class CampaignScene{
   else {this.box(x+.55*big,Y(.63+armLift),z+.04*big,.08*big,.75*big,.08*big,'#b7c4bd');this.box(x+.55*big,Y(.58+armLift),z,.32*big,.08*big,.1*big,'#b5a16c');this.partTransform=null;if(unit.side==='party')this.box(x-.62*big,Y(.48),z,.12*big,.56*big,.46*big,shade(color,.8));}
  }
  const polygons=this.actorPolygons;this.actorPolygons=null;polygons.sort((a,b)=>a.depth-b.depth).forEach(p=>p.draw());this.partTransform=null;this.bodyTransform=null;
+ if(window.OceanVisuals?.isOcean(this.biome)&&unit.side==='party'&&!unit.summon){const c=this.paint,p=this.project(x,y+1.43,z);c.save();c.strokeStyle='#bfedee66';c.fillStyle='#c7f8f90a';c.lineWidth=1;c.beginPath();c.ellipse(p.x,p.y,this.scale*.36,this.scale*.38,0,0,Math.PI*2);c.fill();c.stroke();c.restore();}
  if(unit.guard&&unit.hp){const c=this.paint,p=this.project(x,1.95,z);c.fillStyle='#b8d4d3';c.font='12px Arial';c.textAlign='center';c.fillText('◇',p.x,p.y);}
- const labelHeight=unit.raidOnly?unit.kind==='raidcathedral'?9.5:5.8:{voidentity:3.7,stormheart:4,leviathan:3.8,orrery:4,king:3.1,golem:2.7,stag:3.5,treant:3.2,demon:2.5,gargoyle:2.3,bat:1.9,mushroom:1.4,mimic:1.4,beetle:1,spider:.95,wolf:1.55,boar:1.7,crystal:2,skull:1.65,specter:2.1,slime:.95,rat:.95,wisp:1.5}[unit.kind]||1.95;const point=this.project(x,labelHeight,z);this.positions.set(unit.id,{x:point.x,y:point.y,worldX:pos.x,worldZ:pos.z,groundY:this.project(x,0,z).y,facing:unit.side==='party'?1:-1});
+ const labelHeight=unit.raidOnly?unit.kind==='raidcathedral'?9.5:5.8:{voidentity:3.7,stormheart:4,leviathan:3.8,orrery:4,king:3.1,golem:2.7,stag:3.5,treant:3.2,demon:2.5,gargoyle:2.3,bat:1.9,mushroom:1.4,mimic:1.4,beetle:1,spider:.95,wolf:1.55,boar:1.7,crystal:2,skull:1.65,specter:2.1,slime:.95,rat:.95,wisp:1.5}[unit.kind]||1.95;const point=this.project(x,unit.boss&&unit.kind.startsWith('sea')?5:unit.kind.startsWith('sea')?2.2:labelHeight,z);this.positions.set(unit.id,{x:point.x,y:point.y,worldX:pos.x,worldZ:pos.z,groundY:this.project(x,0,z).y,facing:unit.side==='party'?1:-1});
  if(!this.title){const c=this.paint,w=Math.max(48,this.scale*1.12);c.font='600 '+Math.max(7,Math.min(10,this.scale*.17))+'px Arial';c.textAlign='center';c.shadowColor='#102217';c.shadowBlur=5;c.fillStyle=unit.hp?'#e4e8d3':'#9a9e88';c.fillText(unit.name,point.x,point.y);c.shadowBlur=0;c.fillStyle='#142016';c.fillRect(point.x-w/2,point.y+6,w,4);c.fillStyle=unit.side==='party'?'#9fbd7a':'#c87969';c.fillRect(point.x-w/2,point.y+6,w*(unit.hp/unit.maxHp),4);if(active){c.fillStyle='#e1d2a2';c.beginPath();c.moveTo(point.x,point.y-17);c.lineTo(point.x-4,point.y-23);c.lineTo(point.x+4,point.y-23);c.fill();}}
  if(dying)this.paint.restore();
  }
  creature(unit,x,y,z,time,pose,color){
- const k=unit.kind,step=pose.stride||0;
+ if(window.OceanVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;const k=unit.kind,step=pose.stride||0;
  if(['voidentity','stormheart','leviathan','orrery','raidmaw','raidcathedral','raidfurnace'].includes(k)){
  const giant=unit.raidOnly,scale=giant?2.8:1.5,spin=this.reduced?time/2500:time/1200,hover=Math.sin(time/500)*.1;
  this.shadow(x,z,scale*1.1,scale*.7,.4);this.box(x,y+.7*scale+hover,z,.95*scale,1.1*scale,.9*scale,shade(color,.45));
@@ -251,13 +252,13 @@ class CampaignScene{
 
  point(id){return this.positions.get(id);}
  frame(time){const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.save();const cinematic=this.animations.find(a=>(a.ultimate||a.critical)&&a.style!=='cosmic'&&time>=a.at&&time-a.at<a.duration);if(cinematic&&!this.reduced){const p=(time-cinematic.at)/cinematic.duration,subject=this.point(p<.4?cinematic.actor:cinematic.target)||{x:this.width/2,y:this.height/2},zoom=1+Math.sin(p*Math.PI)*(cinematic.critical?.18:.1);c.translate(this.width/2,this.height*.45);c.scale(zoom,zoom);c.translate(-this.width/2-(subject.x-this.width/2)*Math.sin(p*Math.PI)*.1,-this.height*.45);}c.drawImage(this.cache,0,0,this.width,this.height);
- let units=this.state?(this.camp?[...this.state.party]:[...this.state.party,...(this.state.summons||[]),...this.state.enemies]):[];
+ let units=this.state?(this.camp?[...this.state.party,...(this.state.summons||[])]:[...this.state.party,...(this.state.summons||[]),...this.state.enemies]):[];
  if(this.title){units=[{id:'hero',name:'',hp:88,maxHp:88,side:'party',job:'warrior',color:'#baa47a',kind:'humanoid'},{id:'rowan',name:'',hp:70,maxHp:70,side:'party',job:'ranger',color:'#879b73',kind:'humanoid'},{id:'mira',name:'',hp:65,maxHp:65,side:'party',job:'mage',color:'#9a91b1',kind:'humanoid'}];}
  const entries=units.map(u=>{const list=u.side==='party'?(this.state?.party||units):this.state.enemies;const index=list.findIndex(p=>p.id===u.id);const p=this.positionFor(u,index);return {u,index,depth:this.poseFor(u,index,time).x*.27+this.poseFor(u,index,time).z*.47};}).sort((a,b)=>a.depth-b.depth);
  entries.forEach(({u,index})=>this.actor(u,index,time));
  if(this.camp)this.drawCampfire(time);
  const impactFrame=this.animations.find(a=>a.critical&&a.style!=='cosmic'&&time-a.at-a.impactAt>=0&&time-a.at-a.impactAt<65);if(impactFrame&&!this.reduced){c.save();c.globalCompositeOperation='difference';c.fillStyle='#fff7df';c.fillRect(0,0,this.width,this.height);c.restore();}
- window.RaidFX?.arena(this,time);this.drawEffects(time);this.drawDefeats(time);CombatVFX.draw(this,time);window.RaidFX?.attacks(this,time);c.restore();
+ window.RaidFX?.arena(this,time);this.drawEffects(time);this.drawDefeats(time);CombatVFX.draw(this,time);window.RaidFX?.attacks(this,time);window.OceanVisuals?.attacks(this,time);window.OceanVisuals?.atmosphere(this,time);c.restore();
  this.effects=this.effects.filter(e=>time-e.at<1200);this.animations=this.animations.filter(a=>time-a.at<a.duration);
  if(!this.reduced){c.fillStyle=this.biome==='forest'?'#d3e2a333':this.biome==='throne'?'#f78c6944':'#ead69e33';for(let i=0;i<18;i++){const x=(seeded(i+10)*this.width+Math.sin(time/5000+i)*18),y=(seeded(i+20)*this.height-time/110*(.2+seeded(i+30)))%this.height;c.fillRect(x,y<0?y+this.height:y,i%3===0?2:1,i%3===0?2:1);}}
  requestAnimationFrame(this.frame);
