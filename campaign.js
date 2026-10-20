@@ -41,7 +41,7 @@ function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
  const s={version:5,economyVersion:2,goldEarned:0,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
  s.routeSeed=(s.seed^0x6ac690c5)>>>0;s.party[1]=companion(s,'rowan');s.party[2]=companion(s,'mira');if(options.profile)applyLoadout(s.party[0],options.profile);
- if(options.partySize===6)expandParty(s);if(s.mode!=='raid'&&[2,3].includes(options.campaign)){s.act=options.campaign;s.startCampaign=s.act;const level=1+(s.act-1)*16;s.party.forEach(p=>{p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);});s.gold=s.act===2?240:400;s.potions=8;}attachRoute(s);startBattle(s);return s;
+ s.party[0].adminAllowed=options.adminAllowed===true;s.party[0].adminDisabled=options.adminDisabled===true;if(options.partySize===6)expandParty(s);if(s.mode!=='raid'&&[2,3].includes(options.campaign)){s.act=options.campaign;s.startCampaign=s.act;const level=1+(s.act-1)*16;s.party.forEach(p=>{p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);});s.gold=s.act===2?240:400;s.potions=8;}attachRoute(s);startBattle(s);return s;
 }
 function expandParty(s){for(const id of ['ember','sable','orin'])if(!s.party.some(p=>p.id===id)){const p=companion(s,id),level=s.party[0].level||1;p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);s.party.push(p);if(s.phase==='battle'&&s.order?.length)s.order.push(id);}return s;}
 function companion(s,id){
@@ -51,7 +51,8 @@ function companion(s,id){
 }
 function applyLoadout(p,value){const load=P.profile(value),c=CLASSES[load.job],old=CLASSES[p.job]||CLASSES.warrior,hpRatio=p.hp/p.maxHp,mpRatio=p.mp/p.maxMp;p.maxHp=Math.max(1,p.maxHp-old.hp+c.hp);p.hp=Math.min(p.maxHp,Math.round(p.maxHp*hpRatio));p.atk=p.atk-old.atk+c.atk;p.job=load.job;p.speed=c.speed;p.maxMp=c.mp;p.mp=Math.min(p.maxMp,Math.round(p.maxMp*mpRatio));p.cards=load.equippedCards;p.race=load.race;p.weapon=load.weapon;p.appearance=load.appearance;p.color=load.appearance.clothes;return p;}
 function weaponFor(s,p){const item=(s.inventory||[]).find(i=>i.owner===p.id&&i.slot==='weapon');const base=P.WEAPONS[item?.weaponKey||p.weapon]||P.WEAPONS.sword;return item?.skill&&SKILLS[item.skill]?{...base,name:item.name,skill:item.skill}:base;}
-function abilities(s,p){return p.summon?['knightCut','knightSlam']:['basic_'+p.job,CLASSES[p.job].skill,...(p.cards||[]),...(['mage','paladin'].includes(p.job)?['mend']:[]),weaponFor(s,p).skill,CLASSES[p.job].ultimate,P.RACES[p.race||'human'].ultimate,...(p.name.trim().toLowerCase()==='bryan'?['universe']:[])];}
+function hasAdmin(p){return p?.adminAllowed===true&&p.adminDisabled!==true;}
+function abilities(s,p){return p.summon?['knightCut','knightSlam']:['basic_'+p.job,CLASSES[p.job].skill,...(p.cards||[]),...(['mage','paladin'].includes(p.job)?['mend']:[]),weaponFor(s,p).skill,CLASSES[p.job].ultimate,P.RACES[p.race||'human'].ultimate,...(hasAdmin(p)?['universe']:[])];}
 function living(s,side){return (side==='party'?[...s.party,...(s.summons||[])]:s.enemies).filter(u=>u.hp>0);}
 function unit(s,id){return [...s.party,...(s.summons||[]),...s.enemies].find(u=>u.id===id);}
 function active(s){return s.phase==='battle'?unit(s,s.order[s.cursor]):null;}
@@ -191,9 +192,9 @@ function campAction(s,command){
  else return {ok:false,error:'Choose a camp action.'};
  s.campConfirmed=false;return {ok:true};
 }
-function warp(s,heroId,act,stage){const p=s.party.find(p=>p.id===heroId);if(!p||p.name.trim().toLowerCase()!=='bryan'||![1,2,3].includes(act)||!Number.isInteger(stage)||stage<0||stage>=30)return false;s.mode='campaign';s.act=act;s.stage=stage;s.stories=[];s.restSpent=false;startBattle(s);return true;}
+function warp(s,heroId,act,stage){const p=s.party.find(p=>p.id===heroId);if(!p||!hasAdmin(p)||![1,2,3].includes(act)||!Number.isInteger(stage)||stage<0||stage>=30)return false;s.mode='campaign';s.act=act;s.stage=stage;s.stories=[];s.restSpent=false;startBattle(s);return true;}
 function skipEncounter(s,heroId='hero'){
- const player=s.party.find(p=>p.id===heroId);if(s.phase!=='battle'||!player||player.name.trim().toLowerCase()!=='bryan')return false;
+ const player=s.party.find(p=>p.id===heroId);if(s.phase!=='battle'||!player||!hasAdmin(player))return false;
  s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';s.decisionEndsAt=null;return true;}
@@ -234,5 +235,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });

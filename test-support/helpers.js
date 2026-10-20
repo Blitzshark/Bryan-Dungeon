@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),Engine=require('../campaign');
+const assert=require('node:assert/strict'),Engine=require('./fixture-engine');
 const E={...Engine,createRun:(name,job,mode,options={})=>Engine.createRun(name,job,mode,{seed:2,runId:'fixture-run',...options})};
 function playBattle(s){let turns=0;while(s.phase==='battle'&&turns++<700){const a=E.active(s);if(a.side==='enemy'){assert(E.enemyAct(s).ok);continue;}const weak=E.living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0],fallen=s.party.find(p=>p.hp<=0);let command;
  if(fallen&&s.embers)command={type:'revive',target:fallen.id};else if(weak.hp<weak.maxHp*.4&&s.potions)command={type:'potion',target:weak.id};else if(['mage','paladin'].includes(a.job)&&weak.hp<weak.maxHp*.6&&a.mp>=3&&!a.cooldowns.mend)command={type:'skill',skill:'mend'};else if((a.charge||0)>=100)command={type:'skill',skill:E.CLASSES[a.job].ultimate,target:E.living(s,'enemy')[0].id};else{const key=E.CLASSES[a.job].skill,skill=E.SKILLS[key],target=E.living(s,'enemy').sort((a,b)=>a.hp-b.hp)[0].id;command=a.mp<skill.cost?{type:'focus'}:{type:'skill',skill:!a.cooldowns[key]?key:'strike',target};}

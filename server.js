@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('node:path');
 const app = express();
 app.use((req,res,next)=>{if(!req.path.startsWith('/api/'))res.setHeader('Cache-Control','no-cache, max-age=0, must-revalidate');next();});
+app.use('/api/account',express.json({limit:'4kb'}),express.urlencoded({extended:false,limit:'4kb'}),require('./api/account'));
 app.use('/api/rooms',express.json({limit:'16kb'}),express.text({type:'text/plain',limit:'16kb'}),require('./api/rooms'));
 app.use('/api',(req,res)=>res.status(404).json({error:'Unknown API endpoint.'}));
 app.get('/health', (req, res) => res.json({ ok: true, game: 'campaign', version: 5 }));

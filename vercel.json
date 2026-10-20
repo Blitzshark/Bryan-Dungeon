@@ -6,6 +6,9 @@
   "functions": {
     "api/rooms.js": {
       "maxDuration": 20
+    },
+    "api/account.js": {
+      "maxDuration": 20
     }
   },
   "rewrites": [

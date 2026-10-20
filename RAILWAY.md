@@ -18,3 +18,31 @@ replicas; the default configuration deliberately runs one replica.
 Vercel still requires shared Redis because its functions do not share memory.
 
 Health check: `/health`. Room readiness: `/api/rooms?status=1`.
+
+## Accounts and Bryan abilities
+
+Accounts require persistent storage: connect Redis as above **or** attach a
+Railway volume (Railway supplies `RAILWAY_VOLUME_MOUNT_PATH`). Without either,
+guest play still works, but account creation is disabled to prevent lost logins
+when the service restarts. Back up your Redis database or volume.
+
+To claim the reserved **Bryan** account:
+
+1. In Railway → your game service → Variables, set `BRYAN_ADMIN_CLAIM_CODE` to a
+   private random code of at least 16 characters, then redeploy.
+2. Open the game → **Sign in → Create an account**. Choose `Bryan`, choose your
+   password, and enter that private claim code in the owner field.
+3. Use **Settings → Enable Bryan abilities** to toggle Warp, Skip, and Universe
+   cleave. Once claimed, you can remove the claim-code variable; later logins
+   only need the username and password. Never share passwords or claim codes.
+
+Other players can register their own unique usernames normally. A guest merely
+named Bryan receives no admin permissions. Passwords are hashed with scrypt;
+sessions use HttpOnly cookies. Standard sign-in forms allow the browser to offer
+to save passwords; the prompt depends on the browser's password-manager settings.
+Accounts identify players across devices, but game progress and customization
+remain saved in each browser, separately for each signed-in account.
+
+On Vercel, use the connected Upstash/Redis storage and the same private
+`BRYAN_ADMIN_CLAIM_CODE` variable. Local development stores accounts in ignored
+`.data/accounts`; do not commit or serve account storage publicly.
