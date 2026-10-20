@@ -251,7 +251,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   online human confirms, bots equip the strongest remaining gear and confirm.
   Solo confirmation does the same for both companions. Camp changes revoke
   confirmation; the party host leads travel once everyone is ready.
-- Player and enemy hits have an 8% miss chance and 8% critical chance before
+- Player and enemy hits have an 8% miss chance and 3% critical chance before
   equipment modifiers. Crits multiply raw damage by 1.6 and show a yellow marker.
   Damage/healing numbers can be toggled with **Settings (⚙)** and are remembered
   on the device. Miss labels and the yellow impact mark remain visible.
@@ -322,7 +322,7 @@ the operating-system preference.
 
 Damage, healing and miss text stays readable briefly, then fades out over
 550 ms before removal. The fade works with full and reduced motion alike.
-Base critical chance is now 8% for both sides; Bryan has no accuracy or
+Base critical chance is now 3% for both sides; Bryan has no accuracy or
 critical bonus. Universe Cleave retains its separate cosmic attack behavior.
 
 An adventurer named **Bryan** (case-insensitive) sees **Skip this encounter**
@@ -331,3 +331,9 @@ victory entry. This optional shortcut can skip bosses and finish the final
 stage, including in the sequel and raids. In online rooms the server checks
 the authenticated character’s actual name; it cannot be forged by sending
 another character ID. Skip waits until the current animation finishes.
+
+### Compact controls and Knight arrival
+
+Full animations are the default for a new browser; explicit saved motion preferences still apply. The decision countdown sits beside turn order, and fighter details open by clicking an initiative entry. The permanent name/race strip and action-deck footer are removed. Miss labels are compact and fade normally. Base critical chance is 3%, with Keen adding four percentage points.
+
+Summon: Knight reserves a synchronized 3.6-second arrival cutscene: a portal opens, the knight rises beneath a shield emblem, and every standing enemy displays a temporary exclamation mark and turns toward it. The most recently summoned living knight draws enemy attacks; when it dies, another living knight can take over Taunt.
