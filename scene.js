@@ -11,7 +11,7 @@ class CampaignScene{
  if(this.state?.mode==='raid'&&!this.camp&&!this.title)this.scale*=.76;
  this.cx=this.width*(this.title?.65:this.camp&&this.width>800?.29:.5);this.cy=this.title?this.height*.57:this.camp?(this.height*(this.width>800?.54:.30)):Math.min(this.height*.52,this.height-(this.width<650?185:170)-16-this.scale*2.1);this.dirty=true;}
 
- setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp';if(this.biome!==biome||this.title!==title||this.camp!==camp||this.raid!==(state?.mode==='raid')){this.raid=state?.mode==='raid';this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
+ setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp',layout=state?DungeonCampaign.encounter(state).scenerySeed||0:0;if(this.layoutSeed!==layout||this.biome!==biome||this.title!==title||this.camp!==camp||this.raid!==(state?.mode==='raid')){this.layoutSeed=layout;this.raid=state?.mode==='raid';this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
  project(x,y,z){return {x:this.cx+(x-z*.57)*this.scale,y:this.cy+(x*.27+z*.47-y)*this.scale};}
  polygon(points,color,stroke){if(this.actorPolygons&&points.every(p=>Number.isFinite(p.depth))){this.actorPolygons.push({depth:points.reduce((sum,p)=>sum+p.depth,0)/points.length,draw:()=>this.polygon(points,color,stroke)});return;}const c=this.paint;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.6;c.stroke();}}
  plane(x,z,w,d,color){this.polygon([this.project(x,0,z),this.project(x+w,0,z),this.project(x+w,0,z+d),this.project(x,0,z+d)],color);}
@@ -54,21 +54,21 @@ class CampaignScene{
  rock(x,z,s=1){this.shadow(x,z,s*.8,s*.5,.2);this.box(x,.02,z,s,.5*s,s*.8,palette[this.biome].rock);this.box(x-.18*s,.5*s,z,.68*s,.25*s,.5*s,shade(palette[this.biome].rock,1.04));}
  candle(x,z,y=0){this.box(x,y,z,.11,.3,.11,'#d7cb94');const p=this.project(x,y+.38,z),c=this.paint,g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*.85);g.addColorStop(0,'#f3d57c44');g.addColorStop(1,'#f3d57c00');c.fillStyle=g;c.fillRect(p.x-this.scale,p.y-this.scale,this.scale*2,this.scale*2);c.fillStyle='#ffe4a0';c.fillRect(p.x-1.6,p.y-3,3.2,6);}
  barrel(x,z){this.shadow(x,z,.45,.3);this.box(x,.03,z,.6,.7,.6,'#786144');for(const y of [.12,.55])this.box(x,y,z,.63,.07,.63,'#afa682');}
- background(){const old=this.paint,c=this.cache.getContext('2d');c.setTransform(this.dpr,0,0,this.dpr,0,0);this.paint=c;if(window.OceanVisuals?.isOcean(this.biome)){OceanVisuals.background(this);this.dirty=false;this.paint=old;return;}const p=palette[this.biome];c.fillStyle=p.sky;c.fillRect(0,0,this.width,this.height);const g=c.createLinearGradient(0,0,0,this.height);g.addColorStop(0,p.far);g.addColorStop(1,p.sky);c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
+ background(){const old=this.paint,c=this.cache.getContext('2d');c.setTransform(this.dpr,0,0,this.dpr,0,0);this.paint=c;if(window.OceanVisuals?.isOcean(this.biome)){OceanVisuals.background(this);this.dirty=false;this.paint=old;return;}const rand=n=>seeded(n+(this.layoutSeed||0)%100000),p=palette[this.biome];c.fillStyle=p.sky;c.fillRect(0,0,this.width,this.height);const g=c.createLinearGradient(0,0,0,this.height);g.addColorStop(0,p.far);g.addColorStop(1,p.sky);c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
  // An elevated tiled clearing, surrounded by a layered block-built world.
  for(let x=-17;x<18;x++)for(let z=-15;z<16;z++){
-  const n=seeded(x*43+z*13),color=p.tile[Math.floor(n*p.tile.length)];
+  const n=rand(x*43+z*13),color=p.tile[Math.floor(n*p.tile.length)];
   this.plane(x,z,1.005,1.005,color);
   if(this.biome==='forest'&&n>.7){const a=this.project(x+.5,.01,z+.5);c.fillStyle=n>.9?'#99a36566':'#2b4e2d66';c.fillRect(a.x,a.y,2+n*5,1.5);}
   if(this.biome!=='forest'){const pts=[this.project(x,0,z),this.project(x+1,0,z),this.project(x+1,0,z+1)];c.strokeStyle='#0c181115';c.lineWidth=1;c.beginPath();c.moveTo(pts[0].x,pts[0].y);c.lineTo(pts[1].x,pts[1].y);c.lineTo(pts[2].x,pts[2].y);c.stroke();}
  }
  if(this.biome==='forest'){
-  const trees=[];for(let i=0;i<26;i++){const angle=i/26*Math.PI*2;const x=Math.cos(angle)*(10.5+seeded(i+6)*2),z=Math.sin(angle)*(9.5+seeded(i+8)*2);trees.push({x,z,size:.8+seeded(i+9)*.65,seed:i*27});}trees.sort((a,b)=>(a.x*.27+a.z*.47)-(b.x*.27+b.z*.47));
+  const trees=[];for(let i=0;i<26;i++){const angle=i/26*Math.PI*2;const x=Math.cos(angle)*(10.5+rand(i+6)*2),z=Math.sin(angle)*(9.5+rand(i+8)*2);trees.push({x,z,size:.8+rand(i+9)*.65,seed:i*27});}trees.sort((a,b)=>(a.x*.27+a.z*.47)-(b.x*.27+b.z*.47));
   // Terraced stone along the old road.
   for(let i=0;i<13;i++){this.box(-9+i*1.5,0,-7,1.45,.45,1.4,'#737b60');this.box(-9+i*1.5,.45,-7.6,1.45,.4,1.2,'#667455');}
   trees.forEach(t=>this.tree(t.x,t.z,t.size,t.seed));
   [[-5,-3,1.1],[5,-3,.8],[5,4,1.3],[-5,4,.7],[-2,-5,.7],[2,5,.6]].forEach(a=>this.rock(...a));
-  for(let i=0;i<16;i++){const x=-6+seeded(i+44)*12,z=-5+seeded(i+17)*10;if(Math.abs(x)>4||Math.abs(z)>4){this.box(x,0,z,.15,.25,.13,'#91a263');if(i%3===0)this.box(x,.25,z,.14,.12,.15,'#c4b382');}}
+  for(let i=0;i<16;i++){const x=-6+rand(i+44)*12,z=-5+rand(i+17)*10;if(Math.abs(x)>4||Math.abs(z)>4){this.box(x,0,z,.15,.25,.13,'#91a263');if(i%3===0)this.box(x,.25,z,.14,.12,.15,'#c4b382');}}
   this.box(-5.3,0,2.5,.16,1.3,.16,'#65543b');this.box(-5.3,.9,2.5,.7,.32,.14,'#9f8960');
  }else{
   for(let i=-7;i<8;i++){this.box(i,.05,-6.8,.98,3.8,.75,(this.biome==='throne'?'#392738':'#555a4d'));if(i%3===0)this.box(i,0,-6.1,.6,4.6,.7,'#686e5a');}
@@ -77,13 +77,13 @@ class CampaignScene{
   for(let i=0;i<9;i++){const x=-5+i*1.2;this.candle(x,-5.9,.3);if(i%2===0)this.box(x,0,-5.8,.7,.22,.6,'#6f725c');}
   [[-5,2],[-4.7,2.7],[4,-4],[4.8,-4.2]].forEach(([x,z])=>this.barrel(x,z));
   [[-4.2,-3],[4.4,3.3],[-4,3.5]].forEach(([x,z])=>{this.box(x,0,z,.5,.15,.35,'#a99c79');this.candle(x,z,.15);});
-  if(this.biome==='throne'){for(let i=0;i<22;i++){const x=-8+seeded(i+88)*16,z=-6+seeded(i+99)*12;this.plane(x,z,.1+seeded(i)*.18,1.1,'#e15e44');this.plane(x+.02,z,.05,.9,'#ffb357');if(i%3===0){this.box(x,1.9+seeded(i+55),z,.35,.4,.4,'#62406e');const p=this.project(x,2.5,z);c.fillStyle='#bc7fff';c.fillRect(p.x,p.y,2,5);}}this.box(2.2,.02,-4.6,3,.4,2.2,(this.biome==='throne'?'#513445':'#6d7057'));this.box(2.2,.4,-5,1.6,2.2,.4,(this.biome==='throne'?'#472b49':'#79775a'));this.box(2.2,.4,-4.5,1.6,.55,1.4,(this.biome==='throne'?'#603644':'#7f7654'));this.box(1.25,.4,-4.5,.3,1,.3,(this.biome==='throne'?'#ab685e':'#b3a371'));this.box(3.15,.4,-4.5,.3,1,.3,(this.biome==='throne'?'#ab685e':'#b3a371'));}
+  if(this.biome==='throne'){for(let i=0;i<22;i++){const x=-8+rand(i+88)*16,z=-6+rand(i+99)*12;this.plane(x,z,.1+rand(i)*.18,1.1,'#e15e44');this.plane(x+.02,z,.05,.9,'#ffb357');if(i%3===0){this.box(x,1.9+rand(i+55),z,.35,.4,.4,'#62406e');const p=this.project(x,2.5,z);c.fillStyle='#bc7fff';c.fillRect(p.x,p.y,2,5);}}this.box(2.2,.02,-4.6,3,.4,2.2,(this.biome==='throne'?'#513445':'#6d7057'));this.box(2.2,.4,-5,1.6,2.2,.4,(this.biome==='throne'?'#472b49':'#79775a'));this.box(2.2,.4,-4.5,1.6,.55,1.4,(this.biome==='throne'?'#603644':'#7f7654'));this.box(1.25,.4,-4.5,.3,1,.3,(this.biome==='throne'?'#ab685e':'#b3a371'));this.box(3.15,.4,-4.5,.3,1,.3,(this.biome==='throne'?'#ab685e':'#b3a371'));}
  }
  // Atmospheric light pools and soft horizon fog are baked once per scene.
- if(this.state?.act===2&&this.biome==='forest'){c.fillStyle='#6c3e9030';c.fillRect(0,0,this.width,this.height);for(let i=0;i<18;i++){const p=this.project(-7+seeded(i+700)*14,1+seeded(i+701)*2,-6+seeded(i+702)*12);c.strokeStyle='#cfb0ed80';c.strokeRect(p.x,p.y,5,9);}}
- if(this.biome==='storm'){for(let i=0;i<14;i++){const x=-7+seeded(i+800)*14,z=-6+seeded(i+801)*12;this.box(x,0,z,.6,.15,.6,'#ac905f');if(i%3===0){this.box(x,.15,z,.25,3,.25,'#667d92');this.box(x,3,z,1,.15,.2,'#d0ae65');}}}
- if(this.biome==='abyss'){for(let i=0;i<20;i++){const x=-7+seeded(i+820)*14,z=-6+seeded(i+821)*12;if(i%2)this.box(x,0,z,.2,.7+seeded(i)*2,.25,'#509aa4');else this.box(x,0,z,.7,.3,.5,'#366f7b');}for(const x of [-4,0,4]){this.box(x,0,-5.6,.4,4,.4,'#6eaaaa');this.box(x,4,-5.6,1,.2,1,'#a0d7d1');}}
- if(this.biome==='astral'){for(let i=0;i<45;i++){const p=this.project(-9+seeded(i+840)*18,1+seeded(i+841)*6,-8+seeded(i+842)*16);c.fillStyle=i%3?'#bdabdf':'#fff4de';c.fillRect(p.x,p.y,i%3?1:3,i%3?1:3);}for(let i=0;i<10;i++){const a=i*Math.PI/5;this.box(Math.cos(a)*6,1+Math.sin(a),Math.sin(a)*5,.5,.5,.5,'#9586b3');}}
+ if(this.state?.act===2&&this.biome==='forest'){c.fillStyle='#6c3e9030';c.fillRect(0,0,this.width,this.height);for(let i=0;i<18;i++){const p=this.project(-7+rand(i+700)*14,1+rand(i+701)*2,-6+rand(i+702)*12);c.strokeStyle='#cfb0ed80';c.strokeRect(p.x,p.y,5,9);}}
+ if(this.biome==='storm'){for(let i=0;i<14;i++){const x=-7+rand(i+800)*14,z=-6+rand(i+801)*12;this.box(x,0,z,.6,.15,.6,'#ac905f');if(i%3===0){this.box(x,.15,z,.25,3,.25,'#667d92');this.box(x,3,z,1,.15,.2,'#d0ae65');}}}
+ if(this.biome==='abyss'){for(let i=0;i<20;i++){const x=-7+rand(i+820)*14,z=-6+rand(i+821)*12;if(i%2)this.box(x,0,z,.2,.7+rand(i)*2,.25,'#509aa4');else this.box(x,0,z,.7,.3,.5,'#366f7b');}for(const x of [-4,0,4]){this.box(x,0,-5.6,.4,4,.4,'#6eaaaa');this.box(x,4,-5.6,1,.2,1,'#a0d7d1');}}
+ if(this.biome==='astral'){for(let i=0;i<45;i++){const p=this.project(-9+rand(i+840)*18,1+rand(i+841)*6,-8+rand(i+842)*16);c.fillStyle=i%3?'#bdabdf':'#fff4de';c.fillRect(p.x,p.y,i%3?1:3,i%3?1:3);}for(let i=0;i<10;i++){const a=i*Math.PI/5;this.box(Math.cos(a)*6,1+Math.sin(a),Math.sin(a)*5,.5,.5,.5,'#9586b3');}}
  const light=c.createRadialGradient(this.width*.62,this.height*.27,0,this.width*.6,this.height*.4,this.width*.6);light.addColorStop(0,this.biome==='forest'?'#d8e8ab19':'#d8c7870d');light.addColorStop(1,'#172c1900');c.fillStyle=light;c.fillRect(0,0,this.width,this.height);
  if(this.camp)this.campEnvironment();
  this.paint=old;this.dirty=false;

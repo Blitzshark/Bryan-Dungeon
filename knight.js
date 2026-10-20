@@ -20,7 +20,7 @@ class KnightScene extends CampaignScene{
 }
 class KnightDirector{
  constructor(){this.canvas=document.createElement('canvas');this.canvas.className='knight-scene';this.canvas.hidden=true;this.canvas.setAttribute('aria-label','Oathbound Knight summon: shield and enemy taunt');document.body.append(this.canvas);this.scene=new KnightScene(this.canvas);this.active=false;}
- play(result,state,timing){const s=this.scene;s.state=structuredClone(state);s.knight=s.state.summons.find(k=>k.id===result.events.find(e=>e.type==='summon')?.target);if(!s.knight)return;this.active=true;s.started=performance.now();s.duration=timing.duration;s.impactAt=timing.impactAt;s.biome=DungeonCampaign.encounter(state).biome;s.camp=false;s.title=false;s.resize();s.running=true;this.canvas.hidden=false;clearTimeout(this.timer);this.timer=setTimeout(()=>this.stop(),timing.duration);}
+ play(result,state,timing){const s=this.scene;s.state=structuredClone(state);s.knight=s.state.summons.find(k=>k.id===result.events.find(e=>e.type==='summon')?.target);if(!s.knight)return;this.active=true;s.started=performance.now();s.duration=timing.duration;s.impactAt=timing.impactAt;s.biome=DungeonCampaign.encounter(state).biome;s.layoutSeed=DungeonCampaign.encounter(state).scenerySeed||0;s.camp=false;s.title=false;s.resize();s.running=true;this.canvas.hidden=false;clearTimeout(this.timer);this.timer=setTimeout(()=>this.stop(),timing.duration);}
  stop(){this.active=false;this.scene.running=false;this.canvas.hidden=true;}
 }
 window.KnightDirector=KnightDirector;

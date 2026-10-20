@@ -1,10 +1,6 @@
 # Bryan’s Dungeon: The Hollow Road
 
-A turn-based, block-world campaign for solo play or a party of up to three online
-players. Three worlds contain ten encounters each. The tenth encounter in every
-world is a boss: the Briar Sovereign, the Iron Warden, and the Triune Abyss.
-Defeating the forest boss opens the Ashen Dungeon; the second boss opens the
-Hollow Depths. A second three-section campaign continues into the Sunlit Reef, Sunken Fleet, and Hadal Trench. Every enemy has at least two named attacks.
+A turn-based, block-world expedition for solo play or a party of up to three online players. Only the opening two Moss Slimes are fixed. Every run generates a fresh sixty-encounter route: six shuffled areas, randomized enemy groups, variable bosses, chance-event placement and options, and different scenery. Areas retain readable biome labels; there are no separately named campaigns. Each tenth encounter is a boss and every fight ends at camp. The generated plan is saved and shared by online party members, so reloads and reconnects do not reroll the adventure.
 
 ## Playing
 
@@ -70,8 +66,8 @@ play always requires a reachable server; static files alone cannot share rooms.
 ## Endless raid
 
 Open the **☰ menu → Endless raid** for solo, or select it when creating an online room.
-Each victory goes to camp and unlocks the next boss. Three exclusive giant entities rotate
-through three arenas, each with 55 attacks; boss health and attack strictly increase each wave.
+Each victory goes to camp and unlocks the next boss. Three exclusive giant entities are drawn in shuffled bags
+without consecutive repeats, each with 55 attacks; boss health and attack strictly increase each wave.
 Every boss drops two epic items whose base stats and tier grow with raid level.
 Party levels, healing tonics and gold rewards also scale. Equip, upgrade, sell,
 and buy supplies at every campfire. A party wipe ends the survival run; there is no final raid wave.
@@ -96,7 +92,7 @@ that local server. Restarting the development server clears local online rooms.
 Set Redis variables if you need persistent shared rooms in development. The game
 has no external frontend libraries, assets, sound downloads, or font requests.
 
-The tests cover all thirty legal encounters, world bosses, campfires, equipment,
+The tests cover generated sixty-encounter routes across many seeds, randomized bosses, campfires, equipment,
 status effects, save migration, multiplayer ownership, concurrent enemy ticks,
 ready checks, reconnect handling, and the Redis REST/lock protocol. Browser
 validation additionally uses three isolated player sessions, actual shared
@@ -196,7 +192,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - Regular campaign enemies have 65% more health and 25% more attack. World
   bosses fight alone with larger health pools; the Hollow King has over 1,400 HP.
   Raid bosses keep their separate endless scaling.
-- Eight optional decisions appear between fights across the 30-stage campaign.
+- Chance decisions appear at generated positions between fights; their number and content vary by run.
 - Melee attacks walk into contact, wind up, hit, and return. The attack keeps
   its target location even when position history is unavailable, and walking
   remains visible with reduced motion (without foot bobbing).
@@ -260,11 +256,11 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 - The third world blends void and hell: obsidian stone, violet rifts and floating
   fragments, glowing lava fissures, and ember particles.
 
-### Campaign II: Beneath the Tide
+### Underwater areas
 
-Complete the original three worlds and choose **Dive beneath the tide**. The sequel is thirty underwater encounters across the Sunlit Reef, Sunken Fleet, and Hadal Trench. All seventeen marine species have new geometry; none of its encounter rosters reuse campaign-one enemies. Its solo bosses are the Coralback Matriarch (a giant reef crab), Keelbreaker (a wreck-armored kraken), and Hadal Devourer (a giant deep-sea anglerfish). Bright coral beds, broken ship hulls, and dark hydrothermal vents replace the original terrain, walls and props.
+Coral Reef, Shipwrecks and Deep Sea are three of the biomes that can appear anywhere in a generated route after the moss opening. Seventeen marine species have their own geometry. Their possible bosses include the Coralback Matriarch (a giant reef crab), Keelbreaker (a wreck-armored kraken), and Hadal Devourer (a giant deep-sea anglerfish), drawn in varying order. Bright coral beds, broken ship hulls, and hydrothermal vents have seeded scenery variation.
 
-Marine combat introduces Soaked (electric damage +30%), Ink (22% miss chance), and Pressure (1 focus lost after acting). Guard & focus clears ink and pressure. Nine underwater rescue, salvage and beacon choices replace caravan/training events. Marine weapon loot grants Brine Impaler, Stormline Harpoon, Inkveil Riposte or Bathyal Toll. Camps use an air-filled diving bell with a heater. Existing sequel saves keep their stage, party, equipment and living summons while migrating to the new content.
+Marine combat introduces Soaked (electric damage +30%), Ink (22% miss chance), and Pressure (1 focus lost after acting). Guard & focus clears ink and pressure. Nine underwater rescue, salvage and beacon choices replace caravan/training events. Marine weapon loot grants Brine Impaler, Stormline Harpoon, Inkveil Riposte or Bathyal Toll. Camps use an air-filled diving bell with a heater. Existing saves keep the current encounter, party, equipment and living summons while acquiring a random future route.
 
 ### Ability cards, warp, and raid entities
 
@@ -291,12 +287,12 @@ there is no name-based guarantee. False images can still absorb a hit. Universe 
   preference resets to visible once; Settings can still disable numbers.
 - Misses show a large **MISS — NO DAMAGE** banner and the target dodges.
   Categories now read **Fight / Arts / Items**, bound to **1 / 2 / 3**.
-- The first campaign has a total shared-gold minting budget of 200 across
+- The first thirty encounters have a total shared-gold minting budget of 200 across
   victories, offerings and gear sales, even if all rewards are hoarded. Normal
   victories award 4, bosses 12, and ordinary loot sells for 2–4. First-campaign
   tonics cost 1, revival embers 6, and upgrades start at 5. Spending does not
   refill that minting budget. Personal tavern funds remain separate.
-  The sequel and raids keep their own economies. Old first-campaign gold and
+  Later encounters and raids keep their own economies. Old first-campaign gold and
   gear sale values migrate to the lower scale on save load.
 
 ### Versions and device animation preferences
@@ -330,7 +326,7 @@ critical bonus. Universe Cleave retains its separate cosmic attack behavior.
 An adventurer named **Bryan** (case-insensitive) sees **Skip this encounter**
 during battle. It advances directly without gold, loot, XP, healing or a
 victory entry. This optional shortcut can skip bosses and finish the final
-stage, including in the sequel and raids. In online rooms the server checks
+stage, including later areas and raids. In online rooms the server checks
 the authenticated character’s actual name; it cannot be forged by sending
 another character ID. Skip waits until the current animation finishes.
 
@@ -343,3 +339,9 @@ Summon: Knight reserves a synchronized 3.6-second arrival cutscene: a portal ope
 ### Persistent summons
 
 Living Oathbound Knights are rendered at camp and in every travel/story transition, and retain their identity and current HP across battles and reloads. The camp summary shows their health and a tonic button, authorized to their summoner online. Paid stage-consuming rest also heals living summons. They scale with their owner's level without free healing; only death removes them and starts the card cooldown.
+
+### Random routes and persistence
+
+`routes.js` uses a separate seeded generator for area order, enemy groups, boss draws, variant stats, scene layouts and chance events. Combat and loot rolls do not consume the route generator. The opening moss encounter remains identical across seeds. Enemy stats scale by progression rather than their original campaign, so deep-sea creatures can appear early without late-game damage. Swift groups gain speed; armored groups gain health. Marine regions draw their own creatures and marine story cards. Raid-only entities never enter expedition rosters.
+
+The route is stored on the run and server-held online room. Continuing after the thirty-encounter checkpoint follows the same generated route through the remaining areas. Bryan's warp selector lists encounters 1–30 and 31–60 from that route. Existing saves pin their current encounter and randomize the future; malformed routes are rejected. New runs get new routes, while retries, saves, reloads and reconnects retain the existing draws.

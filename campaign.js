@@ -1,4 +1,4 @@
-(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./hero-options'):root.HeroOptions,typeof module==='object'&&module.exports?require('./content'):root.GameContent);if(typeof module==='object'&&module.exports)module.exports=api;else root.DungeonCampaign=api;})(typeof globalThis!=='undefined'?globalThis:this,function(P,C){
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./hero-options'):root.HeroOptions,typeof module==='object'&&module.exports?require('./content'):root.GameContent,typeof module==='object'&&module.exports?require('./routes'):root.RunRoutes);if(typeof module==='object'&&module.exports)module.exports=api;else root.DungeonCampaign=api;})(typeof globalThis!=='undefined'?globalThis:this,function(P,C,G){
 'use strict';
 const WORLDS=[{name:'The Greenwood',biome:'forest',boss:'The Briar Sovereign'},{name:'The Ashen Dungeon',biome:'crypt',boss:'The Iron Warden'},{name:'The Hollow Depths',biome:'throne',boss:'The Triune Abyss'}];
 const ENEMIES={
@@ -20,8 +20,14 @@ const layouts=[
 const titles=[['The Greenwood','Webbed Trail','The Hunting Grounds','Outlaw Crossing','Spore Hollow','The Root Circle','The Walking Grove','The Broken Bridge','The Briar Gate','The Briar Sovereign'],['Below the Keep','A Chest in the Dark','The Silent Watch','The Gutter Roost','The Bone Chapel','The Cinder Kennel','The False Treasury','The Chain Gallery','The Warden’s Door','The Iron Warden'],['Into the Rift','The Veil Crossing','The Crystal Watch','A Crack in the World','The Oracle’s Chamber','The Hungry Road','The Obsidian Gate','The Last Descent','The Throne Approach','The Triune Abyss']];
 const CHAPTERS=WORLDS.flatMap((world,w)=>layouts[w].map((enemies,p)=>({name:titles[w][p],subtitle:p===9?'WORLD BOSS · '+world.name:'Progression '+(p+1)+' of 10 · '+world.name,biome:world.biome,world:w,progress:p+1,boss:p===9,enemies})));
 const RAID_BOSSES=C.RAID_THEMES.map(t=>t.id);
-function worlds(s){return s.act===2?C.WORLDS2:WORLDS;}
-function encounter(s){if(s.mode!=='raid')return s.act===2?SEQUEL[s.stage]:CHAPTERS[s.stage];const level=s.raidLevel,type=RAID_BOSSES[(level-1)%RAID_BOSSES.length],world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:C.RAID_THEMES[(level-1)%3].biome,world,progress:level,boss:true,enemies:[type]};}
+function routeIndex(s){return (s.act===2?30:0)+s.stage;}
+function attachRoute(s,preserve=false){if(s.mode==='raid'){if(!Array.isArray(s.raidSchedule)||s.raidSchedule.length<s.raidLevel)s.raidSchedule=G.raid(s.routeSeed??(s.seed^0x6ac690c5),RAID_BOSSES,Math.max(128,s.raidLevel+64));return;}if(s.route)return;const old=s.act===2?SEQUEL[s.stage]:CHAPTERS[s.stage];s.route=G.generate((s.routeSeed??(s.seed^0x6ac690c5))>>>0,ENEMIES);if(preserve&&old){const index=routeIndex(s);s.route.encounters[index]={...s.route.encounters[index],...clone(old),regionName:(s.act===2?C.WORLDS2:WORLDS)[old.world].name,procedural:false};if(s.phase==='story')s.route.encounters[index].storyKey=s.choice;}}
+function routeFor(s,act=s.act||1){attachRoute(s);return s.route?s.route.encounters.slice(act===2?30:0,act===2?60:30):[];}
+function worlds(s){attachRoute(s);return s.route?s.route.regions.slice(s.act===2?3:0,s.act===2?6:3):WORLDS;}
+function encounter(s){attachRoute(s);if(s.mode!=='raid')return s.route.encounters[routeIndex(s)];const level=s.raidLevel,type=s.raidSchedule[level-1],theme=C.RAID_THEMES.find(t=>t.id===type),world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:theme.biome,world,progress:level,boss:true,scenerySeed:((s.routeSeed||0)+Math.imul(level,2654435761))>>>0,enemies:[type]};}
+function isOcean(s){return ['reef','wreck','trench'].includes(encounter(s).biome);}
+function storyFor(s){return s.choice?.startsWith('sea-')?C.O.STORIES[Number(s.choice.slice(4))]:null;}
+function needsMigration(s){return s.mode==='raid'?!s.raidSchedule:!s.route;}
 function raidBossStats(level){return {hp:280+85*level+Math.round(18*Math.pow(level,1.3)),atk:10+5*level+Math.floor(level/5)*2};}
 const RARITIES={common:{name:'Common',color:'#b4c5a1'},rare:{name:'Rare',color:'#8fc4df'},epic:{name:'Epic',color:'#c2a1e6'}};
 const CLASSES={warrior:{name:'Vanguard',hp:88,mp:6,atk:13,speed:6,color:'#d5aa73',skill:'sunder'},ranger:{name:'Wayfarer',hp:72,mp:8,atk:12,speed:9,color:'#91ad85',skill:'volley'},mage:{name:'Arcanist',hp:65,mp:10,atk:11,speed:7,color:'#ac9bc8',skill:'ember'},rogue:{name:'Nightblade',hp:78,mp:8,atk:15,speed:10,color:'#a29ac2',skill:'shadow'}};
@@ -33,8 +39,8 @@ function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party'
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
  const s={version:5,economyVersion:2,goldEarned:0,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
- s.party[1]=companion(s,'rowan');s.party[2]=companion(s,'mira');if(options.profile)applyLoadout(s.party[0],options.profile);
- startBattle(s);return s;
+ s.routeSeed=(s.seed^0x6ac690c5)>>>0;s.party[1]=companion(s,'rowan');s.party[2]=companion(s,'mira');if(options.profile)applyLoadout(s.party[0],options.profile);
+ attachRoute(s);startBattle(s);return s;
 }
 function companion(s,id){
  const names=['Juniper','Orin','Sable','Finch','Bram','Aster','Tala','Nico','Wren','Cedar','Lyra','Ember','Kael','Pip','Vesper','Rook','Sol','Thistle','Moss','Iris'];const jobs=['warrior','ranger','mage','rogue'];
@@ -54,6 +60,7 @@ function startBattle(s){
  if(s.act===2)s.campaignTheme='ocean-v1';
  const chapter=encounter(s);s.decisionKey=null;s.decisionEndsAt=null;s.phase='battle';s.round=1;s.reward=null;s.choice=null;
  s.enemies=chapter.enemies.map((type,i)=>{const d=ENEMIES[type],scale=1+chapter.world*.15+(chapter.progress-1)*.035;return {...d,id:'enemy-'+i,side:'enemy',maxHp:Math.round(d.hp*scale*(d.boss?(s.act===2?1.5:chapter.world===2?2.8:2.4):1.65)),hp:Math.round(d.hp*scale*(d.boss?(s.act===2?1.5:chapter.world===2?2.8:2.4):1.65)),atk:Math.round(d.atk*scale*(d.boss?(s.act===2?1.2:chapter.world===2?1.65:1.4):1.25)),mp:0,maxMp:0,guard:false,cooldowns:{},status:{},enemyType:type};});
+ if(chapter.procedural){const global=routeIndex(s),region=G.REGIONS[chapter.biome];s.enemies.forEach(e=>{const d=ENEMIES[e.enemyType],ratio=n=>Math.max(.65,Math.min(1.5,n)),v=chapter.variation||1;if(chapter.boss){e.hp=e.maxHp=Math.round((420+global*44)*v);e.atk=Math.round((15+global*1.3)*v);}else{const single=s.enemies.length===1;e.hp=e.maxHp=Math.round((35+global*5)*ratio(d.hp/region.hp)*v*(single?1.65:1));e.atk=Math.round((6+global*1.02)*ratio(d.atk/region.atk)*v*(single?1.15:1));}e.variant=chapter.variant;if(!chapter.boss&&chapter.variant!=='hunting')e.name=(chapter.variant==='swift'?'Swift ':'Armored ')+e.name;if(chapter.variant==='swift')e.speed+=2;if(chapter.variant==='stout')e.hp=e.maxHp=Math.round(e.maxHp*1.12);});}
  if(s.mode==='raid'){const boss=s.enemies[0],power=raidBossStats(s.raidLevel);Object.assign(boss,{hp:power.hp,maxHp:power.hp,atk:power.atk,boss:true});}
  s.arena=null;s.summons=(s.summons||[]).filter(k=>k.hp>0);for(const k of s.summons){const owner=s.party.find(p=>p.id===k.ownerId);if(owner&&owner.level>k.level){k.level=owner.level;k.maxHp=70+k.level*7;k.atk=6+k.level;k.baseDef=6+k.level;}k.guard=false;k.status={};}s.party.forEach(p=>{p.guard=false;p.cooldowns={...(p.cooldowns.summonKnight?{summonKnight:p.cooldowns.summonKnight}:{})};p.mp=p.maxMp;p.status={};});
  s.order=makeOrder(s);s.cursor=0;s.log=[];note(s,chapter.name+' — battle begins.');beginTurn(s);
@@ -150,15 +157,15 @@ function enemyAct(s){
 }
 function poisonTick(s,actor,events){if(actor.status?.pressure&&actor.hp>0){const lost=Math.min(actor.mp||0,1);actor.mp=Math.max(0,(actor.mp||0)-lost);if(lost)events.push({type:'drainFocus',source:actor.id,target:actor.id,amount:lost});}for(const key of ['soaked','ink','pressure'])if(actor.status?.[key])actor.status[key]--;if(actor.side==='party'&&actor.status?.chill)actor.status.chill--;if(actor.status?.hallucination)actor.status.hallucination--;if(s.arena&&actor.side==='party'&&actor.hp>0){if(s.arena.kind==='inferno'){const amount=Math.min(actor.hp,Math.max(3,Math.ceil(actor.maxHp*.025)));actor.hp-=amount;events.push({type:'damage',source:s.arena.source,target:actor.id,amount,status:'arena'});}if(s.arena.kind==='undertow')actor.mp=Math.max(0,actor.mp-1);}if(actor.status?.burn&&actor.hp>0){const amount=Math.min(actor.hp,Math.max(4,Math.ceil(actor.maxHp*.05)));actor.hp-=amount;actor.status.burn--;events.push({type:'damage',target:actor.id,source:actor.id,amount,status:'burn'});}if(actor.status?.poison&&actor.hp>0){const amount=Math.min(actor.hp,3+encounter(s).world*2);actor.hp-=amount;actor.status.poison--;events.push({type:'damage',target:actor.id,source:actor.id,amount,guarded:false,status:'poison'});note(s,actor.name+' takes '+amount+' poison damage.');}}
 function tonicHeal(s){return s.mode==='raid'?40+s.raidLevel*8:s.act===2?120:40+Math.floor(s.stage/10)*20;}
-function stats(s,p){const gear=(s.inventory||[]).filter(i=>i.owner===p.id);return {atk:p.atk+gear.reduce((n,i)=>n+i.atk+(i.enchantment==='mighty'?2:0),0)+(gear.some(i=>i.slot==='weapon')?0:P.WEAPONS[p.weapon]?.atk||0)+(p.race==='dragonborn'?3:0),def:(s.oceanWard&&s.act===2&&s.round<=2?2:0)+(p.baseDef||0)+gear.reduce((n,i)=>n+i.def+(i.enchantment==='sturdy'?2:0),0)+(p.race==='dwarf'?2:0)};}
+function stats(s,p){const gear=(s.inventory||[]).filter(i=>i.owner===p.id);return {atk:p.atk+gear.reduce((n,i)=>n+i.atk+(i.enchantment==='mighty'?2:0),0)+(gear.some(i=>i.slot==='weapon')?0:P.WEAPONS[p.weapon]?.atk||0)+(p.race==='dragonborn'?3:0),def:(s.oceanWard&&isOcean(s)&&s.round<=2?2:0)+(p.baseDef||0)+gear.reduce((n,i)=>n+i.def+(i.enchantment==='sturdy'?2:0),0)+(p.race==='dwarf'?2:0)};}
 function rollLoot(s){
  const boss=encounter(s).boss,count=boss?2:1,tier=s.mode==='raid'?s.raidLevel:s.act===2?4+Math.floor(s.stage/5):1+Math.floor(s.stage/10);return Array.from({length:count},(_,i)=>{
   const r=nextRandom(s),slot=['weapon','armor','charm'][Math.floor(nextRandom(s)*3)],rarity=boss?'epic':r>.77?'rare':'common',quality=rarity==='epic'?3:rarity==='rare'?2:1;
   const names={weapon:['Traveler’s Blade','Ashwood Edge','Riftforged Steel'],armor:['Ironbark Vest','Keepkeeper Mail','Obsidian Mantle'],charm:['Mossbound Charm','Lantern Sigil','Hollow Star']};
   const enchantment=nextRandom(s)<(boss?.75:.35)?['keen','precise','mighty','sturdy'][Math.floor(nextRandom(s)*4)]:null;
   const weaponKey=slot==='weapon'?Object.keys(P.WEAPONS)[Math.floor(nextRandom(s)*Object.keys(P.WEAPONS).length)]:null;
-  const sea=s.act===2&&s.mode!=='raid',art=sea&&slot==='weapon'?Object.keys(C.O.ARTS)[Math.floor(nextRandom(s)*4)]:null;
-  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(sea?(slot==='weapon'?{brineSpear:'Coralglass Trident',arcHarpoon:'Convoy Arc Harpoon',inkstep:'Inkveil Sabre',pressureBell:'Bathyal Bellstaff'}[art]:slot==='armor'?['Anemone Mail','Wreckplate Dive Suit','Hadal Carapace'][Math.floor(s.stage/10)]:['Tideglass Pearl','Convoy Compass','Lightless Lure'][Math.floor(s.stage/10)]):slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:Math.min(2,tier-1)])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:art|| (weaponKey?P.WEAPONS[weaponKey].skill:null),atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:s.mode!=='raid'&&s.act!==2?1+quality:10+tier*quality*8,owner:null,upgrades:0};
+  const sea=s.mode!=='raid'&&isOcean(s),art=sea&&slot==='weapon'?Object.keys(C.O.ARTS)[Math.floor(nextRandom(s)*4)]:null;
+  return {id:'loot-'+s.stage+'-'+i+'-'+s.seed,name:(sea?(slot==='weapon'?{brineSpear:'Coralglass Trident',arcHarpoon:'Convoy Arc Harpoon',inkstep:'Inkveil Sabre',pressureBell:'Bathyal Bellstaff'}[art]:slot==='armor'?['Anemone Mail','Wreckplate Dive Suit','Hadal Carapace'][['reef','wreck','trench'].indexOf(encounter(s).biome)]:['Tideglass Pearl','Convoy Compass','Lightless Lure'][['reef','wreck','trench'].indexOf(encounter(s).biome)]):slot==='weapon'?P.WEAPONS[weaponKey].name:names[slot][s.mode==='raid'?(s.raidLevel-1)%3:Math.min(2,tier-1)])+(s.mode==='raid'?' · Raid '+tier:''),tier,slot,rarity,weaponKey,enchantment,skill:art|| (weaponKey?P.WEAPONS[weaponKey].skill:null),atk:slot==='weapon'?tier*quality+1:slot==='charm'?tier:0,def:slot==='armor'?tier*quality:slot==='charm'?(s.mode==='raid'?tier+quality:quality):0,price:s.mode!=='raid'&&s.act!==2?1+quality:10+tier*quality*8,owner:null,upgrades:0};
  });
 }
 function gearPower(i){return i.atk+i.def+(i.enchantment==='mighty'||i.enchantment==='sturdy'?2:0);}
@@ -194,12 +201,12 @@ function travel(s){
  if(s.phase!=='camp')return false;
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';return true;}
- if((s.act===2?[1,4,7,11,14,17,21,24,27]:[1,4,7,11,14,17,22,26]).includes(s.stage)&&!s.stories.includes(s.stage)){s.phase='story';s.choice=s.act===2?'sea-'+s.stage:s.stage===1?'stranger':s.stage===14?'shrine':'crossroads';return true;}
+ if(encounter(s).storyKey&&!s.stories.includes(s.stage)){s.phase='story';s.choice=encounter(s).storyKey;return true;}
  s.stage+=s.restSpent?2:1;s.restSpent=false;startBattle(s);return true;
 }
 function choose(s,choice){
  if(s.phase!=='story'||!['accept','decline'].includes(choice))return false;
- if(s.choice.startsWith('sea-')){const story=C.O.STORIES[s.stage];if(!story)return false;if(choice==='accept'){s.potions+=story.potions||0;s.embers+=story.embers||0;grantGold(s,story.gold||0);}else if(story.declineDetail.includes('armor'))s.oceanWard=true;else s.party.forEach(p=>p.atk++);}
+ if(s.choice.startsWith('sea-')){const story=storyFor(s);if(!story)return false;if(choice==='accept'){s.potions+=story.potions||0;s.embers+=story.embers||0;grantGold(s,story.gold||0);}else if(story.declineDetail.includes('armor'))s.oceanWard=true;else s.party.forEach(p=>p.atk++);}
  else if(s.choice==='stranger'){
   if(choice==='accept'){const p=s.party[0],c=CLASSES.rogue;p.job='rogue';p.atk+=3;p.speed=c.speed;p.color=c.color;p.maxMp=Math.max(p.maxMp,8);}
   else s.party.forEach(p=>{p.maxHp+=8;});
@@ -220,10 +227,10 @@ function restore(value){
  const all=[...s.party,...s.enemies];if(all.some(p=>!p||!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.hp<0||p.hp>p.maxHp||!p.cooldowns))return null;
  if(s.party.some(p=>!CLASSES[p.job]||!Number.isFinite(p.mp)||!Number.isFinite(p.maxMp)))return null;
  s.summons=Array.isArray(s.summons)?s.summons.filter(k=>k.summon&&k.ownerId&&k.hp>0&&Number.isFinite(k.maxHp)&&k.cooldowns):[];s.party.forEach(p=>{p.cards=(p.cards||[]).filter(k=>C.CARDS[k]).slice(0,3);p.race=Object.hasOwn(P.RACES,p.race)?p.race:'human';p.weapon=Object.hasOwn(P.WEAPONS,p.weapon)?p.weapon:(p.job==='mage'?'staff':p.job==='ranger'?'bow':'sword');p.appearance=P.appearance(p.appearance||{clothes:p.color});p.charge=Math.max(0,Math.min(100,Number(p.charge)||0));p.raceCharge=Math.max(0,Math.min(100,Number(p.raceCharge)||0));});s.tavernGold=s.tavernGold||0;
- if(s.act===2&&s.campaignTheme!=='ocean-v1'){s.campaignTheme='ocean-v1';if(s.phase==='battle')startBattle(s);else if(s.phase==='story'&&C.O.STORIES[s.stage])s.choice='sea-'+s.stage;}
+ if(s.route&&!G.valid(s.route,ENEMIES))return null;if(s.mode==='raid'&&s.raidSchedule&&(!Array.isArray(s.raidSchedule)||s.raidSchedule.some(k=>!RAID_BOSSES.includes(k))))return null;attachRoute(s,true);
  if(s.phase==='battle'&&(!active(s)||active(s).hp<=0))return null;
  return s;
  }catch{return null;}
 }
-return {C,worlds,warp,P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
