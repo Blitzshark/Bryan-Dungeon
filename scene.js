@@ -117,7 +117,7 @@ class CampaignScene{
  this.barrel(-3.8,-1.3);this.barrel(-4.2,-.6);this.box(3,.02,-1.6,.7,.5,.65,'#9f8256');this.box(3,.52,-1.6,.7,.15,.7,'#675639');
  this.box(-2.6,.02,-3.1,2.3,.15,1.9,'#484f38');for(let i=0;i<6;i++)this.box(-2.6,.17+i*.24,-3.1,2.3-i*.34,.25,1.9,'#829269');
  }
- drawCampfire(time){if(window.OceanVisuals?.isOcean(this.biome)){OceanVisuals.heater(this,time);return;}
+ drawCampfire(time){if(window.OceanVisuals&&(OceanVisuals.isOcean(this.biome)||this.biome==='ship'||this.biome==='abyss')){OceanVisuals.heater(this,time);return;}
  const c=this.paint,p=this.project(0,.55,0),g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*2.3);g.addColorStop(0,'#ffc56a44');g.addColorStop(1,'#ffc56a00');c.fillStyle=g;c.fillRect(p.x-this.scale*3,p.y-this.scale*3,this.scale*6,this.scale*6);
  for(let i=0;i<5;i++){const flicker=this.reduced?.97+Math.sin(time/450+i)*.04:.9+Math.sin(time/95+i*2)*.16;this.box((i-2)*.11,.15,Math.sin(i*2)*.12,.2,(.65-Math.abs(i-2)*.12)*flicker,.2,i%2?'#ffbb57':'#e57738');}
  if(!this.reduced){c.fillStyle='#ffe098';for(let i=0;i<8;i++){const t=(time/1800+i/8)%1,x=p.x+Math.sin(i*12+t*5)*this.scale*.35,y=p.y-t*this.scale*1.7;c.globalAlpha=1-t;c.fillRect(x,y,2,2);}c.globalAlpha=1;}

@@ -172,7 +172,7 @@ function rollLoot(s){
  });
 }
 function gearPower(i){return i.atk+i.def+(i.enchantment==='mighty'||i.enchantment==='sturdy'?2:0);}
-function finishCamp(s,botIds){if(s.phase!=='camp')return false;for(const hero of botIds)campAction(s,{type:'equip-best',hero});s.campConfirmed=true;return true;}
+function finishCamp(s,botIds){if(s.phase!=='camp')return false;for(let pass=0;pass<botIds.length;pass++){const before=s.inventory.map(i=>i.owner).join('|');for(const hero of botIds)campAction(s,{type:'equip-best',hero});if(before===s.inventory.map(i=>i.owner).join('|'))break;}s.campConfirmed=true;return true;}
 function campAction(s,command){
  if(s.phase!=='camp')return {ok:false,error:'Return to the campfire first.'};
  const item=s.inventory.find(i=>i.id===command.item),hero=s.party.find(p=>p.id===command.hero)|| (command.type==='use-tonic'?(s.summons||[]).find(p=>p.id===command.hero):null);
