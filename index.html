@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="game-build" content="rf98862244d"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="game-build" content="r4eef500510"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#131c1b"><meta name="description" content="A block-world campaign RPG. Assemble your party, explore the Greenwood, and defeat the Hollow King. Every battle is turn based.">
 <title>Bryan’s Dungeon — The Hollow Road</title>
-<link rel="stylesheet" href="styles.css?v=rf98862244d">
-<script defer src="display.js?v=rf98862244d"></script><script defer src="updates.js?v=rf98862244d"></script><script defer src="hero-options.js?v=rf98862244d"></script><script defer src="campaign.js?v=rf98862244d"></script><script defer src="combat-fx.js?v=rf98862244d"></script><script defer src="scene.js?v=rf98862244d"></script><script defer src="sound.js?v=rf98862244d"></script><script defer src="multiplayer.js?v=rf98862244d"></script><script defer src="cosmic.js?v=rf98862244d"></script><script defer src="motion.js?v=rf98862244d"></script><script defer src="tavern.js?v=rf98862244d"></script><script defer src="face-editor.js?v=rf98862244d"></script><script defer src="journey.js?v=rf98862244d"></script><script defer src="critical.js?v=rf98862244d"></script><script defer src="game.js?v=rf98862244d"></script>
+<link rel="stylesheet" href="styles.css?v=r4eef500510">
+<script defer src="display.js?v=r4eef500510"></script><script defer src="updates.js?v=r4eef500510"></script><script defer src="hero-options.js?v=r4eef500510"></script><script defer src="campaign.js?v=r4eef500510"></script><script defer src="combat-fx.js?v=r4eef500510"></script><script defer src="scene.js?v=r4eef500510"></script><script defer src="sound.js?v=r4eef500510"></script><script defer src="multiplayer.js?v=r4eef500510"></script><script defer src="cosmic.js?v=r4eef500510"></script><script defer src="motion.js?v=r4eef500510"></script><script defer src="tavern.js?v=r4eef500510"></script><script defer src="face-editor.js?v=r4eef500510"></script><script defer src="journey.js?v=r4eef500510"></script><script defer src="critical.js?v=r4eef500510"></script><script defer src="game.js?v=r4eef500510"></script>
 </head>
 <body>
-<button id="build-status" class="build-status" aria-label="Game version and update settings">Build rf98862244d</button>
+<button id="build-status" class="build-status" aria-label="Game version and update settings">Build r4eef500510</button>
 <div id="decision-clock" class="decision-clock" role="timer" hidden></div>
 <canvas id="world" aria-label="Block-world battle arena. Use the enemy cards to select a target."></canvas>
 <div class="vignette" aria-hidden="true"></div>
@@ -24,7 +24,7 @@
   <div class="actor-header"><div class="actor-portrait" id="actor-portrait">◆</div><div class="actor-info"><div class="eyebrow" id="actor-job">VANGUARD · LEVEL 1</div><h2 id="actor-name">Your adventurer</h2></div><div class="turn-indicator" id="turn-indicator"><i></i> YOUR TURN</div><div class="gold"><span>◈</span> <b id="gold-count">0</b></div><button id="deck-toggle" class="icon-button" aria-label="Hide battle controls" aria-expanded="true" title="Hide controls (H)">⌄</button></div>
   <div class="resource-row"><div><div class="resource-label"><span>HEALTH</span><b id="hp-label"></b></div><div class="meter health"><i id="hp-fill"></i></div></div><div><div class="resource-label"><span>FOCUS</span><b id="mp-label"></b></div><div class="meter focus"><i id="mp-fill"></i></div></div></div>
   <nav class="action-tabs" aria-label="Action category"><button data-tab="fight" class="active">⚔ <span>Fight</span><kbd>1</kbd></button><button data-tab="arts">✧ <span>Arts</span><kbd>2</kbd></button><button data-tab="items">▣ <span>Items</span><kbd>3</kbd></button></nav>
-  <div id="action-content" class="action-content"></div><div class="deck-foot"><span id="target-hint">Select an enemy to target</span><span>20 SECONDS. CHOOSE YOUR MOVE.</span></div>
+  <div id="action-content" class="action-content"></div><button id="skip-encounter" class="skip-encounter" hidden>Skip this encounter → <small>No rewards or healing</small></button><div class="deck-foot"><span id="target-hint">Select an enemy to target</span><span>20 SECONDS. CHOOSE YOUR MOVE.</span></div>
  </section>
  <div class="scene-caption" id="scene-caption">THE GREENWOOD <span>CAMPAIGN I</span></div>
 </main>

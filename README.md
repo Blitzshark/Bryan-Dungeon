@@ -252,7 +252,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   online human confirms, bots equip the strongest remaining gear and confirm.
   Solo confirmation does the same for both companions. Camp changes revoke
   confirmation; the party host leads travel once everyone is ready.
-- Player and enemy hits have an 8% miss chance and 15% critical chance before
+- Player and enemy hits have an 8% miss chance and 8% critical chance before
   equipment modifiers. Crits multiply raw damage by 1.6 and show a yellow marker.
   Damage/healing numbers can be toggled with **Settings (⚙)** and are remembered
   on the device. Miss labels and the yellow impact mark remain visible.
@@ -285,9 +285,8 @@ ember procession. Each has its own movement, staging and props.
 
 Critical attacks now receive cinematic framing, a brief camera push and one
 short contrast impact beat. Reduced motion omits the contrast beat and camera
-movement. An adventurer named **Bryan** (case-insensitive) always critically
-hits and never suffers a normal accuracy miss; false images can still absorb
-a hit. Universe Cleave remains exactly 10,000,000 damage per enemy.
+movement. Bryan now uses the same accuracy and critical-hit rolls as other characters;
+there is no name-based guarantee. False images can still absorb a hit. Universe Cleave remains exactly 10,000,000 damage per enemy.
 
 ### Critical close-ups, clear counters and scarce shared gold
 
@@ -325,3 +324,17 @@ reduced motion. Changes apply immediately to every scene and persist locally.
 Fire moves gently even in reduced mode, and enabled damage numbers stay
 visible; full mode enables camera motion and impact frames regardless of
 the operating-system preference.
+
+### Hit fades and Bryan’s encounter skip
+
+Damage, healing and miss text stays readable briefly, then fades out over
+550 ms before removal. The fade works with full and reduced motion alike.
+Base critical chance is now 8% for both sides; Bryan has no accuracy or
+critical bonus. Universe Cleave retains its separate cosmic attack behavior.
+
+An adventurer named **Bryan** (case-insensitive) sees **Skip this encounter**
+during battle. It advances directly without gold, loot, XP, healing or a
+victory entry. This optional shortcut can skip bosses and finish the final
+stage, including in the sequel and raids. In online rooms the server checks
+the authenticated character’s actual name; it cannot be forged by sending
+another character ID. Skip waits until the current animation finishes.

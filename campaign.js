@@ -75,7 +75,7 @@ function endTurn(s){
  do{s.cursor++;if(s.cursor>=s.order.length){s.round++;s.order=makeOrder(s);s.cursor=0;note(s,'Round '+s.round+'.');}}while(!active(s)||active(s).hp<=0);
  beginTurn(s);
 }
-function damage(s,source,target,amount,events){const gear=(s.inventory||[]).filter(i=>i.owner===source.id),bryan=source.side==='party'&&source.name.trim().toLowerCase()==='bryan',miss=gear.some(i=>i.enchantment==='precise')?.02:.08;if(!bryan&&nextRandom(s)<miss){events.push({type:'miss',source:source.id,target:target.id,amount:0});note(s,source.name+' misses '+target.name+'.');return false;}const critical=bryan||nextRandom(s)<(.15+(gear.some(i=>i.enchantment==='keen')?.08:0));if(critical)amount*=1.6;if(target.images>0){target.images--;events.push({type:'miss',reason:'illusion',target:target.id,source:source.id,amount:0});note(s,'A false image of '+target.name+' shatters.');return false;}const armor=target.side==='party'?stats(s,target).def:0;const dealt=Math.min(target.hp,Math.max(1,Math.round(Math.max(1,amount-armor)*(target.guard?.5:1))));target.hp-=dealt;if(target.side==='party'){target.charge=Math.min(100,(target.charge||0)+15);target.raceCharge=Math.min(100,(target.raceCharge||0)+15);}if(source.race==='revenant'&&source.hp>0&&source.side==='party'){const heal=Math.min(source.maxHp-source.hp,Math.ceil(dealt*.15));if(heal>0){source.hp+=heal;events.push({type:'heal',target:source.id,amount:heal});}}events.push({type:'damage',target:target.id,source:source.id,amount:dealt,critical,defeated:!target.hp,guarded:!!target.guard});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');return true;}
+function damage(s,source,target,amount,events){const gear=(s.inventory||[]).filter(i=>i.owner===source.id),miss=gear.some(i=>i.enchantment==='precise')?.02:.08;if(nextRandom(s)<miss){events.push({type:'miss',source:source.id,target:target.id,amount:0});note(s,source.name+' misses '+target.name+'.');return false;}const critical=nextRandom(s)<(.08+(gear.some(i=>i.enchantment==='keen')?.08:0));if(critical)amount*=1.6;if(target.images>0){target.images--;events.push({type:'miss',reason:'illusion',target:target.id,source:source.id,amount:0});note(s,'A false image of '+target.name+' shatters.');return false;}const armor=target.side==='party'?stats(s,target).def:0;const dealt=Math.min(target.hp,Math.max(1,Math.round(Math.max(1,amount-armor)*(target.guard?.5:1))));target.hp-=dealt;if(target.side==='party'){target.charge=Math.min(100,(target.charge||0)+15);target.raceCharge=Math.min(100,(target.raceCharge||0)+15);}if(source.race==='revenant'&&source.hp>0&&source.side==='party'){const heal=Math.min(source.maxHp-source.hp,Math.ceil(dealt*.15));if(heal>0){source.hp+=heal;events.push({type:'heal',target:source.id,amount:heal});}}events.push({type:'damage',target:target.id,source:source.id,amount:dealt,critical,defeated:!target.hp,guarded:!!target.guard});note(s,source.name+' hits '+target.name+' for '+dealt+(target.guard?' (guarded).':'.'));if(!target.hp)note(s,target.name+' falls.');return true;}
 function act(s,command){
  const actor=active(s);if(!actor||actor.side!=='party')return {ok:false,error:'Wait for your party’s turn.'};
  const events=[];
@@ -99,7 +99,7 @@ function act(s,command){
   if(!skill.heal&&!skill.all&&(!target||target.side!=='enemy'||target.hp<=0))return {ok:false,error:'Choose a standing enemy.'};
   actor.mp-=skill.cost;if(skill.ultimate)actor.charge=0;if(skill.raceUltimate)actor.raceCharge=0;if(skill.cd)actor.cooldowns[key]=skill.cd+1;
   if(skill.heal){const allies=skill.healAll?living(s,'party'):[living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]];for(const ally of allies){const amount=Math.min(skill.heal+Math.max(0,actor.level-1)*2,ally.maxHp-ally.hp);ally.hp+=amount;if(skill.shield)ally.guard=true;events.push({type:'heal',target:ally.id,amount});}note(s,actor.name+' uses '+skill.name+'.');}
-  else if(key==='universe'){living(s,'enemy').forEach(t=>{t.hp=Math.max(0,t.hp-10000000);events.push({type:'damage',target:t.id,source:actor.id,amount:10000000,critical:true,guarded:false,defeated:!t.hp});});note(s,actor.name+' cleaves the universe.');}
+  else if(key==='universe'){living(s,'enemy').forEach(t=>{t.hp=Math.max(0,t.hp-10000000);events.push({type:'damage',target:t.id,source:actor.id,amount:10000000,guarded:false,defeated:!t.hp});});note(s,actor.name+' cleaves the universe.');}
   else{for(const t of (skill.all?living(s,'enemy'):[target])){const hit=damage(s,actor,t,stats(s,actor).atk*skill.mult,events);if(hit&&t.hp>0&&(skill.burn||skill.chill)){t.status=t.status||{};if(skill.burn)t.status.burn=2;if(skill.chill)t.status.chill=2;}}if(skill.shield)actor.guard=true;if(skill.drain){const amount=Math.min(actor.maxHp-actor.hp,Math.ceil(events.filter(e=>e.type==='damage').reduce((n,e)=>n+e.amount,0)*.35));actor.hp+=amount;if(amount)events.push({type:'heal',target:actor.id,amount});}}
  }else return {ok:false,error:'Choose an action.'};
  if(!SKILLS[command.skill]?.ultimate)actor.charge=Math.min(100,(actor.charge||0)+25);if(!SKILLS[command.skill]?.raceUltimate)actor.raceCharge=Math.min(100,(actor.raceCharge||0)+25);
@@ -175,6 +175,13 @@ function campAction(s,command){
  else return {ok:false,error:'Choose a camp action.'};
  s.campConfirmed=false;return {ok:true};
 }
+function skipEncounter(s,heroId='hero'){
+ const player=s.party.find(p=>p.id===heroId);if(s.phase!=='battle'||!player||player.name.trim().toLowerCase()!=='bryan')return false;
+ s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
+ if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
+ if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';s.decisionEndsAt=null;return true;}
+ s.stage++;s.restSpent=false;startBattle(s);return true;
+}
 function travel(s){
  if(s.phase!=='camp')return false;
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
@@ -208,5 +215,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {P,hero,companion,applyLoadout,weaponFor,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
