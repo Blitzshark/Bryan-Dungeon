@@ -73,5 +73,11 @@ are shared with other tavern visitors and carried into battles and cutscenes.
 The project owner's uploaded **The Final Confrontation** plays on campaign
 bosses; **Remix of TFC** plays on raid bosses. Both loop and are bundled under
 `music/` for Railway and Vercel. Settings include boss music volume, and the
-sound button mutes music and effects. Music pauses outside boss fights and
+sound button mutes music and effects. Music pauses outside battles and
 when the browser tab is hidden. No extra hosting variables are needed.
+
+Regular encounters alternate the owner's uploaded `battletheme1.mp3` and
+`battletheme2.mp3`. Boss tracks take priority over regular music. The Settings
+slider controls all battle music; critical hits and impacts briefly lower the
+music so effects remain clear. Approach and impact sounds respond to terrain,
+creature type, element, armor, guard, misses, critical hits and defeat.
