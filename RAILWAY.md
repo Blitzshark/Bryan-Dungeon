@@ -105,3 +105,17 @@ death; living allies persist through camp and travel without free healing.
 Class and race ultimates deal 40% more damage or heal 50% more. Normal actions
 build 30 charge, up from 25. The Greenwood dungeon doors now open toward the
 approaching party, with everyone walking through the opening into darkness.
+
+## Raid boss health and domains
+
+Raid bosses start at 5,500 HP solo or 8,250 HP in a six-slot party and grow
+with every victory. Their large red health bar appears at the top; select it
+to target the boss. Minions retain their individual target cards. Health
+updates at attack impact. Older raid saves migrate without restoring lost HP.
+
+Each raid boss has 110 themed techniques, including stronger party-wide
+attacks and cinematics lasting up to ten seconds. Sovereign Domain techniques
+replace the full battlefield for five rounds: cosmic gravity, an underwater
+cathedral, or a volcanic forge, with three scenery variants per theme. Their
+arena effects remain active and the boss bar shows the remaining duration.
+Screen distortion and hallucination effects have been removed.

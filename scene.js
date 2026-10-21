@@ -291,6 +291,7 @@ class CampaignScene{
 
  point(id){return this.positions.get(id);}
  frame(time){const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.save();const cinematic=this.animations.find(a=>(a.ultimate||a.critical)&&a.style!=='cosmic'&&time>=a.at&&time-a.at<a.duration);if(cinematic&&!this.reduced){const p=(time-cinematic.at)/cinematic.duration,subject=this.point(p<.4?cinematic.actor:cinematic.target)||{x:this.width/2,y:this.height/2},zoom=1+Math.sin(p*Math.PI)*(cinematic.critical?.18:.1);c.translate(this.width/2,this.height*.45);c.scale(zoom,zoom);c.translate(-this.width/2-(subject.x-this.width/2)*Math.sin(p*Math.PI)*.1,-this.height*.45);}c.drawImage(this.cache,0,0,this.width,this.height);
+ window.RaidFX?.domainBackground(this,time);
  let units=this.state?(this.camp?[...this.state.party,...(this.state.summons||[])]:[...this.state.party,...(this.state.summons||[]),...this.state.enemies]):[];
  if(this.title){units=[{id:'hero',name:'',hp:88,maxHp:88,side:'party',job:'warrior',color:'#baa47a',kind:'humanoid'},{id:'rowan',name:'',hp:70,maxHp:70,side:'party',job:'ranger',color:'#879b73',kind:'humanoid'},{id:'mira',name:'',hp:65,maxHp:65,side:'party',job:'mage',color:'#9a91b1',kind:'humanoid'}];}
  const entries=units.map(u=>{const list=u.side==='party'?(this.state?.party||units):this.state.enemies;const index=list.findIndex(p=>p.id===u.id);const p=this.positionFor(u,index);return {u,index,depth:this.poseFor(u,index,time).x*.27+this.poseFor(u,index,time).z*.47};}).sort((a,b)=>a.depth-b.depth);
