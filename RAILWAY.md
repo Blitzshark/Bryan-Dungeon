@@ -182,3 +182,10 @@ and balance; offers cannot be accepted twice. Cancelling, declining, or a
 24-hour expiry refunds escrow. Seven days of completed/closed offer history
 are retained, while pending offers are never pruned. Skin IDs and prices are
 validated on the server; client appearance data cannot unlock trade inventory.
+
+Chat history scrolls after 220 pixels or 28% of the viewport height. Recent
+messages also appear above their speaker in the tavern, battles and camp,
+follow movement and fade after eight seconds. Only the latest message per
+speaker is shown overhead; the full message remains in chat history. Party
+hero IDs and tavern visitor IDs are verified by the server, and polling
+does not extend or replay expired bubbles.
