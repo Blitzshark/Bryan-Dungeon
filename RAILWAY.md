@@ -137,3 +137,48 @@ Raid battle framing reserves the measured space below the boss health bar and
 action notice and above the action deck, including domain labels and mobile
 layouts. Accessories are reached through Customize rather than a separate
 main-menu entry.
+
+## Friends, skins and the Ember Exchange
+
+Sign in, then open **Friends** from the header or the party lobby. Add an
+account username; the recipient accepts before either side can send instant
+party invites. An invite creates a friends-only campaign or raid when you do
+not have a party. **Friends only** is also a room visibility option. The server
+filters these rooms and checks the host's friendship again on code-based joins;
+guest players and non-friends cannot bypass this with a shared code. Public
+raid tables remain available in the tavern.
+
+Open **Trading hub** from the menu, tavern, or party lobby between battles.
+WASD and touch arrows move through the exchange; nearby online traders appear
+in the visitor list. Open a trader's offer form from this list or the Friends
+panel. The hub uses the existing account storage: Railway's persistent volume
+or shared Redis on Railway/Vercel. Friends, skins, wallets and trades persist
+across deployments. Guest play does not create an unsaved trading wallet.
+
+There are eighteen weapon/accessory skins and five rarities: Common, Rare,
+Epic, Legendary and Mythic. Legendary and Mythic skins animate with flame,
+water or astral effects on the model and attack trails. Preview them in the
+shop; equip owned skins in **Customize → Weapon & accessory skins** or the
+collection. Actual accessories remain in **Customize → Wear accessories**.
+Skins affect appearance and effects, without increasing combat statistics.
+
+Ember shards are separate from tavern gold. Each account begins with 250
+shards and two starter skins. The daily gift grants 50 shards and one random
+skin once every 24 hours. A cache costs 100 shards. Both use these skin odds:
+Common 60%, Rare 25%, Epic 11%, Legendary 3.5%, Mythic 0.5%. Direct purchases
+are available at catalog prices. Salvage returns 35% of the listed guide
+value; guide values are references rather than a player market price.
+
+Server-verified online victories award 5 shards; online bosses award 25 shards
+and a skin. Ordinary online victories have a 15% skin chance. A server-issued
+battle reward ID prevents claiming again after resting, rejoining or refreshing.
+Offline solo saves do not mint trade currency from client-reported victories.
+
+Trade offers specify up to six skins and a shard amount on each side. The
+sender reserves their items and shards immediately. The recipient reviews the
+fixed offer before accepting. A single persistent ledger update moves both
+sides' ownership and currency together. Acceptance verifies current ownership
+and balance; offers cannot be accepted twice. Cancelling, declining, or a
+24-hour expiry refunds escrow. Seven days of completed/closed offer history
+are retained, while pending offers are never pruned. Skin IDs and prices are
+validated on the server; client appearance data cannot unlock trade inventory.

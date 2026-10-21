@@ -5,6 +5,7 @@ const app = express();
 let shuttingDown = false;
 app.use((req,res,next)=>{if(!req.path.startsWith('/api/'))res.setHeader('Cache-Control','no-cache, max-age=0, must-revalidate');next();});
 app.use('/api/account',express.json({limit:'4kb'}),express.urlencoded({extended:false,limit:'4kb'}),require('./api/account'));
+app.use('/api/social',express.json({limit:'12kb'}),require('./api/social'));
 app.use('/api/rooms',express.json({limit:'16kb'}),express.text({type:'text/plain',limit:'16kb'}),require('./api/rooms'));
 app.use('/api',(req,res)=>res.status(404).json({error:'Unknown API endpoint.'}));
 app.get('/health', (req, res) => {res.setHeader('Cache-Control','no-store');res.status(shuttingDown?503:200).json({ok:!shuttingDown,game:'campaign',version:5});});

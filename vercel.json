@@ -9,6 +9,9 @@
     },
     "api/account.js": {
       "maxDuration": 20
+    },
+    "api/social.js": {
+      "maxDuration": 20
     }
   },
   "rewrites": [
