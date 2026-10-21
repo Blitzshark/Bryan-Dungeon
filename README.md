@@ -380,3 +380,9 @@ leaderboard points.
 
 Chat opens at the newest message. Public and party histories retain at most 40
 messages for up to 20 minutes; polling removes expired messages from storage.
+
+Trade selection and review screens show rendered skin thumbnails and an enlarged
+character preview. Returning from a preview preserves the trade draft. The
+currency is called **Shards**. The authenticated Bryan owner account has an
+unlimited shard wallet, enforced on the server for purchases and trades; the UI
+shows ∞. A guest or ordinary account named Bryan receives no currency privileges.
