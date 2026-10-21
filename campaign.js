@@ -153,7 +153,15 @@ function enemyAct(s){
  const kit=C.ENEMY_MOVES[actor.enemyType]||['strike','sunder'];
  // Shuffle each complete repertoire into a deterministic, non-repeating cycle.
  if(!actor.moveDeck?.length){actor.moveDeck=[...kit];for(let i=actor.moveDeck.length-1;i>0;i--){const j=Math.floor(nextRandom(s)*(i+1));[actor.moveDeck[i],actor.moveDeck[j]]=[actor.moveDeck[j],actor.moveDeck[i]];}}
- const skill=actor.moveDeck.shift(),move=SKILLS[skill]||SKILLS.strike;note(s,actor.name+' uses '+move.name+'.');if(move.shell)actor.guard=true;
+ // Raid films are signature moments: four quick turns before the first,
+ // and at least four ordinary boss actions between films. Deferred moves stay in the deck.
+ let moveIndex=0;
+ if(actor.raidOnly){const ready=actor.turns-(actor.lastCinematicTurn||0)>=5;
+  const preferred=actor.moveDeck.findIndex(key=>!!SKILLS[key]?.cinematic===ready);
+  moveIndex=preferred>=0?preferred:ready?0:-1;
+ }
+ const skill=moveIndex<0?kit.find(key=>!SKILLS[key]?.cinematic):actor.moveDeck.splice(moveIndex,1)[0],move=SKILLS[skill]||SKILLS.strike;
+ if(actor.raidOnly&&move.cinematic)actor.lastCinematicTurn=actor.turns;note(s,actor.name+' uses '+move.name+'.');if(move.shell)actor.guard=true;
  if(move.summonEnemy){const species={raid_tide:['tideeye','Drowned Spawn'],raid_furnace:['imp','Forge Drone'],raid_eclipse:['wisp','Starved Echo'],raid_spider:['spider','Widow Hatchling'],raid_demon:['skeleton','Risen Legionnaire']}[actor.enemyType],type=species[0];if(living(s,'enemy').length<4){const d=ENEMIES[type],id='spawn-'+s.round+'-'+actor.turns,scale=1+s.raidLevel*.2;const minion={...d,id,enemyType:type,name:species[1],side:'enemy',hp:Math.round(40*scale),maxHp:Math.round(40*scale),atk:Math.round(7+s.raidLevel*2),speed:4,mp:0,maxMp:0,cooldowns:{},status:{},raidMinion:true};s.enemies.push(minion);s.order.push(id);events.push({type:'summon',source:actor.id,target:id,amount:0});}}
  if(move.arena){s.arena={kind:move.arena,rounds:5,source:actor.id,theme:actor.enemyType,variant:move.domainVariant||0,name:move.name};events.push({type:'arena',source:actor.id,target:actor.id,amount:0,arena:move.arena});note(s,'The battlefield becomes '+move.arena+' for five rounds.');}
  if(actor.behavior==='heal'&&actor.turns%2===1){const ally=living(s,'enemy').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0],amount=Math.min(25,ally.maxHp-ally.hp);ally.hp+=amount;events.push({type:'heal',target:ally.id,amount});}
