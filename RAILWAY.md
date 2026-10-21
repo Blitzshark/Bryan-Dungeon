@@ -66,7 +66,7 @@ almanac saves keep their discoveries. The verified Bryan account receives all
 completed entries and catalog unlocks, including accessories, even when its
 combat admin abilities are disabled.
 
-Open **Customize → Wear accessories**, or **Menu → Accessories**. Wear one item
+Open **Customize → Wear accessories**, or **Menu → Customize character → Wear accessories**. Wear one item
 per head, back and neck slot. Extra accessories are sold by Alden; cosmetics
 are shared with other tavern visitors and carried into battles and cutscenes.
 
@@ -132,3 +132,8 @@ Twelve-second journeys choose among twenty themed routes: open-water swimming,
 webbed ravines, cemetery marches, cosmic crossings and furnace transport.
 Only one furnace route uses a chain elevator. Attack cinematics show each
 species rather than recoloring the same boss silhouette.
+
+Raid battle framing reserves the measured space below the boss health bar and
+action notice and above the action deck, including domain labels and mobile
+layouts. Accessories are reached through Customize rather than a separate
+main-menu entry.
