@@ -360,3 +360,23 @@ pause battle or voting timers. Messages are limited to 240 characters.
 
 At camp, equipped item cards have a direct **Unequip** button. Removed gear stays
 in the shared bag until it is equipped again, claimed by a companion, or sold.
+
+## Guilds and chat history
+
+Open **Guilds** from the menu to create a guild, choose a banner, request to join
+another guild, inspect members' equipment, or browse the top 100. Guild leaders
+approve requests, rename the guild, change its banner, remove members and transfer
+leadership. Each account belongs to one guild, with up to 50 members. A leader must
+transfer leadership before leaving unless they are the last member.
+
+Guilds use the existing persistent account store. Rankings start from verified
+online victories earned after this update: 100 points per raid boss, 25 per
+campaign boss, 10 per highest completed stage in each of the three campaigns,
+and 20 per highest raid level. Shared victories count once per guild, and
+repeated reward requests cannot add points. Using Warp, Skip or Universe cleave
+makes that room's run unranked. Equipment views show the member's last verified
+online loadout and currently equipped cosmetic skins. Solo saves do not award
+leaderboard points.
+
+Chat opens at the newest message. Public and party histories retain at most 40
+messages for up to 20 minutes; polling removes expired messages from storage.
