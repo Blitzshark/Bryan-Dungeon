@@ -46,3 +46,14 @@ remain saved in each browser, separately for each signed-in account.
 On Vercel, use the connected Upstash/Redis storage and the same private
 `BRYAN_ADMIN_CLAIM_CODE` variable. Local development stores accounts in ignored
 `.data/accounts`; do not commit or serve account storage publicly.
+
+## Tavern raid queues
+
+Open the tavern's **Raid boss queues** board and choose **Sit & queue**. The
+character walks to the selected table; up to six players can sit together.
+The table departs after 20 seconds, when full, or when every seated player
+presses **Ready to depart**. Unclaimed party slots become AI companions.
+**Stand up** cancels a seat before departure. Visitors can watch groups walk
+through the raid door. Each raid boss room has a 12-second journey, and server
+combat timers reserve the journey before allowing actions. Queues use the same
+room storage and work on the single Railway instance or shared Redis.
