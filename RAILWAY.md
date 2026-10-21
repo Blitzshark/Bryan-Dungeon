@@ -190,3 +190,9 @@ follow movement and fade after eight seconds. Only the latest message per
 speaker is shown overhead; the full message remains in chat history. Party
 hero IDs and tavern visitor IDs are verified by the server, and polling
 does not extend or replay expired bubbles.
+
+Downed party members collapse over 650 milliseconds and remain prone and
+fully gray while their HP is zero, including after the hit effects expire.
+Revival restores the normal pose and colors immediately. Reduced-motion mode
+shows the collapsed pose without the fall animation. This is a visual change;
+combat rounds and encounter transitions do not grant extra healing.
