@@ -108,8 +108,9 @@ approaching party, with everyone walking through the opening into darkness.
 
 ## Raid boss health and domains
 
-Raid bosses start at 5,500 HP solo or 8,250 HP in a six-slot party and grow
-with every victory. Their large red health bar appears at the top; select it
+Most raid bosses have 5,500–5,900 HP, with extra vitality for the demon and
+furnace species. Party size does not multiply boss HP. Attacks grow stronger
+with progression. Their compact red health bar appears at the top; select it
 to target the boss. Minions retain their individual target cards. Health
 updates at attack impact. Older raid saves migrate without restoring lost HP.
 
@@ -133,10 +134,10 @@ webbed ravines, cemetery marches, cosmic crossings and furnace transport.
 Only one furnace route uses a chain elevator. Attack cinematics show each
 species rather than recoloring the same boss silhouette.
 
-Raid battle framing reserves the measured space below the boss health bar and
-action notice and above the action deck, including domain labels and mobile
-layouts. Accessories are reached through Customize rather than a separate
-main-menu entry.
+Raid battles use the same camera scale and framing as regular battles. The
+short, thin health bar adapts to mobile layouts without changing the FOV,
+even when a domain label appears. Accessories are reached through Customize
+rather than a separate main-menu entry.
 
 ## Friends, skins and the Ember Exchange
 
