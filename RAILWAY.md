@@ -116,6 +116,19 @@ updates at attack impact. Older raid saves migrate without restoring lost HP.
 Each raid boss has 110 themed techniques, including stronger party-wide
 attacks and cinematics lasting up to ten seconds. Sovereign Domain techniques
 replace the full battlefield for five rounds: cosmic gravity, an underwater
-cathedral, or a volcanic forge, with three scenery variants per theme. Their
+cathedral, a volcanic forge, a webbed nest, or a necropolis. Their
 arena effects remain active and the boss bar shows the remaining duration.
 Screen distortion and hallucination effects have been removed.
+
+Raid draws now use a shuffled five-species bag, avoiding consecutive repeats.
+The Widow of Worlds uses venom, web snares and spider hatchlings. Malgrave
+raises undead and steals health. The Abyssal Leviathan uses ink, pressure
+and tentacle assaults; the World Furnace uses armor and burning machinery;
+the Star-eating Maw consumes focus and controls gravity. Each has its own
+model, attack effects and 110 named techniques. Older raids keep their current
+boss and health while future draws gain the new species.
+
+Twelve-second journeys choose among twenty themed routes: open-water swimming,
+webbed ravines, cemetery marches, cosmic crossings and furnace transport.
+Only one furnace route uses a chain elevator. Attack cinematics show each
+species rather than recoloring the same boss silhouette.
