@@ -1,0 +1,13 @@
+(function(){
+'use strict';
+class ModelPreview extends CampaignScene{
+ constructor(){super(document.createElement('canvas'));this.canvas.className='model-preview';this.canvas.setAttribute('aria-label','Character in its home environment');this.layer=document.createElement('canvas');this.running=false;}
+ resize(){const rect=this.canvas.getBoundingClientRect();this.width=Math.max(150,rect.width||360);this.height=230;this.dpr=Math.min(devicePixelRatio||1,2);this.canvas.width=this.width*this.dpr;this.canvas.height=this.height*this.dpr;this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);this.cache.width=this.canvas.width;this.cache.height=this.canvas.height;if(this.layer){this.layer.width=this.canvas.width;this.layer.height=this.canvas.height;}this.scale=Math.min(24,this.width/14);this.cx=this.width*.5;this.cy=165;this.dirty=true;}
+ show(parent,unit,biome,silhouette=false){parent.append(this.canvas);this.unit={...unit,id:'preview',side:unit.side||'enemy',hp:unit.hp||1,maxHp:unit.hp||1,status:{}};this.silhouette=silhouette;this.biome=biome;this.layoutSeed=271;this.state={party:[],enemies:[],inventory:[],order:[],phase:'preview'};this.title=true;this.camp=false;this.raid=false;this.resize();this.running=true;return this.canvas;}
+ stop(){this.running=false;}
+ positionFor(){return {x:0,z:0};}
+ poseFor(unit,index,time){return {x:0,z:0,y:this.reduced?0:Math.sin(time/800)*.025,gesture:0,stride:0,facing:-.45};}
+ frame(time){if(this.running&&this.canvas.isConnected&&!document.getElementById('modal').hidden){const c=this.ctx;this.paint=c;const width=this.canvas.getBoundingClientRect().width;if(Math.abs(width-this.width)>2)this.resize();this.scale=Math.min(24,this.width/14);if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.drawImage(this.cache,0,0,this.width,this.height);const large=this.unit.boss||this.unit.raidOnly;this.scale=large?Math.min(32,this.width/9):Math.min(65,this.width/3.2);this.cx=this.width*.5;this.cy=190;this.bodyTransform=null;if(this.silhouette){const l=this.layer.getContext('2d');l.setTransform(this.dpr,0,0,this.dpr,0,0);l.clearRect(0,0,this.width,this.height);this.paint=l;this.actor(this.unit,0,time);l.globalCompositeOperation='source-in';l.fillStyle='#020403';l.fillRect(0,0,this.width,this.height);l.globalCompositeOperation='source-over';c.save();c.shadowColor='#8ba59c';c.shadowBlur=3;c.drawImage(this.layer,0,0,this.width,this.height);c.restore();this.paint=c;}else this.actor(this.unit,0,time);}requestAnimationFrame(this.frame);}
+}
+window.ModelPreview=ModelPreview;
+})();

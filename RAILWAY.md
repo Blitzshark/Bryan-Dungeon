@@ -57,3 +57,21 @@ presses **Ready to depart**. Unclaimed party slots become AI companions.
 through the raid door. Each raid boss room has a 12-second journey, and server
 combat timers reserve the journey before allowing actions. Queues use the same
 room storage and work on the single Railway instance or shared Redis.
+
+## Almanac, accessories and boss music
+
+The enemy almanac renders each enemy in its home region. Encountering reveals
+notes; defeating completes the entry and reveals the full model. Earlier
+almanac saves keep their discoveries. The verified Bryan account receives all
+completed entries and catalog unlocks, including accessories, even when its
+combat admin abilities are disabled.
+
+Open **Customize → Wear accessories**, or **Menu → Accessories**. Wear one item
+per head, back and neck slot. Extra accessories are sold by Alden; cosmetics
+are shared with other tavern visitors and carried into battles and cutscenes.
+
+The project owner's uploaded **The Final Confrontation** plays on campaign
+bosses; **Remix of TFC** plays on raid bosses. Both loop and are bundled under
+`music/` for Railway and Vercel. Settings include boss music volume, and the
+sound button mutes music and effects. Music pauses outside boss fights and
+when the browser tab is hidden. No extra hosting variables are needed.
