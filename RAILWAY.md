@@ -196,3 +196,35 @@ fully gray while their HP is zero, including after the hit effects expire.
 Revival restores the normal pose and colors immediately. Reduced-motion mode
 shows the collapsed pose without the fall animation. This is a visual change;
 combat rounds and encounter transitions do not grant extra healing.
+
+## Combat elements
+
+Every attack skill, weapon and enemy has an element. The ten types are
+Physical, Fire, Water, Frost, Storm, Earth, Nature, Shadow, Light and Arcane.
+Enemy cards, battlefield names and the compact raid bar show the element.
+Hover an enemy card or inspect its element chip for its matchup summary.
+The almanac also lists elements and elemental attack techniques.
+
+Weaknesses multiply damage by 1.5; resistances multiply it by 0.65. Neutral
+matchups retain normal damage. Each enemy resists its own element and one
+additional type, and has one weakness:
+
+| Enemy element | Weak to | Also resists |
+| --- | --- | --- |
+| Physical | Arcane | Earth |
+| Fire | Water | Frost |
+| Water | Storm | Fire |
+| Frost | Fire | Nature |
+| Storm | Earth | Water |
+| Earth | Nature | Storm |
+| Nature | Fire | Earth |
+| Shadow | Light | Arcane |
+| Light | Shadow | Nature |
+| Arcane | Physical | Shadow |
+
+Attack buttons show their element. Elemental weapons change basic attacks;
+cosmetic skins do not. Burn is Fire damage and poison is Nature damage, with
+the same enemy resistance rules. Damage numbers report WEAK or RESIST, and HP
+still changes only at impact. Player characters do not acquire enemy affinities.
+Bryan's Universe cleave retains its fixed damage and bypasses affinities.
+Old enemy saves receive affinities without healing or rerolling their route.
