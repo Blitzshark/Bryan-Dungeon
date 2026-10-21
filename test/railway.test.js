@@ -7,7 +7,7 @@ test('Railway production serves the game, creates discoverable rooms, joins gues
  assert((await fetch(base+'/')).ok);assert((await fetch(base+'/play')).ok);assert((await (await fetch(base+'/health')).json()).ok);assert.equal((await call(null,null,'?status=1')).storage,'local-memory');
  const host=await call({op:'create',name:'Host',job:'warrior'});const guest=await call({op:'join',name:'Guest',code:host.code});assert.equal(guest.members.length,2);const list=await call(null,null,'?list=1');assert(JSON.stringify(list).includes(host.code));
  const view=await call(null,host.token,'?code='+host.code);const started=await call({op:'command',code:host.code,version:view.version,requestId:'railway-start-test',action:{type:'start'}},host.token);assert.equal(started.started,true);assert.equal(started.state.phase,'battle');assert.equal(started.state.route.regions[0].biome,'forest');
- }finally{child.kill();await once(child,'exit');}
+ }finally{const exited=once(child,'exit');child.kill('SIGTERM');const [code,signal]=await exited;assert.equal(code,0,'deployment stop exits successfully');assert.equal(signal,null);}
 });
 test('native Railway Redis keeps the shared store wire format and lock semantics',async()=>{
  const store=new NativeRedisStore('redis://localhost:6379'),values=new Map(),calls=[];store.client={isReady:true,sendCommand:async args=>{calls.push(args);assert(args.every(x=>typeof x==='string'));if(args[0]==='SET'){values.set(args[1],args[2]);return 'OK';}if(args[0]==='GET')return values.get(args[1])??null;return 1;}};

@@ -81,3 +81,15 @@ Regular encounters alternate the owner's uploaded `battletheme1.mp3` and
 slider controls all battle music; critical hits and impacts briefly lower the
 music so effects remain clear. Approach and impact sounds respond to terrain,
 creature type, element, armor, guard, misses, critical hits and defeat.
+
+## Deployment stops and shutdown logs
+
+Railway starts Node directly with `node server.js`. On `SIGTERM` or `SIGINT`,
+the server stops accepting connections, finishes active requests, closes idle
+connections, and exits successfully. An eight-second deadline prevents stuck
+requests from blocking container replacement. A normal deployment stop logs
+`Received SIGTERM; finishing active requests.` followed by `Server stopped
+cleanly.`. `SIGTERM` from an old container during deployment is a lifecycle
+event, not by itself evidence of a JavaScript crash. The old npm production
+configuration warning is unrelated to game logic; the runtime start command
+no longer invokes npm.
