@@ -70,17 +70,13 @@ Open **Customize → Wear accessories**, or **Menu → Accessories**. Wear one i
 per head, back and neck slot. Extra accessories are sold by Alden; cosmetics
 are shared with other tavern visitors and carried into battles and cutscenes.
 
-The project owner's uploaded **The Final Confrontation** plays on campaign
-bosses; **Remix of TFC** plays on raid bosses. Both loop and are bundled under
-`music/` for Railway and Vercel. Settings include boss music volume, and the
-sound button mutes music and effects. Music pauses outside battles and
-when the browser tab is hidden. No extra hosting variables are needed.
-
-Regular encounters alternate the owner's uploaded `battletheme1.mp3` and
-`battletheme2.mp3`. Boss tracks take priority over regular music. The Settings
-slider controls all battle music; critical hits and impacts briefly lower the
-music so effects remain clear. Approach and impact sounds respond to terrain,
-creature type, element, armor, guard, misses, critical hits and defeat.
+Battle music randomly chooses `battletheme1.mp3` or `battletheme2.mp3` once
+per regular encounter. Campaign and raid bosses both randomly choose **The
+Final Confrontation** or **Remix of TFC**. Re-rendering a menu or health bar does
+not reroll or restart the current track. Music fades over about 1.6 seconds,
+with forest, dungeon and water ambient loops between fights. Settings volume
+and the sound toggle apply to ambient and combat music. Muting or hiding the
+tab pauses playback immediately.
 
 ## Deployment stops and shutdown logs
 
@@ -93,3 +89,19 @@ cleanly.`. `SIGTERM` from an old container during deployment is a lifecycle
 event, not by itself evidence of a JavaScript crash. The old npm production
 configuration warning is unrelated to game logic; the runtime start command
 no longer invokes npm.
+
+## Additional dungeon guardian and ability cards
+
+New runs can roll the Ore Golem among the four dungeon guardians. Other
+sections retain their existing boss pools. Its twelve ore and crystal moves
+include shell defense, magnetic weakening and a party-wide mountain breaker.
+Existing saved routes remain intact.
+
+Nine additional cards include Ember Fox, Astral Archer and Grove Wisp summons,
+plus Riftstep Cut, Storm Conduit, Spring of Renewal, Stonebreaker, Viper Needle
+and Second Wind. Maintain up to two different summons per adventurer. Each
+summon has its own automatic move kit and its card cooldown starts only on its
+death; living allies persist through camp and travel without free healing.
+Class and race ultimates deal 40% more damage or heal 50% more. Normal actions
+build 30 charge, up from 25. The Greenwood dungeon doors now open toward the
+approaching party, with everyone walking through the opening into darkness.

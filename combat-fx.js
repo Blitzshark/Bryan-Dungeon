@@ -8,7 +8,7 @@ const profiles={
  potion:['#c1e9af','bloom','cast'],revive:['#ffe7ac','stars','cast'],focus:['#a1d9db','rings','cast'],guard:['#a1d9db','rings','cast']
 };
 const content=typeof module==='object'&&module.exports?require('./content'):root.GameContent;
-const added={...content.MOVES,...content.CARDS,...Object.fromEntries(Object.entries(content.BASICS).map(([k,v])=>['basic_'+k,v])),knightCut:{style:'slash'},knightSlam:{style:'heavy'}};
+const added={...content.SUMMON_SKILLS,...content.MOVES,...content.CARDS,...Object.fromEntries(Object.entries(content.BASICS).map(([k,v])=>['basic_'+k,v])),knightCut:{style:'slash'},knightSlam:{style:'heavy'}};
 let variant=0;for(const [id,move]of Object.entries(added)){const n=++variant;profiles[id]=[move.color||'#'+(0x779999+(n*3571)%0x886666).toString(16).padStart(6,'0'),move.shape|| (move.summon?'portal':move.style==='magic'?['nova','stars','lightning','flame','vortex','ice'][n%6]:move.style==='arrow'?'arrows':['slash','crescent','cross','quake','sweep'][n%5]),move.style==='magic'||move.summon?'cast':move.style==='arrow'?'bow':['swing','leap','thrust','dash','spin'][n%5]];}
 function profile(skill,style){if(skill==='strike'&&style==='magic')return {color:'#c2b4ff',shape:'nova',motion:'cast'};if(skill==='strike'&&style==='arrow')return {color:'#d3dfad',shape:'lance',motion:'bow'};const p=profiles[skill]||['#dec6a0',style==='magic'?'nova':style==='arrow'?'arrows':'slash','swing'];return {color:p[0],shape:p[1],motion:p[2]};}
 function draw(scene,time){const c=scene.paint,s=scene.scale;
