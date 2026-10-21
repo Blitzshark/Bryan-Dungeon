@@ -11,7 +11,7 @@ class CampaignScene{
  this.cx=this.width*(this.title?.65:this.camp&&this.width>800?.29:.5);this.cy=this.title?this.height*.57:this.camp?(this.height*(this.width>800?.54:.30)):Math.min(this.height*.52,this.height-(this.width<650?185:170)-16-this.scale*2.1);this.dirty=true;}
 
 
- setState(state,title=false){this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp',layout=state?DungeonCampaign.encounter(state).scenerySeed||0:0;if(this.layoutSeed!==layout||this.biome!==biome||this.title!==title||this.camp!==camp||this.raid!==(state?.mode==='raid')){this.layoutSeed=layout;this.raid=state?.mode==='raid';this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
+ setState(state,title=false){if(this.menuTrailerActive&&!title){this.menuTrailerActive=false;this.trailer=null;this.animations=[];this.effects=[];this.positions.clear();this.enemyFacing?.clear();}this.state=state;const biome=state?DungeonCampaign.encounter(state).biome:'forest',camp=state?.phase==='camp',layout=state?DungeonCampaign.encounter(state).scenerySeed||0:0;if(this.layoutSeed!==layout||this.biome!==biome||this.title!==title||this.camp!==camp||this.raid!==(state?.mode==='raid')){this.layoutSeed=layout;this.raid=state?.mode==='raid';this.biome=biome;this.title=title;this.camp=camp;this.resize();}this.state=state;}
  project(x,y,z){return {x:this.cx+(x-z*.57)*this.scale,y:this.cy+(x*.27+z*.47-y)*this.scale};}
  polygon(points,color,stroke){if(this.fallenTint&&/^#[0-9a-f]{6}$/i.test(color)){const n=parseInt(color.slice(1),16),v=Math.round(((n>>16)*.3+((n>>8)&255)*.59+(n&255)*.11)*.78);color='#'+v.toString(16).padStart(2,'0').repeat(3);}if(this.actorPolygons&&points.every(p=>Number.isFinite(p.depth))){this.actorPolygons.push({depth:points.reduce((sum,p)=>sum+p.depth,0)/points.length,draw:()=>{const tint=this.fallenTint;this.fallenTint=false;this.polygon(points,color,stroke);this.fallenTint=tint;}});return;}const c=this.paint;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.6;c.stroke();}}
  plane(x,z,w,d,color){this.polygon([this.project(x,0,z),this.project(x+w,0,z),this.project(x+w,0,z+d),this.project(x,0,z+d)],color);}
@@ -299,10 +299,10 @@ class CampaignScene{
  }
 
  point(id){return this.positions.get(id);}
- frame(time){const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.save();const cinematic=this.animations.find(a=>(a.ultimate||a.critical)&&a.style!=='cosmic'&&time>=a.at&&time-a.at<a.duration);if(cinematic&&!this.reduced){const p=(time-cinematic.at)/cinematic.duration,subject=this.point(p<.4?cinematic.actor:cinematic.target)||{x:this.width/2,y:this.height/2},zoom=1+Math.sin(p*Math.PI)*(cinematic.critical?.18:.1);c.translate(this.width/2,this.height*.45);c.scale(zoom,zoom);c.translate(-this.width/2-(subject.x-this.width/2)*Math.sin(p*Math.PI)*.1,-this.height*.45);}c.drawImage(this.cache,0,0,this.width,this.height);
+ frame(time){if(this.title&&this.canvas.id==='world')window.MenuTrailer?.update(this,time);const c=this.ctx;this.paint=c;if(this.dirty)this.background();c.clearRect(0,0,this.width,this.height);c.save();const cinematic=this.animations.find(a=>(a.ultimate||a.critical)&&a.style!=='cosmic'&&time>=a.at&&time-a.at<a.duration);if(cinematic&&!this.reduced){const p=(time-cinematic.at)/cinematic.duration,subject=this.point(p<.4?cinematic.actor:cinematic.target)||{x:this.width/2,y:this.height/2},zoom=1+Math.sin(p*Math.PI)*(cinematic.critical?.18:.1);c.translate(this.width/2,this.height*.45);c.scale(zoom,zoom);c.translate(-this.width/2-(subject.x-this.width/2)*Math.sin(p*Math.PI)*.1,-this.height*.45);}c.drawImage(this.cache,0,0,this.width,this.height);
  window.RaidFX?.domainBackground(this,time);
  let units=this.state?(this.camp?[...this.state.party,...(this.state.summons||[])]:[...this.state.party,...(this.state.summons||[]),...this.state.enemies]):[];
- if(this.title){units=[{id:'hero',name:'',hp:88,maxHp:88,side:'party',job:'warrior',color:'#baa47a',kind:'humanoid'},{id:'rowan',name:'',hp:70,maxHp:70,side:'party',job:'ranger',color:'#879b73',kind:'humanoid'},{id:'mira',name:'',hp:65,maxHp:65,side:'party',job:'mage',color:'#9a91b1',kind:'humanoid'}];}
+ if(this.title&&!this.menuTrailerActive){units=[{id:'hero',name:'',hp:88,maxHp:88,side:'party',job:'warrior',color:'#baa47a',kind:'humanoid'},{id:'rowan',name:'',hp:70,maxHp:70,side:'party',job:'ranger',color:'#879b73',kind:'humanoid'},{id:'mira',name:'',hp:65,maxHp:65,side:'party',job:'mage',color:'#9a91b1',kind:'humanoid'}];}
  const entries=units.map(u=>{const list=u.side==='party'?(this.state?.party||units):this.state.enemies;const index=list.findIndex(p=>p.id===u.id);const p=this.positionFor(u,index);return {u,index,depth:this.poseFor(u,index,time).x*.27+this.poseFor(u,index,time).z*.47};}).sort((a,b)=>a.depth-b.depth);
  entries.forEach(({u,index})=>this.actor(u,index,time));
  if(this.camp)this.drawCampfire(time);
@@ -310,6 +310,7 @@ class CampaignScene{
  window.RaidFX?.arena(this,time);this.drawEffects(time);this.drawDefeats(time);CombatVFX.draw(this,time);window.RaidFX?.attacks(this,time);window.OceanVisuals?.attacks(this,time);window.OceanVisuals?.atmosphere(this,time);c.restore();
  this.effects=this.effects.filter(e=>time-e.at<1200);this.animations=this.animations.filter(a=>time-a.at<a.duration);
  if(!this.reduced){c.fillStyle=this.biome==='forest'?'#d3e2a333':this.biome==='throne'?'#f78c6944':'#ead69e33';for(let i=0;i<18;i++){const x=(seeded(i+10)*this.width+Math.sin(time/5000+i)*18),y=(seeded(i+20)*this.height-time/110*(.2+seeded(i+30)))%this.height;c.fillRect(x,y<0?y+this.height:y,i%3===0?2:1,i%3===0?2:1);}}
+ if(this.menuTrailerActive)window.MenuTrailer?.overlay(this,time);
  requestAnimationFrame(this.frame);
  }
 }
