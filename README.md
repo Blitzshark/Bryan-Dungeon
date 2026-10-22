@@ -410,3 +410,17 @@ staffs cast magic, bows fire projectiles, and melee weapons use swings. Their
 class-specific ability IDs and saved keybinds stay unchanged; names and elemental
 feedback match the weapon. Basic attacks remain free. Ranged critical-hit films
 also retain casting or shooting rather than running up for a melee strike.
+
+Stats & builds is available from the title, tavern, settings and camp. Each
+adventurer starts with 12 spendable points and earns 2 per level (110 at level 50).
+Twelve attributes support weapon damage, survivability, focus, healing, items,
+ultimate charge and summons. Individual attributes cap at 20; Discipline caps at
+16. Respecs are free and apply at camp or to the next journey, never during an
+active fight. Raising maximum health or focus does not restore either resource.
+
+Copy build code exports a `BB1` code containing stats, class, race, starter weapon
+and up to three ability cards. Preview import reviews a build before applying it.
+Codes grant no unlocks, loot, levels or currency. Higher-level plans activate only
+the point budget earned by the receiving adventurer, growing as they level up.
+Equipped loot still overrides the starter weapon. Summon bonuses do not extend a
+summon's single-encounter lifetime.
