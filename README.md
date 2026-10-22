@@ -444,3 +444,12 @@ Sunstone Colossus begins as scattered stone, assembles its actual body pieces,
 then awakens beneath a bright canopy sunbeam. Its entrance and the Admiral's
 wreck reveal reserve three seconds on both clients and the multiplayer server;
 other campaign entrances remain short, and raid journeys keep their own timing.
+
+Critical hits apply to melee, ranged and magic damage without changing critical
+chance. Critical attack films use the move's effect profile, element, attack
+motion and projectile pattern: ranged fighters stay at range, while melee moves
+use their own rush, leap, spin or thrust. Each technique has a deterministic
+camera/effect recipe. Critical hits inside existing guardian, ocean and raid
+signature films keep that film and add the impact frames and yellow label.
+Health and floating damage still update at impact; reduced motion keeps the
+critical label without flashing impact frames or camera movement.
