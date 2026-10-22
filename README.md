@@ -424,3 +424,9 @@ Codes grant no unlocks, loot, levels or currency. Higher-level plans activate on
 the point budget earned by the receiving adventurer, growing as they level up.
 Equipped loot still overrides the starter weapon. Summon bonuses do not extend a
 summon's single-encounter lifetime.
+
+Campaign room creators can choose 3, 4, 5 or 6 total adventurer slots. Unclaimed
+slots are controlled by bots; joining players replace those bots without expanding
+the selected capacity. Existing rooms default to their saved roster size. Summons
+use distinct party formation positions, filling separate lanes before extra rows,
+rather than gathering around the summoner; arrival effects use the same positions.

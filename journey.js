@@ -2,7 +2,7 @@
 'use strict';
 class JourneyScene extends CampaignScene{
  constructor(canvas){super(canvas);this.running=false;}
- positionFor(unit,index){if(unit.summon){const owner=Math.max(0,this.state?.party.findIndex(p=>p.id===unit.ownerId)??0);return {x:3+Math.floor(owner/3)*.9,z:(owner%3-1)*1.8};}if(unit.npc)return {x:0,z:3.5};if(unit.side==='enemy')return {x:3.3,z:0};return {x:(index%3-1)*1.5,z:Math.floor(index/3)*1.5};}
+ positionFor(unit,index){if(unit.summon){const p=this.summonPosition(unit);return {x:p.x+3.5,z:p.z};}if(unit.npc)return {x:0,z:3.5};if(unit.side==='enemy')return {x:3.3,z:0};return {x:(index%3-1)*1.5,z:Math.floor(index/3)*1.5};}
  poseFor(unit,index,time){
  const p=this.positionFor(unit,index),t=Math.min(1,(time-this.started)/this.duration),pulse=Math.sin(t*Math.PI),wave=Math.sin(t*18+index);let x=p.x,z=p.z,y=0,gesture=0,stride=0,swing=0,facing=Math.PI/2;
  if(this.kind==='story'&&this.variant.startsWith('sea-')){const pulse=Math.sin(t*Math.PI);if(this.variant==='sea-rescue'){x+=pulse*.8;z+=pulse;gesture=pulse*.7;}else if(this.variant==='sea-salvage'){x*=1-pulse*.35;y=-pulse*.25;gesture=pulse*.6;}else{z+=pulse*.7;gesture=pulse*.9;}facing=0;}
