@@ -505,3 +505,9 @@ domains. The special snail uses exactly four attacks:
 The snail remains defeatable despite its title. Taunt still redirects enemy
 attacks, including its party-wide moves, to the active knight. Raid progression,
 loot scaling and existing cinematic spacing remain in place.
+
+### Encounter variety
+
+Ordinary campaign fights now draw from a seeded, non-repeating regional bag of six conditions: Crossfire, Wild Magic, Last Stand, Focus Well, Ambush, and Champion Pack. Regions retain their fixed scenery. The opening moss fight and boss fights keep their existing rules. Existing saved fights remain unchanged; conditions begin when entering the next fight.
+
+Optional objectives reward fast victories, conserving healing items, or finishing with everyone standing. Success grants one extra equipment drop and a tonic; champion packs grant the same bonus even if the objective is missed (the rewards do not stack). Neither objectives nor conditions grant automatic healing or extra gold. The compact battle-rules button explains the condition and objective on desktop and mobile, and camp confirms bonus loot. Conditions and item-use progress persist in multiplayer state and saves.
