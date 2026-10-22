@@ -1,13 +1,13 @@
 # Bryan’s Basement
 
-Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose any of three campaigns in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Cloud Gardens, Thunderhead Reach and Sunspire Zenith. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server.
+Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose from four campaigns, unlocked through normal progression, in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Cloud Gardens, Thunderhead Reach Sunspire Zenith, Frostwake Expanse, the Singing Geodes and Aurora Citadel. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server while in the menu.
 
 ## Playing
 
 - Begin a solo journey, choose **Create room**, or **Browse lobbies** inside the game.
 - Browse existing public lobbies, or create a campaign/raid room. Choose public
   visibility to appear in the browser, or invite-only for a private party.
-- Create a room, copy the invite link, and send it to up to two friends.
+- Create a room, copy the invite link, and send it to up to five friends, depending on the selected room size.
 - Each player controls their adventurer. Bots automatically take turns for empty
   character slots, using attacks, healing, revives and focus. The host starts
   the campaign. The invite strip is hidden during matches.
@@ -478,3 +478,30 @@ life drain, reinforcement limits and five-round domain hazards. Fighting habits
 explain behavior-dependent charging, sweeps, healing and guards. Descriptions use
 the combat data rather than generic attack flavor text; undiscovered entries keep
 these details hidden until the species is encountered.
+
+
+The Pale Frontier is campaign four: Frostwake Expanse → the Singing Geodes →
+Aurora Citadel, with thirty encounters, twelve ordinary species, nine possible
+campaign guardians, regional choice events, themed equipment and three new maps.
+It unlocks after a legitimate sky completion; the authenticated Bryan owner has
+immediate access. Existing three-campaign saves append the new route without
+replacing previous encounters or healing the current party.
+
+Raids now include thirteen species. Added bosses are the Immortal Snail,
+Salt-Crowned Hydra, Obsidian Empress, Lantern Matriarch, Walking Cathedral,
+Root of All Hunger, Iron Millipede and Pale Comet. Each has a distinct body and
+journey; the seven non-snail additions have full themed raid repertoires and
+domains. The special snail uses exactly four attacks:
+
+- Roll: party-wide shell impact; each successful hit has a 10% chance to Daze.
+  Daze consumes exactly the affected unit's next turn.
+- Saw: a heavy single-target teeth strike.
+- Goopy Slime: small party damage plus 25% less outgoing damage and armor for
+  two actions. A visible green coating follows the status.
+- Summon Taras: summons an adventurer-sized enemy with ordinary warrior health
+  at the party's level. Taras only throws a red smiling cube. The action itself
+  deals no damage; the usual four-living-enemy summon limit applies.
+
+The snail remains defeatable despite its title. Taunt still redirects enemy
+attacks, including its party-wide moves, to the active knight. Raid progression,
+loot scaling and existing cinematic spacing remain in place.

@@ -3,6 +3,15 @@
 const clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>{n=clamp(n);return n*n*(3-2*n);};
 function pose(type,time,reduced=false){const t=clamp(time),q=ease(t/.78),p={x:0,z:0,y:0,facing:-Math.PI/2,gesture:0,stride:0,swing:0};
  switch(type){
+ case 'frostmammoth':p.x=(1-q)*4;p.stride=reduced?0:Math.sin(t*30)*.15;break;
+ case 'rimeelk':p.x=(1-q)*3;p.y=Math.sin(q*Math.PI)*1.4;break;
+ case 'whiteworm':p.y=-4*(1-q);break;
+ case 'geodeheart':p.y=.5+Math.sin(t*Math.PI)*.7;break;
+ case 'prismqueen':p.y=4*(1-q);break;
+ case 'crystalhermit':p.y=-2*(1-q);break;
+ case 'auroracrown':p.y=4*(1-q);p.gesture=q;break;
+ case 'moonjudge':p.y=1.5*(1-q);p.gesture=q*.5;break;
+ case 'dawnengine':p.y=-2*(1-q);break;
  case 'briar':p.x=(1-q)*7;p.stride=reduced?0:Math.sin(t*50)*.23;p.y=Math.sin(q*Math.PI)*.15;break;
  case 'alpha':p.x=(1-q)*5;p.z=Math.sin(q*Math.PI)*1.7;p.facing=-Math.PI/2+Math.atan2(-Math.cos(q*Math.PI)*1.7,5)*(1-q);p.stride=reduced?0:Math.sin(t*32)*.16;break;
  case 'jadefang':{const leap=ease((t-.18)/.55);p.x=(1-leap)*4;p.z=-(1-leap)*2;p.y=Math.sin(leap*Math.PI)*2;p.gesture=Math.sin(leap*Math.PI)*.7;break;}
@@ -38,6 +47,15 @@ function draw(scene,time){const t=clamp(time),b=scene.state.enemies[0],type=b.en
  const box=(dx,y,dz,w,h,d,color=b.color)=>scene.box(x+dx,y,z+dz,w,h,d,color),point=(dx,y,dz)=>scene.project(x+dx,y,z+dz),line=(a,b,color,width=2)=>{const p=point(...a),r=point(...b);c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(r.x,r.y);c.stroke();},ring=(dx,y,dz,r,color,tilt=0)=>{const p=point(dx,y,dz);c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.ellipse(p.x,p.y,Math.max(0,r*s),Math.max(0,r*s*.35),tilt,0,Math.PI*2);c.stroke();},spark=(dx,y,dz,r,color)=>{const p=point(dx,y,dz);c.fillStyle=color;c.shadowColor=color;c.shadowBlur=12;c.beginPath();c.arc(p.x,p.y,Math.max(0,r*s),0,Math.PI*2);c.fill();c.shadowBlur=0;};
  c.save();
  switch(type){
+ case 'frostmammoth':for(let i=0;i<7;i++){const a=i*2.399;box(Math.cos(a)*2*(1+q),.05,Math.sin(a)*1.8,.5,.5+fade,.5,'#d9e9e4');}break;
+ case 'rimeelk':for(let i=0;i<8;i++){const a=i*Math.PI/4;spark(Math.cos(a)*2,.5+q,Math.sin(a)*2,.06,'#d4f3df');}ring(0,.05,0,q*3,'#b6dbd8');break;
+ case 'whiteworm':for(let i=0;i<9;i++){const a=i*2.399;box(Math.cos(a)*(1+q),.05+fade*.4,Math.sin(a)*(1+q),.5,.25,.7,'#d6e4e1');}break;
+ case 'geodeheart':for(let i=0;i<12;i++){const a=i*2.399;box(Math.cos(a)*3*(1-q),.2+(i%4)*.4,Math.sin(a)*2*(1-q),.2,.7,.2,i%2?'#b3d7d0':'#c9b1dd');}break;
+ case 'prismqueen':for(let i=0;i<8;i++){const a=i*Math.PI/4;line([Math.cos(a)*3,5,Math.sin(a)*2],[0,3*(1-q),0],'#d8c9e6',1);}break;
+ case 'crystalhermit':for(let i=0;i<8;i++){const a=i*Math.PI/4;box(Math.cos(a)*(1+q),.1+Math.sin(a)*fade*.3,Math.sin(a)*(1+q),.4,.9,.4,'#b7d2db');}break;
+ case 'auroracrown':for(let i=0;i<7;i++){const a=i*Math.PI*2/7;line([Math.cos(a)*2,5,Math.sin(a)*2],[Math.cos(a),1+q,Math.sin(a)],i%2?'#b3ead4':'#c8afe8',4);}break;
+ case 'moonjudge':ring(0,3,0,1.3,'#d3dcde');for(let i=0;i<5;i++)box((i-2)*.6,.05,1,.35,.15,.5,'#c0ced4');break;
+ case 'dawnengine':for(let i=0;i<10;i++){const a=i*Math.PI/5+t*3;box(Math.cos(a)*(2-q),1+Math.sin(a),Math.sin(a)*(2-q),.3,.2,.3,'#ead7aa');}ring(0,1,0,1.5,'#eff1c6',t);break;
  case 'sunape':{
   // Light enters through the canopy only once the scattered stones have locked together.
   const light=ease((t-.52)/.3),p=point(0,2.2,0),floor=point(0,0,0);c.fillStyle='rgba(255,235,156,'+light*.34+')';c.beginPath();c.moveTo(p.x-s*.5,-s);c.lineTo(p.x+s*.7,-s);c.lineTo(floor.x+s*2.1,floor.y+s*.3);c.lineTo(floor.x-s*1.8,floor.y+s*.3);c.closePath();c.fill();
