@@ -394,3 +394,9 @@ joined. Unlocks persist in the local profile; verified online victories also sav
 access on the signed-in account. Existing saves retain earned access when their
 history records all three campaign guardians. Warp, Skip and Universe cleave do
 not earn new campaign unlocks, and do not remove access earned previously.
+
+The authenticated Bryan owner is exempt from campaign locks and automatically
+unlocks every class, race, weapon, card, accessory and almanac entry. Every
+cosmetic skin is granted once, including newly added catalog skins on future
+syncs. Disabling special combat powers does not disable these unlocks or the
+unlimited shard wallet. Other accounts still earn campaign access normally.

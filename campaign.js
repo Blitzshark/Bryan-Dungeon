@@ -49,7 +49,7 @@ function campaignUnlocks(s){
  const unlocked=[1],history=s.history||[];if(!s.skipped?.length)for(let act=1;act<=2;act++){const bosses=[9,19,29].map(stage=>s.route?.encounters[(act-1)*30+stage]?.name);if(bosses.every(name=>name&&history.includes(name)))unlocked.push(act+1);else break;}return unlocked;
 }
 function markCampaignShortcut(s){s.unlockedCampaigns=campaignUnlocks(s);s.campaignUnlockVersion=1;s.progressionCheated=true;}
-function beginSequel(s){if(s.mode==='raid'||(s.act||1)>=3||s.phase!=='complete'||s.stage!==29||!campaignUnlocks(s).includes((s.act||1)+1))return false;s.act=(s.act||1)+1;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
+function beginSequel(s){if(s.mode==='raid'||(s.act||1)>=3||s.phase!=='complete'||s.stage!==29||!s.party.some(p=>p.adminAllowed===true)&&!campaignUnlocks(s).includes((s.act||1)+1))return false;s.act=(s.act||1)+1;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
 function entryDuration(s){return s.mode==='raid'?12000:encounter(s).boss?2300:1100;}
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,race:'human',weapon:job==='ranger'?'bow':job==='mage'?'staff':'sword',charge:0,raceCharge:0,appearance:P.appearance({clothes:c.color}),cooldowns:{},cards:['aegis'],guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
