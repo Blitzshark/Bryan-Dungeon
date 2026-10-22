@@ -260,7 +260,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
 
 Coral Reef, Shipwrecks and Deep Sea are three of the biomes that can appear anywhere in a generated route after the moss opening. Seventeen marine species have their own geometry. Their possible bosses include the Coralback Matriarch (a giant reef crab), Keelbreaker (a wreck-armored kraken), and Hadal Devourer (a giant deep-sea anglerfish), drawn in varying order. Bright coral beds, broken ship hulls, and hydrothermal vents have seeded scenery variation.
 
-Marine combat introduces Soaked (electric damage +30%), Ink (22% miss chance), and Pressure (1 focus lost after acting). Guard & focus clears ink and pressure. Nine underwater rescue, salvage and beacon choices replace caravan/training events. Marine weapon loot grants Brine Impaler, Stormline Harpoon, Inkveil Riposte or Bathyal Toll. Camps use an air-filled diving bell with a heater. Existing saves keep the current encounter, party, equipment and living summons while acquiring a random future route.
+Marine combat introduces Soaked (electric damage +30%), Ink (22% miss chance), and Pressure (1 focus lost after acting). Guard & focus clears ink and pressure. Nine underwater rescue, salvage and beacon choices replace caravan/training events. Marine weapon loot grants Brine Impaler, Stormline Harpoon, Inkveil Riposte or Bathyal Toll. Camps use an air-filled diving bell with a heater. Existing saves keep the current encounter, party, equipment while acquiring a random future route.
 
 ### Ability cards, warp, and raid entities
 
@@ -336,9 +336,13 @@ Full animations are the default for a new browser; explicit saved motion prefere
 
 Summon: Knight reserves a synchronized 3.6-second arrival cutscene: a portal opens, the knight rises beneath a shield emblem, and every standing enemy displays a temporary exclamation mark and turns toward it. The most recently summoned living knight draws enemy attacks; when it dies, another living knight can take over Taunt.
 
-### Persistent summons
+### Encounter summons
 
-Living Oathbound Knights are rendered at camp and in every travel/story transition, and retain their identity and current HP across battles and reloads. The camp summary shows their health and a tonic button, authorized to their summoner online. Paid stage-consuming rest also heals living summons. They scale with their owner's level without free healing; only death removes them and starts the card cooldown.
+Summoned allies last only until they die or the current encounter ends. They do
+not appear at camp or carry through travel, retries, world changes or raid bosses.
+A battle save retains living summons for that same encounter. Death starts that
+card’s cooldown during battle; a new encounter resets ability cooldowns. Older
+camp saves are cleaned up automatically.
 
 ### Random routes and persistence
 

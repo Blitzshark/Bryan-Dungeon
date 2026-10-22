@@ -27,7 +27,7 @@ function worlds(s){attachRoute(s);return s.route?s.route.regions.slice(((s.act||
 function encounter(s){attachRoute(s);if(s.mode!=='raid')return s.route.encounters[routeIndex(s)];const level=s.raidLevel,type=s.raidSchedule[level-1],theme=C.RAID_THEMES.find(t=>t.id===type),world=(level-1)%3;return {name:ENEMIES[type].name+' · Raid '+level,subtitle:'RAID BOSS '+level+' · Endless ascent',biome:theme.biome,world,progress:level,boss:true,scenerySeed:((s.routeSeed||0)+Math.imul(level,2654435761))>>>0,enemies:[type]};}
 function isOcean(s){return ['reef','wreck','trench'].includes(encounter(s).biome);}
 function storyFor(s){return s.choice?.startsWith('sea-')?C.O.STORIES[Number(s.choice.slice(4))]:null;}
-function needsMigration(s){return s.mode==='raid'?(!s.raidSchedule||s.raidBalanceVersion!==3||s.raidRosterVersion!==2):!s.route||s.route.version<4;}
+function needsMigration(s){if(s.phase!=='battle'&&s.summons?.length)return true;return s.mode==='raid'?(!s.raidSchedule||s.raidBalanceVersion!==3||s.raidRosterVersion!==2):!s.route||s.route.version<4;}
 function raidBossStats(level,type){const base=5500+Math.min(Math.max(0,level-1),8)*50,bonus=type==='raid_demon'?1800:type==='raid_furnace'?1000:0;return {hp:base+Math.round(bonus*(1+Math.max(0,level-1)*.06)),atk:22+4*level+Math.floor(level/5)*2};}
 const RARITIES={common:{name:'Common',color:'#b4c5a1'},rare:{name:'Rare',color:'#8fc4df'},epic:{name:'Epic',color:'#c2a1e6'}};
 const CLASSES={warrior:{name:'Vanguard',hp:88,mp:6,atk:13,speed:6,color:'#d5aa73',skill:'sunder'},ranger:{name:'Wayfarer',hp:72,mp:8,atk:12,speed:9,color:'#91ad85',skill:'volley'},mage:{name:'Arcanist',hp:65,mp:10,atk:11,speed:7,color:'#ac9bc8',skill:'ember'},rogue:{name:'Nightblade',hp:78,mp:8,atk:15,speed:10,color:'#a29ac2',skill:'shadow'}};
@@ -82,14 +82,15 @@ function startBattle(s){
  // Three adventurers are the baseline; summons and fallen fighters do not change difficulty.
  if(s.mode!=='raid'){const healthScale=1+Math.max(0,s.party.length-3)*.25;for(const enemy of s.enemies)enemy.hp=enemy.maxHp=Math.round(enemy.maxHp*healthScale);}
  if(s.mode==='raid'){const boss=s.enemies[0],power=raidBossStats(s.raidLevel,boss.enemyType);const hp=power.hp;Object.assign(boss,{hp,maxHp:hp,atk:power.atk,boss:true});s.raidBalanceVersion=3;}
- s.arena=null;s.summons=(s.summons||[]).filter(k=>k.hp>0);for(const k of s.summons){const owner=s.party.find(p=>p.id===k.ownerId);if(owner&&owner.level>k.level){const d=C.SUMMONS[k.summonCard||'summonKnight']||C.SUMMONS.summonKnight;k.level=owner.level;k.maxHp=d.hp+k.level*d.hpLevel;k.atk=d.atk+k.level*d.atkLevel;k.baseDef=d.def+(d.taunt?k.level:0);}k.guard=false;k.status={};}s.party.forEach(p=>{p.guard=false;p.cooldowns=Object.fromEntries(Object.entries(p.cooldowns||{}).filter(([key])=>SKILLS[key]?.summon));p.mp=p.maxMp;p.status={};});
+ s.arena=null;dismissSummons(s);s.party.forEach(p=>{p.guard=false;p.cooldowns={};p.mp=p.maxMp;p.status={};});
  s.order=makeOrder(s);s.cursor=0;s.log=[];note(s,chapter.name+' — battle begins.');beginTurn(s);
 }
 function beginTurn(s){const actor=active(s);if(!actor)return;actor.guard=false;if(actor.side==='party'&&actor.race==='elf')actor.mp=Math.min(actor.maxMp,actor.mp+1);for(const k in actor.cooldowns)actor.cooldowns[k]=Math.max(0,actor.cooldowns[k]-1);}
 function campPrices(s){return s.mode!=='raid'&&(s.act||1)===1?{tonic:1,ember:6,upgrade:5,step:3}:{tonic:20,ember:80,upgrade:25,step:20};}
 function grantGold(s,value){const first=s.mode!=='raid'&&(s.act||1)===1,earned=s.goldEarned||0,amount=Math.max(0,Math.floor(first?Math.min(value,200-earned):value));s.gold=first?Math.min(200,s.gold+amount):s.gold+amount;s.goldEarned=earned+amount;return amount;}
+function dismissSummons(s){const ids=new Set((s.summons||[]).map(k=>k.id));s.summons=[];s.order=(s.order||[]).filter(id=>!ids.has(id));}
 function checkEnd(s){
- if(!s.party.some(p=>p.hp>0)){s.phase='defeat';note(s,'The party has fallen. The road is not over.');return true;}
+ if(!s.party.some(p=>p.hp>0)){s.phase='defeat';dismissSummons(s);note(s,'The party has fallen. The road is not over.');return true;}
  if(!living(s,'enemy').length){
   const gold=s.mode==='raid'?40+22*s.raidLevel:s.act>=2?360+s.stage*35:encounter(s).boss?12:4,xp=s.mode==='raid'?30+15*s.raidLevel:20+s.stage*8;const received=grantGold(s,gold);s.tavernGold=(s.tavernGold||0)+(s.mode==='raid'?3+Math.floor(s.raidLevel/5):encounter(s).boss?5:1);s.xp+=xp;s.potions+=1;
   if(s.mode==='raid')s.raidBest=Math.max(s.raidBest,s.raidLevel);
@@ -97,7 +98,7 @@ function checkEnd(s){
   s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}});
   s.oceanWard=false;const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;s.campConfirmed=false;
   if(s.mode!=='raid'&&s.stage===29&&(s.act||1)<3&&!s.progressionCheated){s.unlockedCampaigns=[...new Set([...campaignUnlocks(s),(s.act||1)+1])];s.campaignUnlockVersion=1;}
-  s.reward={gold:received,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
+  s.reward={gold:received,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';dismissSummons(s);note(s,'Victory. Your party returns to the campfire.');return true;
  }
  return false;
 }
@@ -220,7 +221,7 @@ function campAction(s,command){
 function warp(s,heroId,act,stage){const p=s.party.find(p=>p.id===heroId);if(!p||!hasAdmin(p)||![1,2,3].includes(act)||!Number.isInteger(stage)||stage<0||stage>=30)return false;markCampaignShortcut(s);s.mode='campaign';s.act=act;s.stage=stage;s.stories=[];s.restSpent=false;startBattle(s);return true;}
 function skipEncounter(s,heroId='hero'){
  const player=s.party.find(p=>p.id===heroId);if(s.phase!=='battle'||!player||!hasAdmin(player))return false;
- markCampaignShortcut(s);s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
+ dismissSummons(s);markCampaignShortcut(s);s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';s.decisionEndsAt=null;return true;}
  s.stage++;s.restSpent=false;startBattle(s);return true;
@@ -254,7 +255,7 @@ function restore(value){
  if(!Array.isArray(s.party)||![3,6].includes(s.party.length)||!Array.isArray(s.enemies)||!Array.isArray(s.order)||!Array.isArray(s.log)||!Array.isArray(s.history))return null;
  const all=[...s.party,...s.enemies];if(all.some(p=>!p||!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.hp<0||p.hp>p.maxHp||!p.cooldowns))return null;
  if(s.party.some(p=>!CLASSES[p.job]||!Number.isFinite(p.mp)||!Number.isFinite(p.maxMp)))return null;
- s.summons=Array.isArray(s.summons)?s.summons.filter(k=>k.summon&&k.ownerId&&k.hp>0&&Number.isFinite(k.maxHp)&&k.cooldowns):[];s.party.forEach(p=>{p.cards=(p.cards||[]).filter(k=>C.CARDS[k]).slice(0,3);p.race=Object.hasOwn(P.RACES,p.race)?p.race:'human';p.weapon=Object.hasOwn(P.WEAPONS,p.weapon)?p.weapon:(p.job==='mage'?'staff':p.job==='ranger'?'bow':'sword');p.appearance=P.appearance(p.appearance||{clothes:p.color});p.charge=Math.max(0,Math.min(100,Number(p.charge)||0));p.raceCharge=Math.max(0,Math.min(100,Number(p.raceCharge)||0));});s.tavernGold=s.tavernGold||0;
+ s.summons=Array.isArray(s.summons)?s.summons.filter(k=>k.summon&&k.ownerId&&k.hp>0&&Number.isFinite(k.maxHp)&&k.cooldowns):[];s.party.forEach(p=>{p.cards=(p.cards||[]).filter(k=>C.CARDS[k]).slice(0,3);p.race=Object.hasOwn(P.RACES,p.race)?p.race:'human';p.weapon=Object.hasOwn(P.WEAPONS,p.weapon)?p.weapon:(p.job==='mage'?'staff':p.job==='ranger'?'bow':'sword');p.appearance=P.appearance(p.appearance||{clothes:p.color});p.charge=Math.max(0,Math.min(100,Number(p.charge)||0));p.raceCharge=Math.max(0,Math.min(100,Number(p.raceCharge)||0));});s.tavernGold=s.tavernGold||0;if(s.phase!=='battle')dismissSummons(s);
  if(s.route&&!G.valid(s.route,ENEMIES))return null;if(s.mode==='raid'&&s.raidSchedule&&(!Array.isArray(s.raidSchedule)||s.raidSchedule.some(k=>!RAID_BOSSES.includes(k))))return null;attachRoute(s,true);if(s.mode==='raid')for(const boss of s.enemies.filter(e=>e.raidOnly)){const d=ENEMIES[boss.enemyType];if(d){boss.name=d.name;boss.kind=d.kind;}}if(s.mode==='raid'&&s.raidBalanceVersion!==3){const boss=s.enemies.find(e=>e.raidOnly);if(boss){const ratio=boss.maxHp?boss.hp/boss.maxHp:1,power=raidBossStats(s.raidLevel,boss.enemyType);boss.maxHp=power.hp;boss.hp=ratio===0?0:Math.max(1,Math.round(boss.maxHp*ratio));boss.atk=power.atk;boss.moveDeck=null;}s.raidBalanceVersion=3;}for(const enemy of s.enemies)Object.assign(enemy,enemyAffinity(enemy));for(const u of [...s.party,...s.enemies,...(s.summons||[])])if(u.status)delete u.status.hallucination;
  if(s.phase==='battle'&&(!active(s)||active(s).hp<=0))return null;
  return s;
