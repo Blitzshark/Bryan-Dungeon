@@ -437,3 +437,10 @@ Story pools shuffle without repeating until all three have appeared. Existing
 saves upgrade future generic encounters while keeping an active vote unchanged.
 Maximum-health rewards never heal. Jungle combat takes place on a continuous dirt
 and grass clearing, with trees, vines and ruins around its perimeter.
+
+Campaign guardians use themed entrance choreography and physical reveal effects.
+Moving bosses face their approach direction and finish facing the party. The
+Sunstone Colossus begins as scattered stone, assembles its actual body pieces,
+then awakens beneath a bright canopy sunbeam. Its entrance and the Admiral's
+wreck reveal reserve three seconds on both clients and the multiplayer server;
+other campaign entrances remain short, and raid journeys keep their own timing.
