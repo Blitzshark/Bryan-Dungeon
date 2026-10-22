@@ -7,7 +7,7 @@ const {ChatService}=require('../lib/chat');
 const {SocialService}=require('../lib/social');
 const {getAccounts,cookieToken}=require('../lib/accounts');
 let service,tavern,presence,chat;
-function getService(){if(!service){service=new RoomService(createStore());const social=new SocialService(getAccounts(service.store),{rooms:service});service.friendCheck=(a,b)=>social.areFriends(a,b);}return service;}
+function getService(){if(!service){service=new RoomService(createStore());const social=new SocialService(getAccounts(service.store),{rooms:service});service.friendCheck=(a,b)=>social.areFriends(a,b);service.campaignUnlocks=(account,profile)=>social.campaignUnlocks(account,profile);}return service;}
 function bearer(req){return String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');}
 module.exports=async function handler(req,res){
  res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');if(req.method==='OPTIONS')return res.status(204).end();

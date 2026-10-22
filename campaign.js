@@ -42,14 +42,21 @@ function enemyAffinity(unit){return Elements.affinity({...ENEMIES[unit?.enemyTyp
 function attackElement(s,actor,key){const skill=SKILLS[key]||SKILLS.strike;if(actor?.side==='party'&&(key==='strike'||key.startsWith('basic_'))){const element=weaponFor(s,actor).element||'physical';return element==='physical'?skill.element:element;}return skill.element||'physical';}
 
 const clone=value=>JSON.parse(JSON.stringify(value));
-function beginSequel(s){if(s.mode==='raid'||(s.act||1)>=3||s.phase!=='complete'||s.stage!==29)return false;s.act=(s.act||1)+1;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
+function campaignUnlocks(s){
+ if(!s||s.mode==='raid')return [1];
+ if(s.campaignUnlockVersion===1)return P.profile({unlockedCampaigns:s.unlockedCampaigns}).unlockedCampaigns;
+ // Older saves must contain victories over all three guardians, not merely a later act number.
+ const unlocked=[1],history=s.history||[];if(!s.skipped?.length)for(let act=1;act<=2;act++){const bosses=[9,19,29].map(stage=>s.route?.encounters[(act-1)*30+stage]?.name);if(bosses.every(name=>name&&history.includes(name)))unlocked.push(act+1);else break;}return unlocked;
+}
+function markCampaignShortcut(s){s.unlockedCampaigns=campaignUnlocks(s);s.campaignUnlockVersion=1;s.progressionCheated=true;}
+function beginSequel(s){if(s.mode==='raid'||(s.act||1)>=3||s.phase!=='complete'||s.stage!==29||!campaignUnlocks(s).includes((s.act||1)+1))return false;s.act=(s.act||1)+1;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
 function entryDuration(s){return s.mode==='raid'?12000:encounter(s).boss?2300:1100;}
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,race:'human',weapon:job==='ranger'?'bow':job==='mage'?'staff':'sword',charge:0,raceCharge:0,appearance:P.appearance({clothes:c.color}),cooldowns:{},cards:['aegis'],guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
- const s={version:5,economyVersion:2,goldEarned:0,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
+ const s={version:5,campaignUnlockVersion:1,unlockedCampaigns:[1],economyVersion:2,goldEarned:0,runId:options.runId||'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9),tavernGold:0,mode:mode==='raid'?'raid':'campaign',raidLevel:1,raidBest:0,phase:'battle',stage:mode==='raid'?9:0,round:1,party:[hero('hero',String(name).trim().slice(0,18)||'Adventurer',job),hero('rowan','Rowan','ranger'),hero('mira','Mira','mage')],enemies:[],order:[],cursor:0,gold:0,potions:4,embers:1,xp:0,log:[],history:[],reward:null,choice:null,seed:Number.isInteger(options.seed)?options.seed>>>0:Math.floor(Math.random()*4294967296),inventory:[],campRested:false,stories:[]};
  s.routeSeed=(s.seed^0x6ac690c5)>>>0;s.party[1]=companion(s,'rowan');s.party[2]=companion(s,'mira');if(options.profile)applyLoadout(s.party[0],options.profile);
- s.party[0].adminAllowed=options.adminAllowed===true;s.party[0].adminDisabled=options.adminDisabled===true;if(options.partySize===6)expandParty(s);if(s.mode!=='raid'&&[2,3].includes(options.campaign)){s.act=options.campaign;s.startCampaign=s.act;const level=1+(s.act-1)*16;s.party.forEach(p=>{p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);});s.gold=s.act===2?240:400;s.potions=8;}attachRoute(s);startBattle(s);return s;
+ s.party[0].adminAllowed=options.adminAllowed===true;s.party[0].adminDisabled=options.adminDisabled===true;if(options.partySize===6)expandParty(s);if(s.mode!=='raid'&&[2,3].includes(options.campaign)){s.act=options.campaign;s.startCampaign=s.act;s.unlockedCampaigns=Array.from({length:s.act},(_,i)=>i+1);const level=1+(s.act-1)*16;s.party.forEach(p=>{p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);});s.gold=s.act===2?240:400;s.potions=8;}attachRoute(s);startBattle(s);return s;
 }
 function expandParty(s){for(const id of ['ember','sable','orin'])if(!s.party.some(p=>p.id===id)){const p=companion(s,id),level=s.party[0].level||1;p.level=level;p.maxHp+=12*(level-1);p.hp=p.maxHp;p.atk+=3*(level-1);s.party.push(p);if(s.phase==='battle'&&s.order?.length)s.order.push(id);}return s;}
 function companion(s,id){
@@ -89,6 +96,7 @@ function checkEnd(s){
   const level=s.mode==='raid'?s.raidLevel+1:s.act>=2?1+(s.act-1)*16+Math.floor((s.stage+1)/2):1+Math.floor((s.stage+1)/2);let leveled=false;
   s.party.forEach(p=>{if(p.level<level){const gain=level-p.level;p.level=level;p.maxHp+=gain*12;p.atk+=gain*3;leveled=true;}});
   s.oceanWard=false;const loot=rollLoot(s);s.inventory.push(...loot);s.campRested=false;s.campConfirmed=false;
+  if(s.mode!=='raid'&&s.stage===29&&(s.act||1)<3&&!s.progressionCheated){s.unlockedCampaigns=[...new Set([...campaignUnlocks(s),(s.act||1)+1])];s.campaignUnlockVersion=1;}
   s.reward={gold:received,xp,potion:1,leveled,boss:encounter(s).boss,loot:loot.map(i=>i.id)};s.history.push(encounter(s).name);s.phase='camp';note(s,'Victory. Your party returns to the campfire.');return true;
  }
  return false;
@@ -122,7 +130,7 @@ function act(s,command){
   const target=unit(s,command.target);
   if(skill.summon){const own=(s.summons||[]).filter(k=>k.ownerId===actor.id&&k.hp>0);if(own.some(k=>(k.summonCard||'summonKnight')===key))return {ok:false,error:'That summoned ally is already here.'};if(own.length>=2)return {ok:false,error:'You can maintain two different summoned allies.'};}
   if(!skill.summon&&!skill.self&&!skill.heal&&!skill.all&&(!target||target.side!=='enemy'||target.hp<=0))return {ok:false,error:'Choose a standing enemy.'};
-  actor.mp-=skill.cost;if(skill.ultimate)actor.charge=0;if(skill.raceUltimate)actor.raceCharge=0;if(skill.cd&&!skill.summon)actor.cooldowns[key]=skill.cd+1;
+  if(key==='universe')markCampaignShortcut(s);actor.mp-=skill.cost;if(skill.ultimate)actor.charge=0;if(skill.raceUltimate)actor.raceCharge=0;if(skill.cd&&!skill.summon)actor.cooldowns[key]=skill.cd+1;
   if(skill.summon){const d=C.SUMMONS[key]||C.SUMMONS.summonKnight,ally=hero('summon-'+actor.id+'-'+key+'-'+s.seed,d.name,d.job);Object.assign(ally,{summon:true,summonCard:key,summonKit:d.kit,ownerId:actor.id,taunt:!!d.taunt,kind:d.kind,level:actor.level,hp:d.hp+actor.level*d.hpLevel,maxHp:d.hp+actor.level*d.hpLevel,atk:d.atk+actor.level*d.atkLevel,speed:d.speed,baseDef:d.def+(d.taunt?actor.level:0),appearance:P.appearance({clothes:d.color,hair:d.kind==='humanoid'?'long':'bald',outfit:'coat'}),color:d.color});s.summons=s.summons||[];s.summons.push(ally);s.order.push(ally.id);events.push({type:'summon',source:actor.id,target:ally.id,amount:0});note(s,actor.name+' summons '+ally.name+(ally.taunt?'. Taunt draws enemy attacks.':'.'));}
   else if(skill.self){actor.guard=true;const recovered=Math.min(skill.restoreFocus||0,actor.maxMp-actor.mp);actor.mp+=recovered;events.push({type:'focus',target:actor.id,amount:recovered});}
   else if(skill.heal){const allies=skill.healAll?living(s,'party'):[living(s,'party').sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]];for(const ally of allies){const amount=Math.min(skill.heal+Math.max(0,actor.level-1)*2,ally.maxHp-ally.hp);ally.hp+=amount;if(skill.shield)ally.guard=true;if(skill.cleanse)ally.status={};events.push({type:'heal',target:ally.id,amount});}note(s,actor.name+' uses '+skill.name+'.');}
@@ -209,10 +217,10 @@ function campAction(s,command){
  else return {ok:false,error:'Choose a camp action.'};
  s.campConfirmed=false;return {ok:true};
 }
-function warp(s,heroId,act,stage){const p=s.party.find(p=>p.id===heroId);if(!p||!hasAdmin(p)||![1,2,3].includes(act)||!Number.isInteger(stage)||stage<0||stage>=30)return false;s.mode='campaign';s.act=act;s.stage=stage;s.stories=[];s.restSpent=false;startBattle(s);return true;}
+function warp(s,heroId,act,stage){const p=s.party.find(p=>p.id===heroId);if(!p||!hasAdmin(p)||![1,2,3].includes(act)||!Number.isInteger(stage)||stage<0||stage>=30)return false;markCampaignShortcut(s);s.mode='campaign';s.act=act;s.stage=stage;s.stories=[];s.restSpent=false;startBattle(s);return true;}
 function skipEncounter(s,heroId='hero'){
  const player=s.party.find(p=>p.id===heroId);if(s.phase!=='battle'||!player||!hasAdmin(player))return false;
- s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
+ markCampaignShortcut(s);s.skipped=[...(s.skipped||[]),{act:s.act||1,stage:s.stage,raidLevel:s.mode==='raid'?s.raidLevel:null}].slice(-100);
  if(s.mode==='raid'){s.raidLevel++;s.stage=((s.raidLevel-1)%3)*10+9;startBattle(s);return true;}
  if(s.stage===(s.act===2?SEQUEL.length:CHAPTERS.length)-1){s.phase='complete';s.decisionEndsAt=null;return true;}
  s.stage++;s.restSpent=false;startBattle(s);return true;
@@ -252,5 +260,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {campaignUnlocks,Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });

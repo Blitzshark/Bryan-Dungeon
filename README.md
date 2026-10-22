@@ -386,3 +386,11 @@ character preview. Returning from a preview preserves the trade draft. The
 currency is called **Shards**. The authenticated Bryan owner account has an
 unlimited shard wallet, enforced on the server for purchases and trades; the UI
 shows ∞. A guest or ordinary account named Bryan receives no currency privileges.
+
+Campaign selection starts with Campaign 1. Defeating its final guardian normally
+unlocks Campaign 2; clearing Campaign 2 unlocks Campaign 3. Locked journeys are
+shown but disabled in solo and room selectors, and locked lobbies cannot be
+joined. Unlocks persist in the local profile; verified online victories also save
+access on the signed-in account. Existing saves retain earned access when their
+history records all three campaign guardians. Warp, Skip and Universe cleave do
+not earn new campaign unlocks, and do not remove access earned previously.
