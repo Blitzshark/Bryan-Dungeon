@@ -119,3 +119,5 @@ body:has(#game-ui:not([hidden])) .enemy-roster,body:has(#game-ui:not([hidden])):
 
 .battle-rules{font-size:9px;padding:5px 8px;margin-top:5px;color:#f2cf82;background:#17251ae8;max-width:230px;text-align:left}
 .battle-rules{position:absolute;top:-24px;left:0;margin:0;white-space:nowrap;font-size:8px}
+
+#username-rules{display:block;margin:-8px 0 16px;color:var(--muted);font-size:10px;line-height:1.5}.password-toggle{display:block;margin:-6px 0 18px;padding:7px 10px;font-size:11px}
