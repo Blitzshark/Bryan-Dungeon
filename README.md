@@ -471,3 +471,10 @@ The almanac derives its catalog from current campaign regions, campaign bosses,
 raid bosses and raid-summoned species. Retired enemies kept for legacy save
 compatibility do not create entries or completion requirements. Old discovery and
 completion lists are pruned on load; owner unlocks include only the active catalog.
+
+Almanac attacks describe their actual targets, percentage of enemy Attack,
+resolved element, on-hit status durations and consequences, focus loss, guarding,
+life drain, reinforcement limits and five-round domain hazards. Fighting habits
+explain behavior-dependent charging, sweeps, healing and guards. Descriptions use
+the combat data rather than generic attack flavor text; undiscovered entries keep
+these details hidden until the species is encountered.
