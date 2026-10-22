@@ -459,3 +459,10 @@ Twelve added species each have a custom model, three attacks, elemental affinity
 and almanac lore; the Sunscarab now has an insect body. Birds occupy a minority of
 these pools. Saved routes update only future ordinary sky encounters, preserving
 the current fight, previous encounters, boss choices, map layouts and vote events.
+
+Regular campaign enemies gain additional durability to keep pace with equipment:
+campaign one ramps to +35% HP and +10% attack, campaign two from +65% to +100% HP
+and +15% to +25% attack, and campaign three from +130% to +180% HP and +30% to
++45% attack. This grows smoothly over each campaign before party-size HP scaling.
+Mutations retain their effects. The moss tutorial, campaign bosses and raids keep
+their separate balance. Existing fights retain their saved HP and attack values.
