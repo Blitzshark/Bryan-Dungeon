@@ -404,3 +404,9 @@ unlocks every class, race, weapon, card, accessory and almanac entry. Every
 cosmetic skin is granted once, including newly added catalog skins on future
 syncs. Disabling special combat powers does not disable these unlocks or the
 unlimited shard wallet. Other accounts still earn campaign access normally.
+
+Basic attacks follow the equipped weapon, including weapons equipped from loot:
+staffs cast magic, bows fire projectiles, and melee weapons use swings. Their
+class-specific ability IDs and saved keybinds stay unchanged; names and elemental
+feedback match the weapon. Basic attacks remain free. Ranged critical-hit films
+also retain casting or shooting rather than running up for a melee strike.

@@ -39,7 +39,14 @@ for(const [key,skill]of Object.entries(SKILLS))skill.element=Elements.infer({...
 for(const [type,kit]of Object.entries(C.ENEMY_MOVES))for(const key of kit){const move=SKILLS[key];if(move&&move.element==='physical')move.element=ENEMIES[type]?.element||'physical';}
 for(const [key,weapon]of Object.entries(P.WEAPONS))weapon.element=Elements.infer({...weapon,id:key});
 function enemyAffinity(unit){return Elements.affinity({...ENEMIES[unit?.enemyType],...unit,element:unit?.element||ENEMIES[unit?.enemyType]?.element});}
-function attackElement(s,actor,key){const skill=SKILLS[key]||SKILLS.strike;if(actor?.side==='party'&&(key==='strike'||key.startsWith('basic_'))){const element=weaponFor(s,actor).element||'physical';return element==='physical'?skill.element:element;}return skill.element||'physical';}
+function skillFor(s,actor,key){
+ const base=SKILLS[key]||SKILLS.strike;if(actor?.side!=='party'||actor.summon||!(key==='strike'||key.startsWith('basic_')))return base;
+ const basic=SKILLS['basic_'+actor.job]||base,weapon=weaponFor(s,actor),style=weapon.style||basic.style;
+ const names={warrior:{magic:'Iron Bolt',arrow:'Iron Arrow',heavy:'Iron Breaker'},ranger:{magic:'Wild Spark',slash:'Trail Slash',heavy:'Trail Breaker'},mage:{arrow:'Prism Arrow',slash:'Prism Edge',heavy:'Prism Crush'},rogue:{magic:'Shadow Bolt',arrow:'Shadow Shot',heavy:'Ambush Crush'},paladin:{magic:'Dawn Bolt',arrow:'Dawn Arrow',slash:'Dawn Edge'},berserker:{magic:'Rage Bolt',arrow:'Rending Shot',slash:'Rending Edge'}};
+ const name=style===basic.style?basic.name:names[actor.job]?.[style]||basic.name;
+ return {...basic,name,style,element:weapon.element||'physical',description:name+': a free '+CLASSES[actor.job].name+' '+(style==='magic'?'spell cast from your equipped staff':style==='arrow'?'shot from your equipped bow':'attack with your equipped weapon')+'.'};
+}
+function attackElement(s,actor,key){return skillFor(s,actor,key).element||'physical';}
 
 const clone=value=>JSON.parse(JSON.stringify(value));
 function campaignUnlocks(s){
@@ -124,7 +131,7 @@ function act(s,command){
   s.embers--;target.hp=Math.ceil(target.maxHp*.5);events.push({type:'heal',target:target.id,amount:target.hp});note(s,actor.name+' brings '+target.name+' back to the fight.');
  }else if(command.type==='skill'){
   const allowed=abilities(s,actor);
-  const key=command.skill==='strike'?'basic_'+actor.job:command.skill,skill=SKILLS[key];command={...command,skill:key};if(!skill||!allowed.includes(key))return {ok:false,error:'That technique is not available.'};
+  const key=command.skill==='strike'?'basic_'+actor.job:command.skill,skill=skillFor(s,actor,key);command={...command,skill:key};if(!skill||!allowed.includes(key))return {ok:false,error:'That technique is not available.'};
   if(skill.ultimate&&(actor.charge||0)<100||skill.raceUltimate&&(actor.raceCharge||0)<100)return {ok:false,error:'Your ultimate is still charging.'};
   if(actor.mp<skill.cost)return {ok:false,error:'Not enough focus. Use Focus to recover.'};
   if(actor.cooldowns[key]>0)return {ok:false,error:'That technique is recovering.'};
@@ -261,5 +268,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {campaignUnlocks,Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {skillFor,campaignUnlocks,Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });
