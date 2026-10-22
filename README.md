@@ -430,3 +430,10 @@ slots are controlled by bots; joining players replace those bots without expandi
 the selected capacity. Existing rooms default to their saved roster size. Summons
 use distinct party formation positions, filling separate lanes before extra rows,
 rather than gathering around the summoner; arrival effects use the same positions.
+
+Each of the nine campaign maps now has its own three voting encounters (27 total),
+with distinct dilemmas, reward pairs and animated props/actions for both choices.
+Story pools shuffle without repeating until all three have appeared. Existing
+saves upgrade future generic encounters while keeping an active vote unchanged.
+Maximum-health rewards never heal. Jungle combat takes place on a continuous dirt
+and grass clearing, with trees, vines and ruins around its perimeter.

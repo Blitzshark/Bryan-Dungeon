@@ -55,7 +55,17 @@ class CampaignScene{
  candle(x,z,y=0){this.box(x,y,z,.11,.3,.11,'#d7cb94');const p=this.project(x,y+.38,z),c=this.paint,g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*.85);g.addColorStop(0,'#f3d57c44');g.addColorStop(1,'#f3d57c00');c.fillStyle=g;c.fillRect(p.x-this.scale,p.y-this.scale,this.scale*2,this.scale*2);c.fillStyle='#ffe4a0';c.fillRect(p.x-1.6,p.y-3,3.2,6);}
  barrel(x,z){this.shadow(x,z,.45,.3);this.box(x,.03,z,.6,.7,.6,'#786144');for(const y of [.12,.55])this.box(x,y,z,.63,.07,.63,'#afa682');}
  shipBackground(){const c=this.paint;c.fillStyle='#75a8bb';c.fillRect(0,0,this.width,this.height);this.plane(-30,-24,60,48,'#397b93');for(let i=0;i<45;i++)this.plane(-24+seeded(i)*48,-20+seeded(i+40)*40,2+seeded(i+20)*3,.08,'#75b7c0');for(let x=-8;x<8;x++)for(let z=-5;z<5;z++)this.box(x,-.2,z,.98,.2,.98,(x+z)%2?'#98764f':'#a5845b');for(const z of [-5.2,5.2])for(let x=-8;x<9;x++){this.box(x,0,z,.16,1,.16,'#725139');this.box(x,.8,z,1.1,.12,.14,'#d4b380');}for(const x of [-5.8,5.8]){this.box(x,0,-3,.3,7,.3,'#75523a');this.box(x,5.5,-3,.25,.25,6,'#8b6746');this.box(x,2.8,-3,.08,2.6,4.8,'#e3ddbe');}for(const [x,z]of [[-6,2.5],[5,3],[-4,-4]]){this.barrel(x,z);this.box(x+.8,0,z,.8,.6,.7,'#746148');}this.box(7,0,0,1.5,.5,7,'#97744d');}
- jungleBackground(){const c=this.paint;c.fillStyle='#254c3c';c.fillRect(0,0,this.width,this.height);for(let x=-20;x<20;x++)for(let z=-18;z<18;z++)this.plane(x,z,1,1,palette.jungle.tile[Math.abs(x+z)%3]);this.plane(-20,-16,9,32,'#397c78');for(let i=0;i<32;i++){const a=i*Math.PI/16,x=Math.cos(a)*(8+seeded(i)*4),z=Math.sin(a)*(6+seeded(i+40)*4);this.tree(x,z,1.2+seeded(i+60)*.5,i*37);if(i%2===0){this.box(x,3,z,.08,2.4,.08,'#70a359');this.box(x+.5,2,z,.08,2,.08,'#588448');}}for(let i=0;i<5;i++)this.box(1.8+i*.5,.03,-5.7,4-i*.6,.3+i*.25,2,'#7b8e67');for(const x of [-4.8,5.4]){this.box(x,0,3,.5,.4,.5,'#8bac73');for(let i=0;i<5;i++)this.box(x+(i-2)*.3,.3,3,.15,1+Math.sin(i)*.25,.15,'#5d9659');}}
+ jungleBackground(){const c=this.paint;c.fillStyle='#294a36';c.fillRect(0,0,this.width,this.height);
+ // A continuous ground-level clearing; canopy never forms the arena floor.
+ for(let x=-22;x<22;x++)for(let z=-22;z<22;z++){const d=Math.hypot(x/1.15,z),inside=d<7.8;this.plane(x,z,1,1,inside?['#827654','#8c7f59','#7a7250','#948462'][Math.floor(seeded(x*37+z)*4)]:palette.jungle.tile[Math.abs(x+z)%3]);}
+ for(let i=0;i<38;i++){const a=i*Math.PI*2/38,x=Math.cos(a)*(11+seeded(i)*3),z=Math.sin(a)*(10+seeded(i+40)*3),front=x*.27+z*.47>3.8;
+ if(!front)this.tree(x,z,1+seeded(i+60)*.4,i*37);else{this.box(x,0,z,.6,4.5,.65,'#4d4934');this.box(x+Math.sign(x)*2.5,4.5,z+Math.sign(z)*2.5,3.2,1.2,3.2,'#285b38');for(const side of [-1,1])this.box(x+side*.5,.01,z,.9,.18,.3,'#5c5c3e');}
+ if(i%2===0){this.box(x,1.2,z,.09,1.7,.09,'#6c9850');for(let j=0;j<3;j++)this.box(x+(j-1)*.25,.1,z+.4,.35,.25+j*.13,.6,'#366b3f');}}
+ for(let i=0;i<16;i++){const a=i*2.399,x=Math.cos(a)*8.7,z=Math.sin(a)*7.8;this.box(x,.02,z,.65,.12,.5,'#59713e');this.box(x,.14,z,.14,.35,.14,i%3?'#779459':'#c5a67b');}
+ // Half-buried ruin stones sit beyond the fighting space, never under the party.
+ for(let i=0;i<4;i++)this.box(-3+i*.8,.02,-8,1,.3+(i%2)*.2,.8,'#768567');
+ }
+
  skyBackground(){const c=this.paint,p=palette[this.biome],g=c.createLinearGradient(0,0,0,this.height);g.addColorStop(0,p.sky);g.addColorStop(1,p.far);c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
   const rand=n=>seeded(n+this.layoutSeed);for(let i=0;i<32;i++){const x=rand(i+90)*this.width,y=this.height*(.2+rand(i+120)*.8);c.fillStyle=this.biome==='tempest'?'#a6b4d433':'#f4f6e977';c.beginPath();c.ellipse(x,y,80+rand(i+88)*140,15+rand(i+33)*25,0,0,Math.PI*2);c.fill();}
   // Islands taper into open air. The arena has no surrounding ground plane.
