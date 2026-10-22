@@ -511,3 +511,9 @@ loot scaling and existing cinematic spacing remain in place.
 Ordinary campaign fights now draw from a seeded, non-repeating regional bag of six conditions: Crossfire, Wild Magic, Last Stand, Focus Well, Ambush, and Champion Pack. Regions retain their fixed scenery. The opening moss fight and boss fights keep their existing rules. Existing saved fights remain unchanged; conditions begin when entering the next fight.
 
 Optional objectives reward fast victories, conserving healing items, or finishing with everyone standing. Success grants one extra equipment drop and a tonic; champion packs grant the same bonus even if the objective is missed (the rewards do not stack). Neither objectives nor conditions grant automatic healing or extra gold. The compact battle-rules button explains the condition and objective on desktop and mobile, and camp confirms bonus loot. Conditions and item-use progress persist in multiplayer state and saves.
+
+### Lantern Exchange refresh
+
+The trading hub is a lantern-lit market over a canal, with striped stalls, labeled shopkeepers, flower boxes, benches, and an animated fountain. WASD and the touch pad use smooth acceleration and turning; fountain and stall collision prevent walking through the central structures. NPC interaction remains E or the nearby talk button.
+
+Hub visitors now reuse TavernLive peer movement and TavernMotion snapshot interpolation. Authenticated, recipient-only hub signaling establishes movement channels; when a direct connection is unavailable, bounded snapshot interpolation uses 200 ms polling. Established peer connections use one-second membership heartbeats instead. Leaving closes peers and clears interpolation buffers. Reduced-motion settings suppress idle motion and particles. The new renderer is included in both Railway and Vercel builds.
