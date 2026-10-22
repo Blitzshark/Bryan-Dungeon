@@ -466,3 +466,8 @@ and +15% to +25% attack, and campaign three from +130% to +180% HP and +30% to
 +45% attack. This grows smoothly over each campaign before party-size HP scaling.
 Mutations retain their effects. The moss tutorial, campaign bosses and raids keep
 their separate balance. Existing fights retain their saved HP and attack values.
+
+The almanac derives its catalog from current campaign regions, campaign bosses,
+raid bosses and raid-summoned species. Retired enemies kept for legacy save
+compatibility do not create entries or completion requirements. Old discovery and
+completion lists are pruned on load; owner unlocks include only the active catalog.
