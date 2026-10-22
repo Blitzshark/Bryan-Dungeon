@@ -453,3 +453,9 @@ camera/effect recipe. Critical hits inside existing guardian, ocean and raid
 signature films keep that film and add the impact frames and yellow label.
 Health and floating damage still update at impact; reduced motion keeps the
 critical label without flashing impact frames or camera movement.
+
+Sky encounters draw from larger, region-specific wildlife and construct pools.
+Twelve added species each have a custom model, three attacks, elemental affinity
+and almanac lore; the Sunscarab now has an insect body. Birds occupy a minority of
+these pools. Saved routes update only future ordinary sky encounters, preserving
+the current fight, previous encounters, boss choices, map layouts and vote events.
