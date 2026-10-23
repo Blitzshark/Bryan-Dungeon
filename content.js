@@ -1,4 +1,4 @@
-(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./ocean-content'):root.OceanContent,typeof module==='object'&&module.exports?require('./frontier-content'):root.FrontierContent);if(typeof module==='object'&&module.exports)module.exports=api;else root.GameContent=api;})(typeof globalThis!=='undefined'?globalThis:this,function(O,X){
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./ocean-content'):root.OceanContent,typeof module==='object'&&module.exports?require('./frontier-content'):root.FrontierContent,typeof module==='object'&&module.exports?require('./arsenal-content'):root.ArsenalContent);if(typeof module==='object'&&module.exports)module.exports=api;else root.GameContent=api;})(typeof globalThis!=='undefined'?globalThis:this,function(O,X,D){
 'use strict';
 const CARDS={summonKnight:{name:'Summon: Knight',price:100,cost:3,cd:4,summon:true,style:'summon',duration:3600,impactAt:1800,rarity:'Rare',description:'Summon a defensive knight with Taunt for this encounter. Enemies target it, and attacks against it cannot miss. It disappears when the encounter ends. Its four-turn cooldown begins only when it dies.'},aegis:{name:'Aegis Pulse',price:0,cost:1,cd:2,shield:true,self:true,style:'focus',rarity:'Common',description:'Guard yourself with a spectral shield.'},emberLance:{name:'Cinder Lance',price:70,cost:2,cd:2,mult:1.4,burn:true,style:'magic',rarity:'Rare',description:'A burning lance that sets its target ablaze.'},frostNova:{name:'Winter Bloom',price:90,cost:3,cd:3,mult:.85,chill:true,all:true,style:'magic',rarity:'Rare',description:'Ice blossoms weaken every enemy for two attacks.'},siphon:{name:'Sanguine Thread',price:110,cost:2,cd:3,mult:1.3,drain:true,style:'magic',rarity:'Epic',description:'Pull a thread of life from an enemy.'},meteor:{name:'Falling Star',price:150,cost:4,cd:4,mult:2.1,style:'magic',rarity:'Epic',description:'Call down a brilliant meteor on one target.'}};
 Object.assign(CARDS,{
@@ -128,5 +128,6 @@ for(const theme of RAID_THEMES){const kit=RAID_KITS[theme.id];for(let i=0;i<110;
 
 
 Object.assign(MOVES,X.snailMoves());ENEMY_MOVES.raid_snail=Object.keys(X.snailMoves());
-return {X,SUMMON_SKILLS,SUMMONS,O,SECTION_BOSSES,BOSS_ENTRANCES,BOSS_INTRO_DURATIONS,SKY_FOES,SKY_ARTS,SKY_DIVERSITY,RAID_THEMES,RAID_MINIONS,CARDS,BASICS,ENEMY_MOVES,MOVES,WORLDS2,FOES,CAMPAIGN2};
+Object.assign(BASICS,D.BASICS);Object.assign(MOVES,D.SKILLS);
+return {D,X,SUMMON_SKILLS,SUMMONS,O,SECTION_BOSSES,BOSS_ENTRANCES,BOSS_INTRO_DURATIONS,SKY_FOES,SKY_ARTS,SKY_DIVERSITY,RAID_THEMES,RAID_MINIONS,CARDS,BASICS,ENEMY_MOVES,MOVES,WORLDS2,FOES,CAMPAIGN2};
 });
