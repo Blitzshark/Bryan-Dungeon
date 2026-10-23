@@ -541,3 +541,24 @@ Bryan's authenticated account automatically unlocks the complete current catalog
 ### Raid cinematic skip votes
 
 Raid boss journeys and cinematic raid attacks show **Ready to skip** with a party readiness count. Every connected human player must agree; empty slots and disconnected companions count as automatically ready bots. Solo players can skip immediately. Votes are scoped to a single cutscene, accept concurrent player requests, and expire when it ends. Skipping advances presentation and the server's animation wait without undoing or repeating combat damage, spending resources again, or advancing the raid. Normal combat decision timers restart after a successful skip. The server retains the skipped cutscene key so a slower client can catch up after the next action starts.
+
+### Campaign bestiary and entrances
+
+Each of the twelve active campaign areas gains two regular species and one campaign-only guardian: 24 ordinary enemies, 12 bosses, and 144 named moves in total. Every addition has a nonhumanoid model, native element, combat role, habitat, almanac lore, and described attacks. Ordinary species have three moves; the new bosses have six, ending in a brief signature film.
+
+| Area | Added regular enemies | Added boss |
+| --- | --- | --- |
+| Greenwood | Reed Toad, Thorn Mantis | The Lily Crown |
+| Hollow Depths | Candle Crawler, Coffin Mite | The Mourning Bell |
+| Void & Hell | Cinder Leech, Rift Urchin | The Ashen Procession |
+| Ocean | Pearl Snipper, Kelp Dragon | The Spiral Abbey |
+| Corsair Ship | Powder Rat, Rope Weaver | The Powder King |
+| Jade Jungle | Fang Bromeliad, Jade Pangolin | The Threefold Root |
+| Cloud Gardens | Nimbus Moth, Balloon Urchin | The Drifting Continent |
+| Thunderhead Reach | Copper Hare, Living Stormkite | The Thunder Engine |
+| Sunspire Zenith | Sundial Mite, Glass Cobra | The Noonday Lens |
+| Frostwake Expanse | Snowbank Yak, Hoarfrost Dragonfly | The Glacier Carrier |
+| Singing Geodes | Copper Coil, Gem Ammonite | The Cavern Resonator |
+| Aurora Citadel | Ribbon Fox, Night Compass | The Northern Loom |
+
+Fresh runs draw from the expanded pools. Existing saves retain their generated routes. The fixed opening moss encounter and the ten-encounter regional maps are preserved. Regular battle intros show the actual enemies with six alternating approach scripts and seeded camera variation shared by online players. Adjacent encounters use different approach scripts. New boss entrances include lily leaps, descending bells, crawling fire centipedes, emerging shell abbeys, rolling cannon kegs, rising root hydras, flying whales, bouncing thunder drums, turning solar lenses, breaking ice shelves, resonating forks, and descending aurora looms. Raid journey boss reveals remain removed.
