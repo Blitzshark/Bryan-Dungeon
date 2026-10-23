@@ -520,9 +520,15 @@ Hub visitors now reuse TavernLive peer movement and TavernMotion snapshot interp
 
 ### Permanent equipment
 
-Open **Permanent gear** from the title menu, party lobby, or tavern to select one weapon, armor, and charm for all future campaigns and raids. Gear worn at camp is automatically archived (up to 60 pieces), including gear recovered from existing local camp saves. Its rarity, attack, armor, weapon identity, special art, enchantment, and upgrades carry over. The first recovered piece in each slot is selected automatically until the player customizes the loadout. Unequipping a permanent slot keeps the item in the vault. Existing runs keep their current equipment.
+Permanent gear is a separate collection from temporary campaign loot. Buy the 36 named pieces with shards in **Permanent gear → Shop permanent gear**, or earn them from verified online raid boss victories. Later raids can award higher rarities; duplicate permanent drops award 10 extra shards. Bryan automatically owns every piece.
 
-The vault saves locally per account (or guest browser), and signed-in accounts sync it to persistent account storage. Server requests send only three changed items at a time, keeping room profiles small. New runs receive bound equipment copies; companions cannot take these copies, and copies sell for zero gold. Upgrades made at camp are archived back into the permanent item. Each human room member brings their own gear, including through tavern raid queues; replacing a departed player removes that player's bound copies. Permanent equipment is separate from tradable cosmetic skins.
+Equip one weapon, armor, and charm before departure. Their bonuses remain active alongside temporary run equipment; run loot and camp upgrades never become permanent items. Permanent upgrades are purchased separately with shards, up to three times per piece. The collection holds up to 120 pieces and signed-in account storage verifies ownership, purchases, upgrades, and raid claims. Loadout changes apply to the next run or an unstarted room. Permanent weapon arts remain available when a temporary weapon is equipped.
+
+Previously copied campaign gear is preserved in a legacy backup, separate from the active permanent collection. Existing runs keep their equipment. Permanent gear is also separate from tradable cosmetic skins.
+
+### Simple builds
+
+The build screen has four stats: Power, Toughness, Speed, and Focus. Choose Balanced, Damage, Tank, or Support to distribute points automatically, or use the four plus/minus controls. Press **Save build** to apply. Changing class, race, weapon, and cards, plus sharing/importing codes, are collapsed by default. Existing BB1 build codes still work; imported allocations fit the current level's point budget. Adding maximum health does not heal an active adventurer.
 
 ### Custom heraldry and arsenal expansion
 

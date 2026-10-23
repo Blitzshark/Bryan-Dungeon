@@ -1,0 +1,10 @@
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./build-stats'):root.BuildStats);if(typeof module==='object'&&module.exports)module.exports=api;else root.SimpleBuilds=api;})(typeof globalThis!=='undefined'?globalThis:this,function(B){
+'use strict';
+const GROUPS={power:{name:'Power',description:'Stronger melee, magic, and ranged attacks.',keys:['strength','intellect','dexterity']},health:{name:'Toughness',description:'More maximum health and armor.',keys:['vitality','endurance']},speed:{name:'Speed',description:'Act sooner and dodge more attacks.',keys:['agility']},focus:{name:'Focus',description:'Better abilities, healing, and summons.',keys:['spirit','discipline','resolve','restoration','alchemy','command']}};
+const PRESETS={balanced:{name:'Balanced',weights:[.35,.3,.15,.2]},damage:{name:'Damage',weights:[.55,.25,.1,.1]},tank:{name:'Tank',weights:[.2,.5,.1,.2]},support:{name:'Support',weights:[.2,.25,.1,.45]}};
+function counts(stats){const p=B.allocation(stats);return Object.fromEntries(Object.entries(GROUPS).map(([id,g])=>[id,g.keys.reduce((n,k)=>n+p[k],0)]));}
+function cap(id){return GROUPS[id].keys.reduce((n,k)=>n+(B.DEFS[k].cap||20),0);}
+function change(stats,id,delta,level){const p=B.allocation(stats,B.budget(level)),g=GROUPS[id];if(!g||![1,-1].includes(delta))return p;const keys=g.keys.filter(k=>delta>0?p[k]<(B.DEFS[k].cap||20):p[k]>0).sort((a,b)=>delta>0?p[a]-p[b]:p[b]-p[a]);if(keys.length&&(delta<0||B.total(p)<B.budget(level)))p[keys[0]]+=delta;return p;}
+function preset(id,level){let stats=B.allocation({});const plan=PRESETS[id]||PRESETS.balanced,ids=Object.keys(GROUPS);for(let n=0;n<B.budget(level);n++){const used=counts(stats),choices=ids.filter(k=>used[k]<cap(k)).sort((a,b)=>plan.weights[ids.indexOf(b)]/(used[b]+1)-plan.weights[ids.indexOf(a)]/(used[a]+1));if(!choices.length)break;stats=change(stats,choices[0],1,level);}return stats;}
+return {GROUPS,PRESETS,counts,cap,change,preset};
+});
