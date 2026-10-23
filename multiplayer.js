@@ -32,7 +32,15 @@ class OnlineParty{
  async resume(){if(!this.session)throw Error('There is no room to resume in this browser tab.');this.closed=false;if(typeof this.session.server==='string')this.server=this.session.server;const data=await this.request(null,this.session.code);this.accept(data,true);this.schedule();return data;}
  schedule(){clearTimeout(this.timer);if(this.closed||!this.session)return;this.timer=setTimeout(()=>this.poll(),1200);}
  async poll(){if(this.closed||!this.session||this.inFlight){this.schedule();return;}try{const data=await this.request(null,this.session.code);if(!this.closed)this.accept(data);}catch(error){this.onError(error);if([401,404].includes(error.status)){this.stop();return;}}finally{this.schedule();}}
- async send(action){if(this.inFlight||!this.room)throw Error('Wait for the party to finish syncing.');this.inFlight=true;try{const input={op:'command',code:this.session.code,version:this.room.version,requestId:crypto.randomUUID(),action};let data;for(let attempt=0;;attempt++){try{data=await this.request(input);break;}catch(error){if(action.type!=='choice'||error.status!==409||attempt>=3)throw error;await new Promise(resolve=>setTimeout(resolve,150+Math.random()*250));}}if(data.left){this.stop(true);return data;}this.accept(data);return data;}catch(error){this.poll().catch(()=>{});throw error;}finally{this.inFlight=false;this.schedule();}}
+ async send(action){
+  if(this.inFlight||!this.room)throw Error('Wait for the party to finish syncing.');
+  this.inFlight=true;const scope=d=>[d?.code,d?.state?.runId,d?.started,d?.state?.mode,d?.state?.act,d?.state?.stage,d?.state?.phase].join(':'),origin=scope(this.room),retryable=['ready','camp','loadout','permanent-gear','start','travel','retry','sequel'].includes(action.type);
+  try{const input={op:'command',code:this.session.code,version:this.room.version,requestId:crypto.randomUUID(),action};let data;
+   for(let attempt=0;;attempt++){try{data=await this.request(input);break;}catch(error){if(error.status===409&&/party is syncing/i.test(error.message)&&attempt<3){await new Promise(resolve=>setTimeout(resolve,150+attempt*150));continue;}const conflict=error.status===409&&/party state changed/i.test(error.message);if(attempt>=3||!conflict||!retryable&&action.type!=='choice')throw error;const fresh=await this.request(null,input.code);if(this.closed||this.session?.code!==input.code)throw error;this.accept(fresh);if(scope(fresh)!==origin)throw error;if(action.type==='choice'&&action.ballot!==fresh.ballot?.key)throw error;input.version=this.room.version;}}
+   if(data.left){this.stop(true);return data;}this.accept(data);return data;
+  }catch(error){this.poll().catch(()=>{});throw error;}finally{this.inFlight=false;this.schedule();}
+ }
+
  depart(){
   if(!this.session)return;const session=this.session,url=(this.server??session.server??'')+'/api/rooms',body=JSON.stringify({op:'depart',code:session.code,token:session.token});
   this.stop(true);try{if(navigator.sendBeacon?.(url,new Blob([body],{type:'text/plain'})))return;}catch{}

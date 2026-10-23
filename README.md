@@ -562,3 +562,9 @@ Each of the twelve active campaign areas gains two regular species and one campa
 | Aurora Citadel | Ribbon Fox, Night Compass | The Northern Loom |
 
 Fresh runs draw from the expanded pools. Existing saves retain their generated routes. The fixed opening moss encounter and the ten-encounter regional maps are preserved. Regular battle intros show the actual enemies with six alternating approach scripts and seeded camera variation shared by online players. Adjacent encounters use different approach scripts. New boss entrances include lily leaps, descending bells, crawling fire centipedes, emerging shell abbeys, rolling cannon kegs, rising root hydras, flying whales, bouncing thunder drums, turning solar lenses, breaking ice shelves, resonating forks, and descending aurora looms. Raid journey boss reveals remain removed.
+
+### Camera faces and party conflict recovery
+
+In **Customize → Take a photo for your face**, open the device camera, adjust the center-square zoom, take or retake a photo, then choose **Use photo → Save appearance**. **Download PNG** saves a local copy. Image upload also works when a camera is unavailable or permission is declined. Camera access starts only on request and its tracks stop after capture, on closing customization, or on leaving the page. Photos are resized to bounded 32×32 PNGs and saved with the character appearance, including shared party and tavern profiles. Default and drawn faces remain available.
+
+Lobby and camp commands recover from stale party versions by fetching the latest snapshot and retrying the same request identifier, only while the run, encounter, and phase remain unchanged. Combat commands do not rebase onto a different turn. Brief shared-store lock conflicts retry the identical request with bounded backoff. Camp confirmation sends an explicit ready value instead of a toggle, avoiding accidental reversal on retries.
