@@ -528,7 +528,7 @@ Previously copied campaign gear is preserved in a legacy backup, separate from t
 
 ### Simple builds
 
-The build screen has four stats: Power, Toughness, Speed, and Focus. Choose Balanced, Damage, Tank, or Support to distribute points automatically, or use the four plus/minus controls. Press **Save build** to apply. Changing class, race, weapon, and cards, plus sharing/importing codes, are collapsed by default. Existing BB1 build codes still work; imported allocations fit the current level's point budget. Adding maximum health does not heal an active adventurer.
+The build screen has four stats: Power, Toughness, Speed, and Focus. Choose Balanced, Damage, Tank, or Support to distribute points automatically, or use the four plus/minus controls. Press **Save build** to apply. Changing class, race, weapon, and cards, plus sharing/importing codes, are collapsed by default. Existing BB1 build codes still work; imported allocations fit the current level's point budget. Adding maximum health does not heal an active adventurer. There is no future-level planner: applying or restoring a build trims both stored and active allocations to the adventurer’s actual level budget. Excess points from old plans or imported codes are discarded; leveling creates unspent points for manual allocation.
 
 ### Custom heraldry and arsenal expansion
 
