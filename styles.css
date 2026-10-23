@@ -127,3 +127,6 @@ body:has(#game-ui:not([hidden])) .enemy-roster,body:has(#game-ui:not([hidden])):
 
 .hub-note{bottom:68px}@media(max-width:650px){.hub-note{bottom:76px}}
 #permanent-gear-preview .model-preview{width:100%;height:180px}.permanent-slot{display:grid;gap:8px;border:1px solid #c4d6ae33;border-radius:7px;background:#15291e88;padding:14px;margin:10px 0}.permanent-slot label{font-size:10px;color:#d3c18c;letter-spacing:.12em}.permanent-slot select{width:100%;min-width:0;padding:10px;color:#e0e9ce;background:#12241b;border:1px solid #b9c7a544;border-radius:4px;font-size:12px}.permanent-slot small{color:#a9baa2;font-size:10px;line-height:1.6}#permanent-gear-storage{font-size:11px}#tavern-gear{font-size:10px}
+
+/* Turn announcements belong to the controls, never the battlefield. */
+#turn-indicator{max-width:180px;min-width:0;white-space:normal;flex-shrink:1;gap:6px}#turn-indicator>i{flex-shrink:0}#battle-announcement{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.35;font-size:8px;letter-spacing:.04em;text-align:left}@media(max-width:520px){#turn-indicator{max-width:120px}#battle-announcement{font-size:7px}}
