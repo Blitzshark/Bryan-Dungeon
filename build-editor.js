@@ -3,7 +3,7 @@
 const B=BuildStats,S=SimpleBuilds,P=HeroOptions,E=DungeonCampaign,node=(tag,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;return e;};
 class BuildEditor{
  constructor(options){Object.assign(this,options);}
- open(){const p=this.getProfile();this.level=Math.max(1,Math.min(50,this.getLevel()));this.draft={job:p.job,race:p.race,weapon:p.weapon,cards:[...p.equippedCards],stats:B.allocation(p.statAllocation,B.budget(this.level))};this.render();}
+ open(){const p=this.getProfile();this.level=Math.max(1,Math.floor(Number(this.getLevel())||1));this.draft={job:p.job,race:p.race,weapon:p.weapon,cards:[...p.equippedCards],stats:B.allocation(p.statAllocation,B.budget(this.level))};this.render();}
  owned(){const p=this.getProfile(),d=this.draft,missing=[];for(const [id,list,catalog]of [[d.job,p.classes,E.CLASSES],[d.race,p.races,P.RACES],[d.weapon,p.weapons,P.WEAPONS],...d.cards.map(id=>[id,p.cards,P.CARDS])])if(!Object.hasOwn(catalog,id)||!list.includes(id))missing.push(catalog[id]?.name||id);return missing;}
  render(){this.showModal('<div id="build-editor" class="simple-build-editor"></div>');const root=document.getElementById('build-editor');root.append(node('h2','Your build.'),node('p','Pick a style, or spend points yourself. Changes are free.'));
  const presets=node('div','','simple-build-presets');for(const [id,preset]of Object.entries(S.PRESETS)){const b=node('button',preset.name);b.onclick=()=>{this.draft.stats=S.preset(id,this.level);this.update();this.message(preset.name+' points set. Press Save build.');};presets.append(b);}root.append(presets);this.points=node('strong','','simple-build-points');root.append(this.points);this.rows=[];
