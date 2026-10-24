@@ -7,7 +7,7 @@ const SHOTS=[
  {biome:'reef',act:2,enemies:['reefcrab','moonbell'],spell:'spark'},
  {biome:'ship',act:2,enemies:['nautilus','sawshark'],spell:'frostbite'},
  {biome:'jungle',act:2,enemies:['spider','treant'],spell:'wildfire'},
- {biome:'cloud',act:3,enemies:['brasswing','conductor'],spell:'chainshot'}
+ {biome:'cloud',act:3,enemies:['glassadder','sailback'],spell:'chainshot'}
 ];
 const SHOT_MS=10000;
 function update(scene,time){

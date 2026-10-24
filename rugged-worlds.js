@@ -1,0 +1,82 @@
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.RuggedWorlds=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
+'use strict';
+const REGIONS={cloud:{name:'Scorchglass Desert',effect:'heat',icon:'☀',title:'Desert heat',description:'After an attack, lose 1% maximum HP (at most 8). Guard & focus shelters you from heat for that action.'},tempest:{name:'Fulgur Canyon',effect:'static',icon:'ϟ',title:'Static buildup',description:'Every third non-guard action discharges static: lose 2% maximum HP (at most 12) and 1 focus. Guard & focus grounds the charge.'},zenith:{name:'The Buried Sun Temple',effect:'sunphase',icon:'◑',title:'Sun / moon alignment',description:'Odd rounds empower Light attacks by 18%; even rounds empower Shadow attacks by 18%. This affects both sides.'},tundra:{name:'Frostwake Wilderness',effect:'cold',icon:'❄',title:'Biting cold',description:'Every third non-guard action costs 1 focus. Guard & focus warms you and resets cold exposure.'},geode:{name:'The Singing Depths',effect:'echo',icon:'◈',title:'Crystal resonance',description:'Repeating the same damaging skill consecutively causes 2% maximum HP recoil (at most 12). Change skills, use an item, or Guard & focus to break the echo.'},aurora:{name:'Aurora Bastion',effect:'ward',icon:'▣',title:'Bastion wards',description:'Each enemy renews a ward every round. Its first elemental hit is reduced by 20%; a Physical hit breaks the ward without damage reduction.'}};
+const rows={
+cloud:[
+['dunescuttler','Dune Scuttler','sandbeetle','earth','guard',.95,7,['Carapace Jab','Sand Fan','Chitin Brace']],
+['glassadder','Glass Adder','glasscobra','arcane','poison',.8,11,['Glass Fang','Shard Venom','Refracted Coil']],
+['bristletortoise','Bristleback Tortoise','cactustortoise','nature','guard',1.4,3,['Spine Ram','Cactus Barrage','Bristle Guard']],
+['sailback','Sailback Lizard','sailback','fire','pounce',1,10,['Sun Sail','Scorching Tail','Dune Pounce']],
+['saltjackal','Salt Jackal','saltjackal','physical','pounce',.9,12,['Salt Fang','Pack Feint','Grit Pounce']],
+['urnmimic','Thirsting Urn','urn','shadow','drain',1.15,5,['Clay Bite','Blackwater Draw','Burial Dust']],
+['dunewyrm','THE GLASS DUNE WYRM','dunewyrm','earth','sweep',4,6,['Sand Maw','Glass Wake','Buried Armor','Dune Lance','Silt Deluge','Desert Undertow','Crystal Fangs','The Desert Opens']],
+['carapaceking','THE CARAPACE KING','hornbeetle','nature','guard',4.2,4,['Royal Horn','Chitin Rain','Ancient Carapace','Thorn Lance','Buried Charge','Molting Sweep','Crown Break','The Scarab March']],
+['sunkenobelisk','THE SUNKEN OBELISK','obelisk','arcane','charge',4,5,['Glyph Lance','Burial Ring','Sealed Stone','Sand Coffin','Mirage Verdict','Orbiting Ruin','Runic Crush','The Lost City Rises']],
+['dunesail','THE SAND-SAIL DEVOURER','duneray','earth','sweep',4,8,['Sand Wing','Buried Teeth','Silt Mantle','Dune Cutter','Glass Spray','Undersand Lunge','Horizon Sweep','A Sea of Sand']]],
+tempest:[
+['basalttoad','Basalt Toad','basalttoad','earth','guard',1.25,5,['Stone Tongue','Pebble Croak','Basalt Hide']],
+['copperwasp','Copper Wasp','copperwasp','storm','pounce',.75,13,['Wire Sting','Arc Wing','Capacitor Dive']],
+['cairnwalker','Cairn Walker','cairnwalker','earth','charge',1.35,4,['Stacked Blow','Falling Cairn','Stone Balance']],
+['arcgecko','Arc Gecko','arcgecko','storm','pounce',.9,11,['Spark Toe','Wall Leap','Tail Conductor']],
+['spoolhermit','Cable Hermit','spoolcrab','physical','guard',1.25,5,['Cable Claw','Spool Shot','Wound Shield']],
+['stormvulture','Canyon Vulture','vulture','storm','drain',.9,10,['Hooked Beak','Thunder Draft','Scavenger Dive']],
+['lightningmill','THE LIGHTNING MILL','windmill','storm','sweep',4,6,['Rotor Cut','Arc Turbine','Copper Shutters','Lightning Rod','Crosswind','Gearfall','Capacitor Roar','The Canyon Conducts']],
+['chasmarachnid','THE CHASM WEAVER','canyonspider','nature','poison',4,10,['Basalt Fang','Cable Snare','Stone Carapace','Chasm Thread','Venom Rain','Ceiling Ambush','Eightfold Pierce','The Ravine Closes']],
+['ironbison','THE IRON BISON','ironbison','earth','charge',4.5,5,['Iron Horn','Hoofquake','Magnetic Hide','Canyon Rush','Shrapnel Breath','Copper Sweep','Mountain Charge','The Faultline Breaks']],
+['fulgurserpent','THE FULGUR SPINE','copperserpent','storm','sweep',4,9,['Copper Fang','Coil Storm','Grounded Armor','Forked Lance','Thunder Spiral','Lightning Spines','Arc Guillotine','Sky to Stone']]],
+zenith:[
+['papyrusguard','Papyrus Guardian','mummy','shadow','guard',1.1,6,['Linen Blade','Burial Wrap','Funerary Guard']],
+['mirrorscarab','Mirror Scarab','mirrorscarab','light','guard',1.05,7,['Lens Bite','Sun Scatter','Mirror Shell']],
+['censerwisp','Censer Spirit','censer','fire','drain',.8,9,['Incense Bolt','Ember Chain','Smoke Tithe']],
+['sunviper','Sun Viper','sunviper','fire','poison',.9,11,['Solar Fang','Golden Venom','Noon Coil']],
+['tilegolem','Mosaic Golem','mosaic','earth','charge',1.4,3,['Tile Hammer','Mosaic Shards','Temple Brace']],
+['goldleech','Gold Leech','goldleech','shadow','drain',.9,8,['Coin Teeth','Gilded Siphon','Black Tribute']],
+['solaridol','THE FOURFOLD IDOL','fourarmidol','light','sweep',4,7,['Golden Palm','Noon Halo','Temple Guard','Fourfold Spear','Dawn Verdict','Idolfall','Solar Crucible','The Sun Has Four Hands']],
+['tombsphinx','THE ENTOMBED SPHINX','sphinx','shadow','charge',4.2,8,['Riddle Claw','Grave Breath','Basalt Mantle','Royal Pounce','Burial Wings','Silent Verdict','Lion’s Sentence','Answer the Tomb']],
+['glasspyramid','THE PRISM TOMB','pyramid','arcane','guard',4.5,4,['Facet Ray','Glass Rain','Sealed Facets','Pyramid Lance','Split Horizon','Refraction Ring','Burial Light','The Pyramid Unfolds']],
+['ushabtilegion','THE USHABTI TRINITY','trinity','earth','sweep',4.3,6,['Three Scepters','Funeral March','Stone Oath','Idol Spears','Crownfall','Tomb Circle','Royal Sentence','The Buried Court']]],
+tundra:[
+['frostboar','Frostmane Boar','frostboar','frost','charge',1.3,6,['Ice Tusk','Snowbank Rush','Frost Mane']],
+['snowowl','Snowblind Owl','snowowl','frost','pounce',.8,12,['White Talon','Blizzard Wing','Silent Descent']],
+['crevasseangler','Crevasse Angler','iceangler','water','drain',1,8,['Lure Bite','Glacier Spit','Cold Siphon']],
+['rimeporcupine','Rime Porcupine','porcupine','frost','guard',1.2,4,['Icicle Quill','Snowburst','Winter Curl']],
+['woollouse','Woolly Ice Louse','woollouse','earth','guard',1.4,3,['Wool Slam','Ice Scrape','Fur Mantle']],
+['cairnhermit','Glacier Hermit','cairnhermit','earth','guard',1.3,4,['Cairn Claw','Stone Toss','Mountain Home']],
+['glacierox','THE GLACIER OX','glacierox','frost','charge',4.4,4,['Polar Horn','Whiteout Stomp','Winter Hide','Tusk Sweep','Frozen Charge','Avalanche','Hoarfrost Roar','The Glacier Advances']],
+['floejaw','THE FLOEJAW','icecroc','water','drain',4,7,['Ice Jaw','Shelf Break','Frozen Scales','Undertow Bite','Glacial Roll','Floe Shrapnel','Cold Harvest','Beneath the Frozen Lake']],
+['wintercrown','THE WINTER CROWN','crownelk','nature','sweep',4,10,['Antler Blade','White Forest','Barkfrost Guard','Crown Spear','Frozen Roots','Polar Charge','Thorn Blizzard','The Forest in Winter']],
+['icecairn','THE WALKING MORAINE','moraine','earth','guard',4.7,3,['Moraine Fist','Boulder Rain','Glacier Plates','Permafrost Lance','Ridge Collapse','Stone Avalanche','Mountain Hammer','The Valley Moves']]],
+geode:[
+['quartzslug','Quartz Slug','quartzslug','arcane','guard',1.15,4,['Quartz Slime','Facet Shot','Crystal Mantle']],
+['blindrootbat','Blindroot Bat','rootbat','shadow','drain',.8,12,['Root Fang','Cavern Echo','Dark Harvest']],
+['gemarmadillo','Gem Armadillo','gemarmadillo','earth','guard',1.35,4,['Facet Roll','Diamond Claw','Mineral Guard']],
+['tuningmite','Tuning Mite','tuningmite','arcane','sweep',.85,10,['Tine Strike','Dissonant Pulse','Pitch Shift']],
+['prismnewt','Prism Newt','prismnewt','water','pounce',1,9,['Glass Tail','Crystal Dew','Cavern Leap']],
+['coalroot','Coalroot Tangle','coalroot','nature','drain',1.25,5,['Carbon Thorn','Root Siphon','Black Sap']],
+['prismscorpion','THE PRISM STINGER','prismscorpion','arcane','poison',4.1,9,['Diamond Pincer','Venom Facets','Prismatic Molt','Stinger Verdict','Shard Cyclone','Gem Impalement','Crystal Venom','The Mountain Stings']],
+['stoneorgan','THE STONE ORGAN','stoneorgan','earth','sweep',4.5,4,['Bass Hammer','Cavern Chord','Closed Pipes','Resonance Lance','Organfall','Faultline Hymn','Shattering Note','The Deepest Note']],
+['diamondtortoise','THE DIAMOND BASTION','diamondtortoise','earth','guard',4.8,3,['Diamond Ram','Facet Hail','Bastion Shell','Crystal Spear','Gemquake','Mineral Breath','Mountain Sweep','An Unbroken Mountain']],
+['gemqueen','THE JEWEL CARAVAN','gemcentipede','arcane','sweep',4.2,8,['Gem Mandible','Prismatic March','Crystal Bearings','Facet Lance','Carriage Crush','Geode Rain','Resonant Coil','Every Jewel Sings']]],
+aurora:[
+['silkautomaton','Silk Automaton','tripodlantern','arcane','guard',1.05,7,['Shuttle Needle','Silk Veil','Clockwork Brace']],
+['shutterknight','Shutter Knight','shutterknight','light','guard',1.3,5,['Shutter Blade','Lantern Flash','Closed Visor']],
+['sixlegfrosthound','Sixleg Frosthound','sixhound','frost','pounce',1,12,['Polar Fang','Sixfold Pounce','Ice Breath']],
+['bellcrane','Bell Crane','bellcrane','light','sweep',.9,10,['Bell Beak','Chime Wing','Bronze Talon']],
+['threadviper','Thread Viper','threadviper','arcane','poison',.85,11,['Needle Fang','Knot Snare','Light Venom']],
+['doormimic','Gate Mimic','doormimic','shadow','drain',1.4,4,['Threshold Bite','Hinge Crush','Toll of Shadows']],
+['loomwidow','THE LOOM WIDOW','loomwidow','arcane','sweep',4,10,['Shuttle Fang','Aurora Snare','Silken Frame','Needle Rain','Weaver’s Guillotine','Threadfall','Loom Crush','Unweave the Dawn']],
+['auroraram','THE AURORA BATTERING RAM','siegegoat','light','charge',4.5,5,['Gatebreaker Horn','Lantern Volley','Siege Mantle','Bastion Charge','Rampart Quake','Polar Cannon','Crown Ram','The Last Gate Falls']],
+['gatecolossus','THE GATE COLOSSUS','gatecolossus','earth','guard',4.8,3,['Portcullis Slam','Rampart Rain','Iron Gates','Tower Lance','Courtyard Crush','Bellfall','Stone Procession','The Fortress Walks']],
+['moonclock','THE MOON CLOCK','moonclock','shadow','sweep',4.3,6,['Pendulum Blade','Midnight Chime','Closed Dial','Hourhand Spear','Lunar Eclipse','Clockwork Rain','Stolen Hour','The Last Midnight']]]};
+const FOES={},MOVES={},KITS={},POOLS={},BOSSES={},LORE={},ENTRANCES={},DURATIONS={},colors={earth:'#b79c79',nature:'#92a76c',physical:'#b6ad95',arcane:'#baa5d7',fire:'#dc9a64',storm:'#d2bd79',light:'#e3d3a4',shadow:'#9b87b2',frost:'#bdd6dd',water:'#8dbcc5'};
+Object.entries(rows).forEach(([biome,list],region)=>{POOLS[biome]=[];BOSSES[biome]=[];list.forEach(([id,name,form,element,behavior,ratio,speed,names],n)=>{const boss=n>=6,color=colors[element];FOES[id]={name,kind:'rug_'+form,form,element,behavior,hp:Math.round(([320,360,400,490,540,590][region])*ratio),atk:([46,50,54,60,65,70][region])+(boss?12:n%3-1),speed,color,...(boss?{boss:true}:{})};(boss?BOSSES:POOLS)[biome].push(id);LORE[id]=name.replace(/^THE /,'')+' is native to '+REGIONS[biome].name+'. '+({cloud:'Its body carries layers of wind-cut glass and salt; water is a memory here, and even the oldest predators shelter when the dunes begin to sing.',tempest:'Generations of storms have threaded copper through the canyon rock. This creature follows the charge through stone, claiming the ledges and ravines as its hunting ground.',zenith:'The sun priests sealed this guardian below the sand. Its form still carries fragments of their ritual: mirror, linen, gold and black stone arranged around a hunger older than the temple.',tundra:'There are no floating islands here, only buried valleys and hard ice. Its heavy frame and winter-grown defenses tell the story of a creature that must survive the long night.',geode:'Far beneath the frozen surface, sound travels farther than light. Its strange body has grown around crystal pressure, mineral seams and the echoes of approaching prey.',aurora:'The bastion was built on the polar bedrock to keep something outside. Its surviving machines and beasts carry shutters, bells, silk and siege armor from the fortress workshops.'}[biome]);KITS[id]=names.map((name,i)=>{const key='rug_'+id+'_'+i,guard=/Guard|Armor|Mantle|Hide|Shell|Brace|Plates|Closed|Sealed|Molting|Carapace|Scales|Molt|Bastion/.test(name),sweep=boss?[1,5,7].includes(i):i===1&&behavior==='sweep',extra=i===2&&!guard||boss&&i===4?{...(element==='fire'?{burn:true}:element==='frost'?{chill:true}:behavior==='poison'?{poison:true}:element==='shadow'?{focusLoss:1}:element==='water'?{water:true}:{})}:{};MOVES[key]={name,cost:0,cd:0,mult:guard?.65:boss&&i===7?1.5:i===0?1.2:1,all:sweep,shell:guard,style:['arcane','light','storm','shadow'].includes(element)?'magic':['glasscobra','saltjackal','canyonspider','sunviper','icecroc','sixhound','threadviper','loomwidow'].includes(form)?'slash':'heavy',element,shape:{earth:'quake',nature:'thorns',physical:'cross',arcane:'mirrors',fire:'flame',storm:'lightning',light:'sun',shadow:'chains',frost:'ice',water:'vortex'}[element],color:'#'+(parseInt(color.slice(1),16)+region*1013+n*79+i*3).toString(16).padStart(6,'0'),...extra,...(boss&&i===7?{guardian:true,cinematic:true,duration:2700,impactAt:1800}:{}),description:name+': '+(sweep?'strikes the party.':'strikes one target.')+(guard?' Guards until its next turn.':'')+(extra.burn?' Burns for two actions.':extra.chill?' Weakens attacks for two actions.':extra.poison?' Poisons for two actions.':extra.water?' Leaves targets soaked.':extra.focusLoss?' Drains one focus.':'')};return key;});if(boss){ENTRANCES[id]='rug-'+form;DURATIONS[id]=2600+(n-6)*100;}});});
+function effectFor(s,biome){return s?.mode!=='raid'&&s?.phase==='battle'&&(s.act||1)>=3?REGIONS[biome]||null:null;}
+function hitFactor(s,biome,source,target,element){const region=effectFor(s,biome);if(!region)return 1;let factor=1;if(region.effect==='sunphase'&&element===(s.round%2?'light':'shadow'))factor*=1.18;if(region.effect==='ward'&&target.side==='enemy'&&target.regionWardRound!==s.round){target.regionWardRound=s.round;if(element!=='physical')factor*=.8;}return factor;}
+function afterAction(s,biome,actor,command,events){const region=effectFor(s,biome);if(!region||actor.side!=='party'||actor.summon||actor.hp<=0)return;actor.regionExposure??={};const r=actor.regionExposure,guard=command.type==='focus',hurt=(percent,cap,label,element)=>{const amount=Math.min(actor.hp,cap,Math.max(1,Math.ceil(actor.maxHp*percent)));actor.hp-=amount;events.push({type:'damage',source:'region-'+region.effect,target:actor.id,amount,element,status:'region',region:region.effect,defeated:actor.hp===0});s.log.push(label+' deals '+amount+' damage to '+actor.name+'.');};
+ if(region.effect==='heat'&&!guard&&command.type==='skill'&&events.some(e=>e.type==='damage'&&e.target!==actor.id||e.type==='miss'))hurt(.01,8,'Desert heat','fire');
+ if(region.effect==='static'){if(guard)r.static=0;else if((r.static=(r.static||0)+1)>=3){r.static=0;hurt(.02,12,'Static discharge','storm');const n=Math.min(1,actor.mp);actor.mp-=n;if(n)events.push({type:'drainFocus',source:'region-static',target:actor.id,amount:n,region:'static'});}}
+ if(region.effect==='cold'){if(guard)r.cold=0;else if((r.cold=(r.cold||0)+1)>=3){r.cold=0;const n=Math.min(1,actor.mp);actor.mp-=n;if(n){events.push({type:'drainFocus',source:'region-cold',target:actor.id,amount:n,region:'cold'});s.log.push('Biting cold drains 1 focus from '+actor.name+'.');}}}
+ if(region.effect==='echo'){const damaging=command.type==='skill'&&events.some(e=>e.type==='damage'&&e.source===actor.id);if(damaging&&r.lastSkill===command.skill)hurt(.02,12,'Crystal resonance','arcane');r.lastSkill=damaging?command.skill:null;}
+}
+return {REGIONS,rows,FOES,MOVES,KITS,POOLS,BOSSES,LORE,ENTRANCES,DURATIONS,effectFor,hitFactor,afterAction};
+});

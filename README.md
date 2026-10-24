@@ -1,6 +1,6 @@
 # Bryan’s Basement
 
-Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose from four campaigns, unlocked through normal progression, in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Cloud Gardens, Thunderhead Reach Sunspire Zenith, Frostwake Expanse, the Singing Geodes and Aurora Citadel. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server while in the menu.
+Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose from four campaigns, unlocked through normal progression, in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Scorchglass Desert, Fulgur Canyon, the Buried Sun Temple, Frostwake Wilderness, the Singing Depths and Aurora Bastion. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server while in the menu.
 
 ## Playing
 
@@ -454,11 +454,16 @@ signature films keep that film and add the impact frames and yellow label.
 Health and floating damage still update at impact; reduced motion keeps the
 critical label without flashing impact frames or camera movement.
 
-Sky encounters draw from larger, region-specific wildlife and construct pools.
-Twelve added species each have a custom model, three attacks, elemental affinity
-and almanac lore; the Sunscarab now has an insect body. Birds occupy a minority of
-these pools. Saved routes update only future ordinary sky encounters, preserving
-the current fight, previous encounters, boss choices, map layouts and vote events.
+Campaigns three and four now use grounded landscapes: desert → storm canyon → buried sun temple, then snowy wilderness → underground crystal caves → a walled aurora fortress. Their active pools contain 36 ordinary creatures and 24 campaign-only bosses, each with a distinct model and native-element attack kit (three moves per creature, eight per boss). Six region mechanics appear in a compact expandable battle label:
+
+- Desert heat costs up to eight HP after attacking; guarding avoids it.
+- Canyon static discharges every third action; guarding grounds the charge.
+- Temple sunlight boosts Light attacks on odd rounds and Shadow attacks on even rounds.
+- Winter cold drains focus every third action; guarding resets exposure.
+- Crystal resonance punishes repeating the same damaging ability consecutively.
+- Bastion wards reduce the first elemental hit each round; physical attacks break them.
+
+Campaigns one and two, camps and raid mode have no ambient region hazards. Saved runs migrate upcoming later regions without resetting party health, gear, gold or completed encounters. Regional choices, travel scenes, boss reveals, atmosphere and loot names follow the new themes.
 
 Regular campaign enemies gain additional durability to keep pace with equipment:
 campaign one ramps to +35% HP and +10% attack, campaign two from +65% to +100% HP
@@ -560,14 +565,8 @@ Each of the twelve active campaign areas gains two regular species and one campa
 | Ocean | Pearl Snipper, Kelp Dragon | The Spiral Abbey |
 | Corsair Ship | Powder Rat, Rope Weaver | The Powder King |
 | Jade Jungle | Fang Bromeliad, Jade Pangolin | The Threefold Root |
-| Cloud Gardens | Nimbus Moth, Balloon Urchin | The Drifting Continent |
-| Thunderhead Reach | Copper Hare, Living Stormkite | The Thunder Engine |
-| Sunspire Zenith | Sundial Mite, Glass Cobra | The Noonday Lens |
-| Frostwake Expanse | Snowbank Yak, Hoarfrost Dragonfly | The Glacier Carrier |
-| Singing Geodes | Copper Coil, Gem Ammonite | The Cavern Resonator |
-| Aurora Citadel | Ribbon Fox, Night Compass | The Northern Loom |
 
-Fresh runs draw from the expanded pools. Existing saves retain their generated routes. The fixed opening moss encounter and the ten-encounter regional maps are preserved. Regular battle intros show the actual enemies with six alternating approach scripts and seeded camera variation shared by online players. Adjacent encounters use different approach scripts. New boss entrances include lily leaps, descending bells, crawling fire centipedes, emerging shell abbeys, rolling cannon kegs, rising root hydras, flying whales, bouncing thunder drums, turning solar lenses, breaking ice shelves, resonating forks, and descending aurora looms. Raid journey boss reveals remain removed.
+The later six areas use the replacement roster described above; retired sky and polar species no longer appear in the active almanac. The first two campaigns retain their expanded creatures, fixed opening moss encounter and ten-encounter regional maps. Ordinary intros vary their approach choreography, and campaign boss reveals are short; raid journey boss reveals remain removed.
 
 ### Camera faces and party conflict recovery
 

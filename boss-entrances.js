@@ -1,7 +1,7 @@
-(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./expedition-visuals'):root.ExpeditionVisuals);if(typeof module==='object'&&module.exports)module.exports=api;else root.BossEntrances=api;})(typeof globalThis!=='undefined'?globalThis:this,function(V){
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./expedition-visuals'):root.ExpeditionVisuals,typeof module==='object'&&module.exports?require('./rugged-visuals'):root.RuggedVisuals);if(typeof module==='object'&&module.exports)module.exports=api;else root.BossEntrances=api;})(typeof globalThis!=='undefined'?globalThis:this,function(V,R){
 'use strict';
 const clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>{n=clamp(n);return n*n*(3-2*n);};
-function pose(type,time,reduced=false){const custom=V?.bossPose(type,time,reduced);if(custom)return custom;const t=clamp(time),q=ease(t/.78),p={x:0,z:0,y:0,facing:-Math.PI/2,gesture:0,stride:0,swing:0};
+function pose(type,time,reduced=false){const custom=R?.bossPose(type,time,reduced)||V?.bossPose(type,time,reduced);if(custom)return custom;const t=clamp(time),q=ease(t/.78),p={x:0,z:0,y:0,facing:-Math.PI/2,gesture:0,stride:0,swing:0};
  switch(type){
  case 'frostmammoth':p.x=(1-q)*4;p.stride=reduced?0:Math.sin(t*30)*.15;break;
  case 'rimeelk':p.x=(1-q)*3;p.y=Math.sin(q*Math.PI)*1.4;break;
@@ -43,7 +43,7 @@ function pose(type,time,reduced=false){const custom=V?.bossPose(type,time,reduce
  }return p;
 }
 function assembly(t){return ease((clamp(t)-.15)/.5);}
-function draw(scene,time){if(V?.bossEntrance(scene,time))return true;const t=clamp(time),b=scene.state.enemies[0],type=b.enemyType;if(type==='captain')return false;const c=scene.paint,s=scene.scale,q=ease(t/.78),fade=Math.sin(t*Math.PI),x=3.3,z=0;
+function draw(scene,time){if(R?.bossEntrance(scene,time))return true;if(V?.bossEntrance(scene,time))return true;const t=clamp(time),b=scene.state.enemies[0],type=b.enemyType;if(type==='captain')return false;const c=scene.paint,s=scene.scale,q=ease(t/.78),fade=Math.sin(t*Math.PI),x=3.3,z=0;
  const box=(dx,y,dz,w,h,d,color=b.color)=>scene.box(x+dx,y,z+dz,w,h,d,color),point=(dx,y,dz)=>scene.project(x+dx,y,z+dz),line=(a,b,color,width=2)=>{const p=point(...a),r=point(...b);c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(r.x,r.y);c.stroke();},ring=(dx,y,dz,r,color,tilt=0)=>{const p=point(dx,y,dz);c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.ellipse(p.x,p.y,Math.max(0,r*s),Math.max(0,r*s*.35),tilt,0,Math.PI*2);c.stroke();},spark=(dx,y,dz,r,color)=>{const p=point(dx,y,dz);c.fillStyle=color;c.shadowColor=color;c.shadowBlur=12;c.beginPath();c.arc(p.x,p.y,Math.max(0,r*s),0,Math.PI*2);c.fill();c.shadowBlur=0;};
  c.save();
  switch(type){
