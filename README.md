@@ -546,7 +546,7 @@ Bryan's authenticated account automatically unlocks the complete current catalog
 
 ### Raid cinematic skip votes
 
-Raid boss journeys and cinematic raid attacks show **Ready to skip** with a party readiness count. Every connected human player must agree; empty slots and disconnected companions count as automatically ready bots. Solo players can skip immediately. Votes are scoped to a single cutscene, accept concurrent player requests, and expire when it ends. Skipping advances presentation and the server's animation wait without undoing or repeating combat damage, spending resources again, or advancing the raid. Normal combat decision timers restart after a successful skip. The server retains the skipped cutscene key so a slower client can catch up after the next action starts.
+Only raid boss entrance journeys show **Ready to skip** with a party readiness count. Every connected human player must agree; empty slots and disconnected companions count as automatically ready bots. Solo players can skip immediately. Votes are scoped to a single entrance, accept concurrent player requests, and expire when it ends. Boss attack cinematics always play in full and never offer a skip vote. Skipping advances presentation and the server's animation wait without undoing or repeating combat damage, spending resources again, or advancing the raid. Normal combat decision timers restart after a successful skip. The server retains the skipped cutscene key so a slower client can catch up after the next action starts.
 
 ### Campaign bestiary and entrances
 
