@@ -583,3 +583,7 @@ With Bryan abilities enabled, the authenticated owner starts campaigns and raids
 Raid reinforcements occupy three distinct positions in front of and beside their boss. Spawned minions receive stable formation slots, reused when a minion dies, so surviving minions do not jump positions. Legacy minions without saved slots use a deterministic fallback. Boss positions and battlefield camera settings remain unchanged.
 
 Guild leaders can also select **Guild icon → Draw my own icon** while creating or editing a guild. The transparent 16×16 pixel icon has its own paint, eraser and undo controls, separate from the banner pattern. The live preview, guild overview and leaderboard all show the saved custom icon. Switching back to a symbol preserves the drawing for later use.
+
+### Owner stat allocation
+
+The authenticated Bryan owner with owner abilities enabled has an unlimited stat budget in campaigns and raids. Build rows accept typed totals for Power, Toughness, Speed and Focus; points distribute across the underlying attributes. Normal players retain level budgets and attribute limits. High-point owner builds persist through profile saving, room loadouts, save restoration and build-code sharing; ordinary imports and combat application retain ordinary limits. Changing maximum health does not heal the adventurer.
