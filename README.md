@@ -244,7 +244,7 @@ folds the bottom controls; Escape opens the menu. The music-note button mutes.
   technique. Keen adds critical chance, Precise improves accuracy, Mighty adds
   attack and Sturdy adds armor.
 - Humans choose equipment first and press **Confirm equipment**. After every
-  online human confirms, bots equip the strongest remaining gear and confirm.
+  human confirms, the party may depart. Bots equip the strongest remaining gear only on departure. Bot-worn gear remains available for players to reclaim at camp, and disconnected human slots retain protected ownership.
   Solo confirmation does the same for both companions. Camp changes revoke
   confirmation; the party host leads travel once everyone is ready.
 - Player and enemy hits have an 8% miss chance and 3% critical chance before
