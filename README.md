@@ -491,16 +491,22 @@ Raids now include thirteen species. Added bosses are the Immortal Snail,
 Salt-Crowned Hydra, Obsidian Empress, Lantern Matriarch, Walking Cathedral,
 Root of All Hunger, Iron Millipede and Pale Comet. Each has a distinct body and
 journey; the seven non-snail additions have full themed raid repertoires and
-domains. The special snail uses exactly four attacks:
+domains. The special snail has 31 attacks, including:
 
 - Roll: party-wide shell impact; each successful hit has a 10% chance to Daze.
   Daze consumes exactly the affected unit's next turn.
 - Saw: a heavy single-target teeth strike.
 - Goopy Slime: small party damage plus 25% less outgoing damage and armor for
   two actions. A visible green coating follows the status.
-- Summon Taras: summons an adventurer-sized enemy with ordinary warrior health
-  at the party's level. Taras only throws a red smiling cube. The action itself
-  deals no damage; the usual four-living-enemy summon limit applies.
+- Shell ricochets, radula sweeps, acid spit, mucus veils, guarded shell strikes,
+  draining bites, focus-draining suction, and sticky moss attacks.
+- Garden of Ages transforms the arena into a slime garden for five rounds;
+  acting adventurers receive the two-action goo debuff.
+- Immortal Spiral and Shellfall are signature cinematic attacks, spaced by
+  ordinary attacks using the standard raid cinematic cooldown.
+
+Summon Taras is retired. Old saves discard its queued move and summoned Taras
+minions while preserving adventurer health and the current turn.
 
 The snail remains defeatable despite its title. Taunt still redirects enemy
 attacks, including its party-wide moves, to the active knight. Raid progression,
