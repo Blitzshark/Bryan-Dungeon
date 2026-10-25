@@ -1,4 +1,4 @@
-(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./hero-options'):root.HeroOptions,typeof module==='object'&&module.exports?require('./content'):root.GameContent,typeof module==='object'&&module.exports?require('./routes'):root.RunRoutes,typeof module==='object'&&module.exports?require('./elements'):root.CombatElements,typeof module==='object'&&module.exports?require('./build-stats'):root.BuildStats);if(typeof module==='object'&&module.exports)module.exports=api;else root.DungeonCampaign=api;})(typeof globalThis!=='undefined'?globalThis:this,function(P,C,G,Elements,B){
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./hero-options'):root.HeroOptions,typeof module==='object'&&module.exports?require('./content'):root.GameContent,typeof module==='object'&&module.exports?require('./routes'):root.RunRoutes,typeof module==='object'&&module.exports?require('./elements'):root.CombatElements,typeof module==='object'&&module.exports?require('./build-stats'):root.BuildStats,typeof module==='object'&&module.exports?require('./party-carry'):root.PartyCarry);if(typeof module==='object'&&module.exports)module.exports=api;else root.DungeonCampaign=api;})(typeof globalThis!=='undefined'?globalThis:this,function(P,C,G,Elements,B,Carry){
 'use strict';
 const WORLDS=[{name:'The Greenwood',biome:'forest',boss:'The Briar Sovereign'},{name:'The Ashen Dungeon',biome:'crypt',boss:'The Iron Warden'},{name:'The Hollow Depths',biome:'throne',boss:'The Triune Abyss'}];
 const ENEMIES={
@@ -60,7 +60,8 @@ function campaignUnlocks(s){
 }
 function markCampaignShortcut(s){s.unlockedCampaigns=campaignUnlocks(s);s.campaignUnlockVersion=1;s.progressionCheated=true;}
 function beginSequel(s){if(s.mode!=='campaign'||(s.act||1)>=G.CAMPAIGNS.length||s.phase!=='complete'||s.stage!==29||!s.party.some(p=>p.adminAllowed===true)&&!campaignUnlocks(s).includes((s.act||1)+1))return false;s.act=(s.act||1)+1;s.stage=0;s.stories=[];s.restSpent=false;s.campConfirmed=false;startBattle(s);return true;}
-function entryDuration(s){return s.mode==='raid'?12000:encounter(s).boss?(C.BOSS_INTRO_DURATIONS[s.enemies[0]?.enemyType]||2300):1100;}
+function entryDuration(s){return (s.mode==='raid'?12000:encounter(s).boss?(C.BOSS_INTRO_DURATIONS[s.enemies[0]?.enemyType]||2300):1100)+Carry.extra(s.party);}
+function transitionDuration(s,worldChange=false){return worldChange&&s.mode!=='raid'?3200+Carry.extra(s.party):entryDuration(s);}
 function hero(id,name,job){const c=CLASSES[job];return {id,name,job,statPlan:B.allocation({}),statAllocation:B.allocation({}),statHpBonus:0,statMpBonus:0,statSpeedBonus:0,side:'party',kind:'humanoid',hp:c.hp,maxHp:c.hp,mp:c.mp,maxMp:c.mp,atk:c.atk,speed:c.speed,color:c.color,level:1,race:'human',weapon:job==='ranger'?'bow':job==='mage'?'staff':'sword',charge:0,raceCharge:0,appearance:P.appearance({clothes:c.color}),cooldowns:{},cards:['aegis'],guard:false};}
 function createRun(name='Adventurer',job='warrior',mode='campaign',options={}){
  if(!Object.hasOwn(CLASSES,job))job='warrior';
@@ -290,5 +291,5 @@ function restore(value){
  return s;
  }catch{return null;}
 }
-return {regionEffect:s=>C.RUG.effectFor(s,encounter(s).biome),OWNER_LEVEL,promoteOwner,equipment,refreshOrder:s=>{s.order=makeOrder(s);s.cursor=0;},BuildStats:B,applyStatPlan,skillFor,campaignUnlocks,Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
+return {regionEffect:s=>C.RUG.effectFor(s,encounter(s).biome),OWNER_LEVEL,promoteOwner,equipment,refreshOrder:s=>{s.order=makeOrder(s);s.cursor=0;},BuildStats:B,applyStatPlan,skillFor,campaignUnlocks,Elements,enemyAffinity,attackElement,G,routeFor,storyFor,isOcean,needsMigration,C,worlds,warp,P,entryDuration,transitionDuration,carryDuration:s=>Carry.extra(s.party),hero,expandParty,companion,applyLoadout,weaponFor,hasAdmin,abilities,encounter,SEQUEL,beginSequel,raidBossStats,RAID_BOSSES,WORLDS,CHAPTERS,ENEMIES,RARITIES,CLASSES,SKILLS,stats,tonicHeal,campPrices,finishCamp,campAction,createRun,randomAct,botAct,skipEncounter,active,unit,living,act,enemyAct,travel,choose,buyTonic,retry,restore};
 });

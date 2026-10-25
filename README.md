@@ -609,3 +609,8 @@ Creature attacks now use body-specific movement before impact instead of the hum
 
 
 Ordinary healing moves and healing ultimates affect living allies only. Single-target healing directed at a fallen ally is rejected before focus, cooldowns or the action are consumed. Healing tonics also require a standing ally; Revival embers are explicit revival items in battle and at camp.
+
+
+### Carrying fallen party members
+
+During encounter entrances, travel, camp departures and raid journeys, living adventurers carry fallen party members across their shoulders and lay them in their usual formation positions. Assignment follows the shared party order and ignores summons. If there are more fallen teammates than survivors, carriers make separate trips instead of stacking bodies. Characters remain gray, at zero HP, and out of combat turn order until explicitly revived. Carrying never changes health or inventory. The server extends entry/transition waits for the same deterministic number of trips, so multiplayer cannot begin combat before placement finishes. Healthy parties retain their existing timings.
