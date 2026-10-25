@@ -18,11 +18,12 @@ class OnlineParty{
   this.discovery=attempt;try{await attempt;}finally{if(this.discovery===attempt)this.discovery=null;}
  }
  async request(body=null,code=null,query='status=1'){
-  await this.connect();const headers={'Content-Type':'application/json'};if((code||body?.op==='command'||body?.code&&['chatSend','chatPoll'].includes(body.op))&&this.session?.token)headers.Authorization='Bearer '+this.session.token;
+  await this.connect();const headers={'Content-Type':'application/json'};if((code||body?.op==='command'||body?.code&&['chatSend','chatPoll','battleLook'].includes(body.op))&&this.session?.token)headers.Authorization='Bearer '+this.session.token;
   let response;try{response=await fetch(this.server+(body?'/api/rooms':'/api/rooms?'+(code?'code='+encodeURIComponent(code):query)),{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(12000)});}catch{throw Error('Cannot reach the room server. Check your connection and retry.');}
   if(!(response.headers.get('content-type')||'').includes('application/json'))throw Error('The room server returned an invalid response. Try again shortly.');
   const data=await response.json();if(!response.ok){const e=Error(data.error||'The room request failed.');e.status=response.status;throw e;}return data;
  }
+ async syncLook(look){if(!this.session||!this.room?.started||this.closed)return [];const session=this.session;const data=await this.request({op:'battleLook',code:session.code,...look});return this.session===session?data.looks:[];}
  async status(){return this.request();}
  async list(mode='all'){return this.request(null,null,'list=1&mode='+encodeURIComponent(mode));}
  accept(data,initial=false){if(this.room?.code===data.code&&data.version<this.room.version)return;if(data.token){this.session={code:data.code,token:data.token,server:this.server};sessionStorage.setItem(KEY,JSON.stringify(this.session));}if(initial)this.lastEvent=null;this.room=data;this.clockOffset=data.serverNow-Date.now();const event=initial?null:data.event&&data.event.id!==this.lastEvent?data.event.result:null;this.lastEvent=data.event?.id||this.lastEvent;this.onUpdate(data,event,initial);}
