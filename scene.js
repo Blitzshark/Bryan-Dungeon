@@ -123,13 +123,14 @@ class CampaignScene{
  this.paint=old;this.dirty=false;
  }
  campEnvironment(){
+ if(this.biome==='cloud'){this.box(0,.03,0,1.6,.12,1.1,'#c7b78c');this.box(0,.16,0,.65,.65,.6,'#7baca5');this.box(0,.81,0,.75,.12,.7,'#bfc9a4');for(const side of [-1,1])this.box(side*2.5,0,-1.7,.12,2.8,.12,'#9b8763');this.box(0,2.8,-1.7,5.4,.12,2.8,'#d3c7a0');for(const x of [-2.2,0,2.2])this.box(x,.01,2,1.1,.08,.9,'#a9a17d');return;}
  this.shadow(0,0,2,1,.3);for(let i=0;i<10;i++){const a=i*Math.PI/5;this.box(Math.cos(a)*.75,.02,Math.sin(a)*.65,.3,.2,.28,'#8a8a72');}
  this.box(0,.02,0,1.05,.16,.22,'#69503a');this.box(0,.13,0,.22,.16,.8,'#806045');
  [[-2.2,1.3],[0,3],[2.2,1.3]].forEach(([x,z])=>this.box(x,0,z,1.3,.3,.42,'#725b42'));
  this.barrel(-3.8,-1.3);this.barrel(-4.2,-.6);this.box(3,.02,-1.6,.7,.5,.65,'#9f8256');this.box(3,.52,-1.6,.7,.15,.7,'#675639');
  this.box(-2.6,.02,-3.1,2.3,.15,1.9,'#484f38');for(let i=0;i<6;i++)this.box(-2.6,.17+i*.24,-3.1,2.3-i*.34,.25,1.9,'#829269');
  }
- drawCampfire(time){if(window.OceanVisuals&&(OceanVisuals.isOcean(this.biome)||this.biome==='ship'||this.biome==='abyss')){OceanVisuals.heater(this,time);return;}
+ drawCampfire(time){if(this.biome==='cloud')return;if(window.OceanVisuals&&(OceanVisuals.isOcean(this.biome)||this.biome==='ship'||this.biome==='abyss')){OceanVisuals.heater(this,time);return;}
  const c=this.paint,p=this.project(0,.55,0),g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,this.scale*2.3);g.addColorStop(0,'#ffc56a44');g.addColorStop(1,'#ffc56a00');c.fillStyle=g;c.fillRect(p.x-this.scale*3,p.y-this.scale*3,this.scale*6,this.scale*6);
  for(let i=0;i<5;i++){const flicker=this.reduced?.97+Math.sin(time/450+i)*.04:.9+Math.sin(time/95+i*2)*.16;this.box((i-2)*.11,.15,Math.sin(i*2)*.12,.2,(.65-Math.abs(i-2)*.12)*flicker,.2,i%2?'#ffbb57':'#e57738');}
  if(!this.reduced){c.fillStyle='#ffe098';for(let i=0;i<8;i++){const t=(time/1800+i/8)%1,x=p.x+Math.sin(i*12+t*5)*this.scale*.35,y=p.y-t*this.scale*1.7;c.globalAlpha=1-t;c.fillRect(x,y,2,2);}c.globalAlpha=1;}
