@@ -14,7 +14,7 @@ function pose(type,time,reduced=false){const custom=R?.bossPose(type,time,reduce
  case 'dawnengine':p.y=-2*(1-q);break;
  case 'briar':p.x=(1-q)*7;p.stride=reduced?0:Math.sin(t*50)*.23;p.y=Math.sin(q*Math.PI)*.15;break;
  case 'alpha':p.x=(1-q)*5;p.z=Math.sin(q*Math.PI)*1.7;p.facing=-Math.PI/2+Math.atan2(-Math.cos(q*Math.PI)*1.7,5)*(1-q);p.stride=reduced?0:Math.sin(t*32)*.16;break;
- case 'jadefang':{const leap=ease((t-.18)/.55);p.x=(1-leap)*4;p.z=-(1-leap)*2;p.y=Math.sin(leap*Math.PI)*2;p.gesture=Math.sin(leap*Math.PI)*.7;break;}
+ case 'jadefang':{const leap=ease((t-.16)/.57);p.x=(1-leap)*5;p.z=-(1-leap)*2.3;p.y=Math.sin(leap*Math.PI)*1.9-(t<.16?.2:0);p.gesture=t>.73?Math.sin(clamp((t-.73)/.27)*Math.PI):Math.sin(leap*Math.PI)*.65;p.stride=reduced?0:Math.sin(leap*Math.PI)*.18;break;}
  case 'broodmother':p.y=-2.6*(1-q);break;
  case 'warden':{const drop=ease((t-.1)/.45);p.y=6*(1-drop);p.gesture=Math.sin(drop*Math.PI);break;}
  case 'ossuary':p.y=-2*(1-q);p.gesture=q*.5;break;
@@ -76,7 +76,7 @@ function draw(scene,time){if(R?.bossEntrance(scene,time))return true;if(V?.bossE
  case 'leviathan':for(let i=0;i<5;i++)ring(Math.sin(t*5+i)*.3,.2+i*.35,0,1.8-i*.17,'#9edce3',i*.2+t);break;
  case 'keelbreaker':for(let i=0;i<6;i++){const a=i*Math.PI/3;line([Math.cos(a)*2,.03,Math.sin(a)*2],[Math.cos(a)*1.3,fade*2,Math.sin(a)*1.3],'#7aa79b',6);box(Math.cos(a)*2,.1+fade*.2,Math.sin(a)*2,.7,.12,.35,'#7d694e');}break;
  case 'ballast':for(let i=0;i<7;i++){const a=i*2.399;box(Math.cos(a)*(1+t),.03+Math.sin(clamp((t-.5)*2)*Math.PI)*.6,Math.sin(a)*(1+t),.5,.12,.45,'#7e745d');}if(t>.5)ring(0,.03,0,ease((t-.5)/.3)*3,'#c9c8a4');break;
- case 'jadefang':for(let i=0;i<12;i++){const a=i*2.399;box(1+Math.cos(a)*2,.3+fade*(i%4)*.25,-1+Math.sin(a),.3,.08,.15,i%2?'#80ac66':'#c2b874');}break;
+ case 'jadefang':for(let i=0;i<18;i++){const a=i*2.399;box(1+Math.cos(a)*(1.5+q),.15+fade*(i%4)*.35,-1+Math.sin(a)*(1+q*.5),.38,.08,.18,i%2?'#80ac66':'#c2b874');}for(const side of [-1,1]){box(side*(1.2+q*1.5),0,-1,.15,1.8,.15,'#557a4c');box(side*(1.2+q*1.5),1.3,-1,.8,.08,.4,'#83ac6a');}if(t>.65)ring(0,.03,0,2.7*clamp((t-.65)/.35),'#b8c88b');break;
  case 'orchid':for(let i=0;i<8;i++){const a=i*Math.PI/4;box(Math.cos(a)*(1+q),.2+Math.sin(q*Math.PI)*.5,Math.sin(a)*(1+q),.65,.1,.65,i%2?'#c394be':'#8c689c');spark(Math.cos(a)*2,.5+q,Math.sin(a)*1.5,.035,'#edd5a4');}break;
  case 'roc':for(let i=0;i<9;i++){const a=i*2.399;box(Math.cos(a)*2,.3+(1-t)*(i%4),Math.sin(a)*1.7,.12,.04,.45,'#b7cddd');}ring(0,.02,0,3*q,'#d0e7e7');break;
  case 'cloudtitan':for(let i=0;i<14;i++){const a=i*2.399;box(Math.cos(a)*3*(1-q),.5+(i%4)*.5,Math.sin(a)*2*(1-q),.8,.45,.7,'#c5dfe2');}break;

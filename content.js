@@ -81,7 +81,7 @@ const NEW_FOES={oregolem:['THE ORE GOLEM','oregolem','#8e8979',['Iron Ore Fist',
  hellmaw:['THE CINDER WYRM','skyserpent','#d7835c',['Cinder Fang','Magma Coil','Sulfur Breath','Ash Cyclone','Molten Scales','Obsidian Spear','Hellfire Lash','Furnace Roar','Pyre Spiral','Red Eclipse']],
  captain:['THE DROWNED ADMIRAL','drownedAdmiral','#67dec8',['Boarding Order','Admiral’s Cut','Grapeshot','Anchor Verdict','Broadside','Black Flag','Deckbreaker','Pistol Salute','Keel Sentence','Last Command']],
  ballast:['THE IRON BELL','ironbell','#89989c',['Bell Hammer','Ballast Crash','Iron Knell','Hull Breach','Chain Anchor','Steel Tide','Deck Quake','Rusted Verdict','Heavy Weather','Last Toll']],
- jadefang:['THE JADEFANG EMPRESS','wolf','#9dd19a',['Jade Fang','Canopy Ambush','Emerald Roar','Hunting Vines','Temple Leap','Raking Jade','Moonlit Stalk','Verdant Claw','Predator’s Circle','Queen’s Hunt']],
+ jadefang:['THE JADEFANG EMPRESS','jadeEmpress','#9dd19a',['Jade Fang','Canopy Ambush','Emerald Roar','Hunting Vines','Temple Leap','Raking Jade','Moonlit Stalk','Verdant Claw','Predator’s Circle','Queen’s Hunt']],
  orchid:['THE CARNIVOROUS ORCHID','flower','#ce98ba',['Petal Guillotine','Sweet Venom','Vine Snare','Pollen Burst','Root Maw','Flowering Hunger','Thorn Lash','Perfumed Doom','Canopy Bloom','Final Blossom']],
  sunape:['THE SUNSTONE COLOSSUS','sunape','#c4aa70',['Sunstone Fist','Temple Drum','Canopy Crush','Golden Boulder','Ruin Leap','Pillar Break','Solar Knuckle','Ancient Roar','Jungle Quake','Temple’s End']],
  cloudtitan:['THE CLOUD SHEPHERD','cloudgiant','#d6dce8',['Cloud Hammer','Mist Veil','Vapor Ring','Sky Bell','Rain Crown','White Horizon','Condensed Lance','Cloudburst','Heaven’s Weight','Last Cloud']],
@@ -131,5 +131,6 @@ Object.assign(MOVES,X.snailMoves());ENEMY_MOVES.raid_snail=Object.keys(X.snailMo
 Object.assign(BASICS,D.BASICS);Object.assign(MOVES,D.SKILLS);
 Object.assign(FOES,N.FOES);Object.assign(MOVES,N.MOVES);Object.assign(ENEMY_MOVES,N.ENEMY_MOVES);Object.assign(BOSS_ENTRANCES,N.BOSS_ENTRANCES);Object.assign(BOSS_INTRO_DURATIONS,N.BOSS_INTRO_DURATIONS);for(const [area,types]of Object.entries(N.SECTION_BOSSES))SECTION_BOSSES[area].push(...types);
 Object.assign(FOES,RUG.FOES);Object.assign(MOVES,RUG.MOVES);Object.assign(ENEMY_MOVES,RUG.KITS);Object.assign(BOSS_ENTRANCES,RUG.ENTRANCES);Object.assign(BOSS_INTRO_DURATIONS,RUG.DURATIONS);for(const [biome,pool]of Object.entries(RUG.BOSSES))SECTION_BOSSES[biome]=pool;
+BOSS_INTRO_DURATIONS.jadefang=2800;
 return {RUG,N,GEAR:Q,D,X,SUMMON_SKILLS,SUMMONS,O,SECTION_BOSSES,BOSS_ENTRANCES,BOSS_INTRO_DURATIONS,SKY_FOES,SKY_ARTS,SKY_DIVERSITY,RAID_THEMES,RAID_MINIONS,CARDS,BASICS,ENEMY_MOVES,MOVES,WORLDS2,FOES,CAMPAIGN2};
 });

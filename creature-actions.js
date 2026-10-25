@@ -7,11 +7,11 @@ function recipe(unit,skill={}){if(unit?.side!=='enemy'||skill.cinematic||skill.g
  if(/bat|dreammoth|rootbat/.test(body))return {family:'bat',kind:'swoop',height:1.2};
  if(/serpent|viper|cobra|adder|lamprey|wyrm/.test(body))return {family:'serpent',kind:/breath|spit|venom|poison|rain/.test(name)?'spit':'serpent-lunge',height:.7};
  if(/spider|widow|mantis/.test(body))return {family:'hunter',kind:/web|snare|thread/.test(name)?'web-cast':'scuttle',height:.6};
- if(/boar|bison|glacierox|wolf|hound|jackal|jaguar|hare|ram\b|siegegoat/.test(body))return {family:'beast',kind:/howl|roar|breath/.test(name)?'roar':'ram',height:.8};
+ if(/jadefang|jadeempress|boar|bison|glacierox|wolf|hound|jackal|jaguar|hare|ram\b|siegegoat/.test(body))return {family:'beast',kind:/howl|roar|breath/.test(name)?'roar':'ram',height:.8};
  if(/snail|tortoise|armadillo/.test(body))return {family:'shell',kind:/roll|ram|crash|skid/.test(name)?'shell-roll':/slime|goop|spit/.test(name)?'spit':'shell-bash',height:.65};
  if(/slime|jelly|medusa/.test(body))return {family:'gel',kind:/spray|spit|goop|bolt/.test(name)?'spit':'splash-hop',height:.6};
  if(/crab|pincer|scorpion/.test(body))return {family:'claw',kind:/shot|shard|hail|venom/.test(name)?'spit':'pincer',height:.7};
- if(/treant|root|lotus|mandrake|bromeliad|orchid|sporebasket/.test(body))return {family:'plant',kind:/cry|bloom|pollen|spore/.test(name)?'croak':'vine',height:1};
+ if(/raid_tree|raidtree|treant|root|lotus|mandrake|bromeliad|orchid|sporebasket/.test(body))return {family:'plant',kind:/cry|bloom|pollen|spore/.test(name)?'croak':'vine',height:1};
  if(/wasp|bee|skater|urchin/.test(body))return {family:'insect',kind:'sting',height:.9};
  if(/piston|press|automaton|railmaw|gear|boiler|windmill/.test(body))return {family:'machine',kind:'piston',height:1};return null;
 }

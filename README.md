@@ -614,3 +614,8 @@ Ordinary healing moves and healing ultimates affect living allies only. Single-t
 ### Carrying fallen party members
 
 During encounter entrances, travel, camp departures and raid journeys, living adventurers carry fallen party members across their shoulders and lay them in their usual formation positions. Assignment follows the shared party order and ignores summons. If there are more fallen teammates than survivors, carriers make separate trips instead of stacking bodies. Characters remain gray, at zero HP, and out of combat turn order until explicitly revived. Carrying never changes health or inventory. The server extends entry/transition waits for the same deterministic number of trips, so multiplayer cannot begin combat before placement finishes. Healthy parties retain their existing timings.
+
+
+### Jadefang, Root of All Hunger and Pale Comet
+
+These bosses use dedicated models rather than the generic wolf, tree or dragon primitives. Jadefang is a six-legged jade saber cat with a mineral crown, ivory fangs, armored shoulders, claws and a split tail; its short entrance pushes through foliage into a pounce and roar. Root of All Hunger has a physically hollow bark cage, toothed maws, crawling roots and hanging seed coffins. Pale Comet is a floating skeletal frost wyrm with an exposed spine and ribs, crescent wings, a split jaw, orbiting ice shards and a trailing segmented tail. Battle, attack-film and almanac renderers share the new models; previews fit their silhouettes without changing battle FOV. Existing saved boss identities show the new designs immediately, hit flashes still recolor the full model, and reduced motion stops idle movement.
