@@ -649,3 +649,5 @@ The Immortal Snail now uses its original `frontier-visuals.js` renderer again, i
 Quartzling, Frost Lantern, Emerald Viper, Jungle Jaguar, Screaming Mandrake and Scarlet Macaw also use lightweight models in `campaign-sculptures.js`: crystal cluster, hanging icy lantern, coiled snake, spotted cat, leafy root creature and red parrot. They retain the same enemy identities and attacks, so saved encounters and raid minion variants use the updated shapes.
 
 Iron Bell, Thorn Mantis, Candle Crawler, Cinder Leech, Rift Urchin, Coffin Mite, Pearl Snipper and Kelp Dragon also use simple authored models: a heavy iron bell, folded-scythe insect, wax crawler, ember-segmented leech, spiny rift creature, crawling coffin, pearl clam and leafy seahorse. Existing attacks and stats are unchanged.
+
+Ashen Procession, Powder King and Spiral Abbey now have distinct centipede, cannon-keg and nautilus-abbey models. Rope Weaver, Jade Pangolin and Fang Bromeliad use simpler knot, armored mammal and flower designs. Enemy art standards in `AGENTS.md` require readable species-specific silhouettes, restrained detail, appropriate materials and browser checks for future campaign additions.
