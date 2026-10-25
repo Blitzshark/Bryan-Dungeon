@@ -624,3 +624,12 @@ These bosses use dedicated models rather than the generic wolf, tree or dragon p
 ### Menu sizing
 
 The title menu uses normal flowing layout with a second collection column on wider windows and vertical scrolling when needed. It no longer uses an absolute vertical-center offset that clips added buttons. Room dialogs stay within the viewport, use compact responsive form columns and reset their scroll position whenever opened. Small-screen online presence appears beneath the menu rather than covering menu controls. Browser checks cover 1366×650, 1280×620, 1024×600, 844×430, 390×700 and 320×568, including successful room creation.
+
+
+### Party power and landscape combat
+
+At battle entry, enemy health, attack and modest initiative bonuses scale above the encounter baseline using the whole party’s effective equipment and build: permanent and equipped run gear, damage stats, armor, maximum health, focus and support bonuses. Native campaign progression already budgets for ordinary levels and expected run equipment, so normal progression is not counted twice. Stronger members carry additional weight, while empty inventory ownership, cosmetics, current wounds, deaths and active summons do not alter the snapshot. Bonuses have finite upper bounds. Existing normal-mode party-size HP scaling remains separate and applies once; raid baseline HP remains unchanged for an ordinary party.
+
+Each enemy preserves its unscaled base stats, so rechecking pregame room loadouts never compounds multipliers. Shared rooms take a final snapshot when the host starts. Enemy stats remain fixed through combat and reloads; the next fight reflects camp equipment and build changes. Raid summons inherit the fight snapshot. Existing saved battles retain their current stats until the next encounter. Inspecting an enemy explains active power scaling.
+
+In landscape windows up to 650 pixels tall, combat controls occupy a roughly 81–83 pixel bottom strip. Side panels, enemy cards and the top bar are compact, with horizontal scrolling for moves and vertical target scrolling when required. All action categories, targets, collapse controls and owner buttons remain reachable; combat camera zoom is unchanged. Browser checks cover 844×390, 568×320, 1024×600 and 1280×620.
