@@ -10,3 +10,5 @@ When adding or reworking campaign enemies:
 - Preserve enemy identities, attacks, stats and saved-run compatibility unless gameplay changes were requested.
 
 The user prefers the restored larger UI. Do not reintroduce the compact landscape layout or the removed Expedition Rally/Banner Arena modes without a request.
+
+The title menu should use the original single vertical list down the left side. Do not rearrange menu actions into right-hand columns without a request.

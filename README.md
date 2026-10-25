@@ -623,7 +623,7 @@ These bosses use dedicated models rather than the generic wolf, tree or dragon p
 
 ### Menu sizing
 
-The title menu uses normal flowing layout with a second collection column on wider windows and vertical scrolling when needed. It no longer uses an absolute vertical-center offset that clips added buttons. Room dialogs stay within the viewport, use compact responsive form columns and reset their scroll position whenever opened. Small-screen online presence appears beneath the menu rather than covering menu controls. Browser checks cover 1366×650, 1280×620, 1024×600, 844×430, 390×700 and 320×568, including successful room creation.
+The title menu uses a single vertical list on the left with scrolling when needed. It no longer uses an absolute vertical-center offset that clips added buttons. Room dialogs stay within the viewport, use compact responsive form columns and reset their scroll position whenever opened. Small-screen online presence appears beneath the menu rather than covering menu controls. Browser checks cover 1366×650, 1280×620, 1024×600, 844×430, 390×700 and 320×568, including successful room creation.
 
 
 ### Party power scaling
@@ -660,7 +660,7 @@ Click Look around to capture the mouse, then move it freely; Escape releases it 
 
 `first-person.js` contains preferences, camera math, geometry collection and the renderer. Tests cover projection, look limits, persistence and articulated geometry; browser checks cover mouse capture/release, impact timing, map and raid-domain changes, image faces, resizing and transitions.
 
-The title’s journey, tavern and trading-hub actions share a row. Collection tools sit to the right on wider windows. The main menu fills three columns on desktop and two on phones, with scrolling available on short screens. These menu-only styles do not shrink the restored battle interface.
+The title menu stacks actions in a single vertical list on the left, including journey, tavern, trading hub, rooms and collection buttons. The main menu also uses its original vertical list. Short screens can scroll every action into view. Battle interface sizing is unchanged.
 
 The jungle/desert model set also covers Powder Rat, Threefold Root, Glass Adder, Dune Scuttler, Bristleback Tortoise, Sailback Lizard, Salt Jackal, Thirsting Urn, Glass Dune Wyrm, Carapace King, Sunken Obelisk and Sand-Sail Devourer. Seven lightweight normal creatures accompany five distinct bosses: a branching plant, circular-mawed worm, horned scarab, floating ruin and broad sand ray. They reuse the existing combat identities and work in both tactical and first-person rendering.
 
