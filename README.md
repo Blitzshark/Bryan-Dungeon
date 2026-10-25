@@ -1,6 +1,6 @@
 # Bryan’s Basement
 
-Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose from four campaigns, unlocked through normal progression, in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Scorchglass Desert, Fulgur Canyon, the Buried Sun Temple, Frostwake Wilderness, the Singing Depths and Aurora Bastion. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server while in the menu.
+Bryan’s Basement is a turn-based, block-world adventure for solo play or up to six online players in two rows of three. Choose from five campaigns, unlocked through normal progression, in Begin your journey or Create room. Each has three fixed ten-encounter sections: Greenwood, Hollow Depths, Void & Hell, Ocean, Corsair Ship, Jade Jungle, Scorchglass Desert, Fulgur Canyon, the Buried Sun Temple, Frostwake Wilderness, the Singing Depths, Aurora Bastion, Lanternfen, Gearhaven and the Heartforge. Enemies, loot, bosses, choice encounters and occasional individual buffs or weaknesses vary. Every tenth encounter is a boss; each fight ends at camp. Routes persist on reload and are shared by online party members. The right-side directory shows currently connected players on the same server while in the menu.
 
 ## Playing
 
@@ -578,7 +578,7 @@ Chat mode pauses movement and E interaction in both the tavern and trading hub. 
 
 Battle introductions now settle onto the actual combat formation, with short eased approaches, gait that stops before the handoff, and gentle camera motion applied to both scenery and characters. Letterboxing retracts into battle instead of flashing to black. Unique boss reveals settle into their combat positions, and raid journey walking phases join continuously. Starting another journey cancels the previous timer so an older animation cannot interrupt the new one.
 
-With Bryan abilities enabled, the authenticated owner starts campaigns and raids at level 64, the highest campaign level, with the full 110-point stat budget available to allocate. Hosting and joining online lobbies apply the same grant. Existing owner characters can be promoted once without healing an active run or stacking level bonuses; already higher raid levels remain intact. A guest display name or client-supplied profile cannot grant owner levels.
+With Bryan abilities enabled, the authenticated owner starts campaigns and raids at level 80, the highest campaign level, with unlimited stat points available to allocate. Hosting and joining online lobbies apply the same grant. Existing owner characters can be promoted once without healing an active run or stacking level bonuses; already higher raid levels remain intact. A guest display name or client-supplied profile cannot grant owner levels.
 
 Raid reinforcements occupy three distinct positions in front of and beside their boss. Spawned minions receive stable formation slots, reused when a minion dies, so surviving minions do not jump positions. Legacy minions without saved slots use a deterministic fallback. Boss positions and battlefield camera settings remain unchanged.
 
@@ -587,3 +587,12 @@ Guild leaders can also select **Guild icon → Draw my own icon** while creating
 ### Owner stat allocation
 
 The authenticated Bryan owner with owner abilities enabled has an unlimited stat budget in campaigns and raids. Build rows accept typed totals for Power, Toughness, Speed and Focus; points distribute across the underlying attributes. Normal players retain level budgets and attribute limits. High-point owner builds persist through profile saving, room loadouts, save restoration and build-code sharing; ordinary imports and combat application retain ordinary limits. Changing maximum health does not heal the adventurer.
+
+
+### Rustwild, Rift Rush and menu changelog
+
+**Changelog · New** on the title screen and pause menu lists recent player-facing updates. Bonus challenges, challenge objectives and challenge-specific rewards have been removed, including from older saved fights. Battle conditions (such as Crossfire) remain inspectable. Ordinary campaign encounters after the opening fight now drop two regular equipment pieces so progression no longer depends on optional objectives.
+
+Campaign 5, **The Rustwild**, unlocks by clearing campaign 4 normally; Bryan owns it immediately. Its three fixed ten-encounter regions are Lanternfen (a glowing wetland), Gearhaven (an abandoned machine city) and the Heartforge (a volcanic industrial chamber). The regions add 18 regular creatures, 12 exclusive guardians, nine unique choices, custom models, travel scenes and native-element attack kits. Spore bloom amplifies Nature/Water; Gearhaven builds steam pressure unless you guard; the Heartforge alternates Frost-favored rounds with every-third-round Fire pulses. Existing routes append the 30 encounters without replacing saved fights or gear.
+
+**Rift Rush** is a separate, seeded 12-wave survival mode available from the menu or online room creation. Each run selects three regions with a campaign guardian on waves 4, 8 and 12. Waves 3, 6, 9 and 12 open equipment and supply stops. Between those stops, the party only confirms passage through the next rift; it cannot use the camp shop or change equipment. Health and focus persist, resting and defeat retries are disabled, summons last one encounter, and all human players must confirm advancement. Rush uses its own local save and does not unlock campaigns or count as campaign/raid guild progression. Two through six adventurer slots work online; bots fill empty slots.
