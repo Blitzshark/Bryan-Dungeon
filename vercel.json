@@ -12,6 +12,9 @@
     },
     "api/social.js": {
       "maxDuration": 20
+    },
+    "api/rivals.js": {
+      "maxDuration": 20
     }
   },
   "rewrites": [

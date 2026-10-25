@@ -192,7 +192,7 @@ class CampaignScene{
  if(!this.title){const c=this.paint,w=Math.max(48,this.scale*1.12);c.font='600 '+Math.max(7,Math.min(10,this.scale*.17))+'px Arial';c.textAlign='center';c.shadowColor='#102217';c.shadowBlur=5;c.fillStyle=unit.hp?'#e4e8d3':'#a4a4a4';c.fillText(unit.name+(unit.side==='enemy'?' · '+DungeonCampaign.Elements.label(DungeonCampaign.enemyAffinity(unit).element):'')+(fallen?' · DOWN':''),point.x,point.y);c.shadowBlur=0;c.fillStyle='#142016';c.fillRect(point.x-w/2,point.y+6,w,4);c.fillStyle=unit.side==='party'?'#9fbd7a':'#c87969';c.fillRect(point.x-w/2,point.y+6,w*(unit.hp/unit.maxHp),4);if(active){c.fillStyle='#e1d2a2';c.beginPath();c.moveTo(point.x,point.y-17);c.lineTo(point.x-4,point.y-23);c.lineTo(point.x+4,point.y-23);c.fill();}}
  if(dying)this.paint.restore();
  }
- creature(unit,x,y,z,time,pose,color){if(window.RuggedVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;if(window.ExpeditionVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;if(window.FrontierVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;
+ creature(unit,x,y,z,time,pose,color){if(window.BossDesigns?.creature(this,unit,x,y,z,time,pose,color))return true;if(window.RuggedVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;if(window.ExpeditionVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;if(window.FrontierVisuals?.creature(this,unit,x,y,z,time,pose,color))return true;
  if(unit.kind==='drownedAdmiral'){
  const sway=this.reduced?0:Math.sin(time/650)*.07,swing=pose.swing||0,box=(dx,dy,dz,w,h,d,col)=>this.box(x+dx,y+dy+sway,z+dz,w,h,d,col);
  // Split keel, corroded admiral's coat, and a broken mast form an asymmetric silhouette.
