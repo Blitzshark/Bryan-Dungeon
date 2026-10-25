@@ -619,3 +619,8 @@ During encounter entrances, travel, camp departures and raid journeys, living ad
 ### Jadefang, Root of All Hunger and Pale Comet
 
 These bosses use dedicated models rather than the generic wolf, tree or dragon primitives. Jadefang is a six-legged jade saber cat with a mineral crown, ivory fangs, armored shoulders, claws and a split tail; its short entrance pushes through foliage into a pounce and roar. Root of All Hunger has a physically hollow bark cage, toothed maws, crawling roots and hanging seed coffins. Pale Comet is a floating skeletal frost wyrm with an exposed spine and ribs, crescent wings, a split jaw, orbiting ice shards and a trailing segmented tail. Battle, attack-film and almanac renderers share the new models; previews fit their silhouettes without changing battle FOV. Existing saved boss identities show the new designs immediately, hit flashes still recolor the full model, and reduced motion stops idle movement.
+
+
+### Menu sizing
+
+The title menu uses normal flowing layout with a second collection column on wider windows and vertical scrolling when needed. It no longer uses an absolute vertical-center offset that clips added buttons. Room dialogs stay within the viewport, use compact responsive form columns and reset their scroll position whenever opened. Small-screen online presence appears beneath the menu rather than covering menu controls. Browser checks cover 1366×650, 1280×620, 1024×600, 844×430, 390×700 and 320×568, including successful room creation.
