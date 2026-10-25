@@ -651,3 +651,11 @@ Quartzling, Frost Lantern, Emerald Viper, Jungle Jaguar, Screaming Mandrake and 
 Iron Bell, Thorn Mantis, Candle Crawler, Cinder Leech, Rift Urchin, Coffin Mite, Pearl Snipper and Kelp Dragon also use simple authored models: a heavy iron bell, folded-scythe insect, wax crawler, ember-segmented leech, spiny rift creature, crawling coffin, pearl clam and leafy seahorse. Existing attacks and stats are unchanged.
 
 Ashen Procession, Powder King and Spiral Abbey now have distinct centipede, cannon-keg and nautilus-abbey models. Rope Weaver, Jade Pangolin and Fang Bromeliad use simpler knot, armored mammal and flower designs. Enemy art standards in `AGENTS.md` require readable species-specific silhouettes, restrained detail, appropriate materials and browser checks for future campaign additions.
+
+### Optional first-person battle view
+
+Settings → Battle camera offers Classic tactical view (default) and First person, with locally saved mouse sensitivity. First person uses native WebGL perspective rendering and a depth buffer; it reuses the existing map and voxel-model geometry, articulated poses, custom face textures, incoming hit flashes and combat effects. Static map meshes are cached separately from animated characters. GPU near-plane clipping and distance fog keep the view stable while looking around. Raid domains replace the map geometry and palette.
+
+Click Look around to capture the mouse, then move it freely; Escape releases it without opening the pause menu. Dragging the battlefield supports touch and devices without pointer lock. The view follows the local adventurer (including their attack walk-up), with visible hands and a weapon. Classic battle controls retain their larger layout and keyboard bindings. Camp, menus, tavern, previews and directed cinematics keep their existing cameras. The camera does not change combat rules, server state or movement permissions. If WebGL cannot initialize or the context is lost, tactical view remains available.
+
+`first-person.js` contains preferences, camera math, geometry collection and the renderer. Tests cover projection, look limits, persistence and articulated geometry; browser checks cover mouse capture/release, impact timing, map and raid-domain changes, image faces, resizing and transitions.
