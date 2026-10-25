@@ -647,3 +647,5 @@ Combat UI uses the original larger layout and typography. The compact landscape 
 The Immortal Snail now uses its original `frontier-visuals.js` renderer again, including the green shell, eye stalks and retracting roll. Its attacks, health and other gameplay are unchanged.
 
 Quartzling, Frost Lantern, Emerald Viper, Jungle Jaguar, Screaming Mandrake and Scarlet Macaw also use lightweight models in `campaign-sculptures.js`: crystal cluster, hanging icy lantern, coiled snake, spotted cat, leafy root creature and red parrot. They retain the same enemy identities and attacks, so saved encounters and raid minion variants use the updated shapes.
+
+Iron Bell, Thorn Mantis, Candle Crawler, Cinder Leech, Rift Urchin, Coffin Mite, Pearl Snipper and Kelp Dragon also use simple authored models: a heavy iron bell, folded-scythe insect, wax crawler, ember-segmented leech, spiny rift creature, crawling coffin, pearl clam and leafy seahorse. Existing attacks and stats are unchanged.
