@@ -141,7 +141,7 @@ class CampaignScene{
  const party=this.state?.party||[],summons=this.state?.summons||[],used=new Set();let slot=0;
  // Reserve one position per adventurer before adding another row, regardless of ownership.
  for(const summon of (summons.some(p=>p.id===unit.id)?summons:[...summons,unit])){const preferred=Math.max(0,party.findIndex(p=>p.id===summon.ownerId));slot=preferred;if(used.has(slot)){slot=0;while(used.has(slot))slot++;}used.add(slot);if(summon.id===unit.id)break;}
- const row=Math.floor(slot/3);return {x:-.4-row*1.65,z:(slot%3-1)*2.6+(row%2)*1.2};
+ const row=Math.floor(slot/3);return {x:-1-row*1.65,z:(slot%3-1)*2.6+(row%2)*1.2};
  }
  raidMinionPosition(unit){const minions=(this.state?.enemies||[]).filter(e=>e.raidMinion),slot=Number.isInteger(unit.raidSlot)&&unit.raidSlot>=0&&unit.raidSlot<3?unit.raidSlot:Math.max(0,minions.findIndex(e=>e.id===unit.id))%3;return [{x:1.4,z:3.4},{x:4,z:6},{x:-.8,z:6}][slot];}
  positionFor(unit,index){if(unit.summon&&this.camp){const n=(this.state?.summons||[]).findIndex(p=>p.id===unit.id);return {x:-3+(n%4)*1.7,z:5.5+Math.floor(n/4)*1.3};}if(unit.summon)return this.summonPosition(unit);if(unit.raidOnly)return {x:4.8,z:.5};if(unit.raidMinion&&!this.camp)return this.raidMinionPosition(unit);if(this.camp){return [{x:-2.2,z:1.3},{x:0,z:3},{x:2.2,z:1.3},{x:-3.7,z:3},{x:0,z:4.6},{x:3.7,z:3}][index]||{x:0,z:0};}const side=unit.side==='party'?-1:1;const roster=unit.side==='party'?this.state?.party:this.state?.enemies;const count=roster?.length||3;if(unit.side==='party'&&count>3)return {x:index<3?-2.8:-5,z:(index%3-1)*2.6};return {x:side*(3.3+(index%2)*.2),z:(index-(count-1)/2)*(count>3?1.8:2.4)};}
