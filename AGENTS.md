@@ -3,6 +3,7 @@
 When adding or reworking campaign enemies:
 
 - Give each species an intentional, recognizable silhouette and anatomy. Do not reuse an unrelated creature model with a new color.
+- Preserve successful simple designs such as Moss Slime; low detail alone is not a reason to redesign an enemy.
 - Prefer simple, readable shapes and a few identifying details over visual clutter. Normal enemies should stay lightweight; bosses need a distinct focal feature.
 - Match materials and colors to the creature and its region. Preserve the game's block-style appearance.
 - Give different bosses distinct designs rather than repeating the same body with new decorations.
