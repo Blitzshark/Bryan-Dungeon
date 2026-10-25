@@ -639,3 +639,9 @@ In landscape windows up to 650 pixels tall, combat controls occupy a roughly 81â
 `boss-sculptures.js` supplies authored models for Lily Crown, Mourning Bell and the eleven remaining raid bosses; `boss-designs.js` preserves the existing Jadefang, Root and Pale Comet designs and combines their preview bounds. Cathedral architecture, Hydra necks and crowns, jointed arthropods, fossil shell, hanging filaments, furnace machinery and segmented carriages use distinct geometry. Idle motion respects Reduced Motion, impact flashes preserve their materials, and all battle/film/almanac renderers use the same models.
 
 `menu-trailer.js` chooses only Greenwood, Hollow Depths, Void & Hell, reef, ship and jungle. Each shot randomizes opponents, adventurer looks, classes, weapons, actors and legal noncinematic attacks. It excludes raid-only enemies and campaigns 3â€“5. Camera anchors stay fixed; attacks wait for the previous animation to finish, HP changes at impact, particles match the region, and scene changes fade. No account progression or saved battle is modified.
+
+### Campaign creature sculptures
+
+`campaign-sculptures.js` adds separate models for Broodmother, Silvermane Alpha, Walking Ossuary, Gilded Devourer, Cinder Wyrm, Ore Golem, Glass Leviathan, Last Orrery and Triune Abyss. The bone reliquary, chained vault, coiled fire wyrm, broad glass sea-beast, mineral golem and orbital constructs have distinct silhouettes. Tidewatch Eye, Rift Brute, Rift Hound and Obsidian Sentinel use simpler geometry. Bounds and label heights cover previews and battles, saved enemy identities select the new models, damage still flashes red, and Reduced Motion freezes idle details.
+
+The Immortal Snail now uses its original `frontier-visuals.js` renderer again, including the green shell, eye stalks and retracting roll. Its attacks, health and other gameplay are unchanged.
