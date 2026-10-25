@@ -606,3 +606,6 @@ The encounter heading, turn-order panel and expandable region-effect label form 
 ### Creature attack choreography
 
 Creature attacks now use body-specific movement before impact instead of the humanoid walk-and-swing fallback. Beak and talon attacks make birds climb, fold their wings and pitch into a dive, then return to formation; feather volleys and wing gusts stay ranged. Frog/toad tongues extend from the mouth to the target and retract while the creature stays in place. Croaks send throat pulses and hops launch the body. Other supported families include bat swoops, serpent lunges/spit, spider scuttles/webs, beast charges, shell rolls, slime hops, pincers, plant vines, insect strikes and mechanical recoil. Generic spell projectiles are suppressed during these creature windups; elemental impacts, critical effects, hit flashes and damage-number timing remain synchronized to the original attack impact. Reduced motion keeps actors in formation and avoids dives and body rotations. Existing signature films and player-weapon animations retain their own systems.
+
+
+Ordinary healing moves and healing ultimates affect living allies only. Single-target healing directed at a fallen ally is rejected before focus, cooldowns or the action are consumed. Healing tonics also require a standing ally; Revival embers are explicit revival items in battle and at camp.
