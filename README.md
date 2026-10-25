@@ -663,3 +663,5 @@ Click Look around to capture the mouse, then move it freely; Escape releases it 
 The title’s journey, tavern and trading-hub actions share a row. Collection tools sit to the right on wider windows. The main menu fills three columns on desktop and two on phones, with scrolling available on short screens. These menu-only styles do not shrink the restored battle interface.
 
 The jungle/desert model set also covers Powder Rat, Threefold Root, Glass Adder, Dune Scuttler, Bristleback Tortoise, Sailback Lizard, Salt Jackal, Thirsting Urn, Glass Dune Wyrm, Carapace King, Sunken Obelisk and Sand-Sail Devourer. Seven lightweight normal creatures accompany five distinct bosses: a branching plant, circular-mawed worm, horned scarab, floating ruin and broad sand ray. They reuse the existing combat identities and work in both tactical and first-person rendering.
+
+First-person floors use `GroundLayers` to trim the intentional isometric tile overlap at shared grid edges and assign separate depths to overlapping painted surfaces. Floor planes stay below solid deck tops, avoiding depth conflicts with ship planks. The tactical renderer and map layouts are unchanged.
