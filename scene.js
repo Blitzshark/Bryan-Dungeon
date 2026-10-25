@@ -21,14 +21,14 @@ class CampaignScene{
  if(this.bodyTransform){this.orientedBox(x,y,z,w,h,d,color,top);return;}const a=x-w/2,b=z-d/2,p=(xx,yy,zz)=>this.project(xx,yy,zz);this.polygon([p(a,y,b+d),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a,y+h,b+d)],shade(color,.83));this.polygon([p(a+w,y,b),p(a+w,y,b+d),p(a+w,y+h,b+d),p(a+w,y+h,b)],shade(color,.65));this.polygon([p(a,y+h,b),p(a+w,y+h,b),p(a+w,y+h,b+d),p(a,y+h,b+d)],top||shade(color,1.13));}
  orientedBox(x,y,z,w,h,d,color,top){
  const t=this.bodyTransform,cos=Math.cos(t.angle),sin=Math.sin(t.angle);
- const point=(dx,dy,dz)=>{let xx=x+dx,yy=y+dy,zz=z+dz;const part=this.partTransform;if(part){const py=yy-part.y,pz=zz-part.z,pc=Math.cos(part.angle),ps=Math.sin(part.angle);yy=part.y+py*pc-pz*ps;zz=part.z+py*ps+pz*pc;}if(t.fall){const fy=yy-(t.y||0),fz=zz-t.z,fc=Math.cos(t.fall),fs=Math.sin(t.fall);yy=(t.y||0)+fy*fc-fz*fs+.3*fs;zz=t.z+fy*fs+fz*fc;}const px=xx-t.x,pz=zz-t.z;const wx=t.x+px*cos+pz*sin,wz=t.z-px*sin+pz*cos;return {...this.project(wx,yy,wz),depth:wx*.57+yy*.624+wz};};
+ const point=(dx,dy,dz)=>{let xx=x+dx,yy=y+dy,zz=z+dz;const part=this.partTransform;if(part){const py=yy-part.y,pz=zz-part.z,pc=Math.cos(part.angle),ps=Math.sin(part.angle);yy=part.y+py*pc-pz*ps;zz=part.z+py*ps+pz*pc;}if(t.wingFold){const offset=xx-t.x;if(Math.abs(offset)>.35)xx=t.x+Math.sign(offset)*(.35+(Math.abs(offset)-.35)*(1-t.wingFold*.75));}if(t.pitch){const pivot=(t.y||0)+.8,py=yy-pivot,pz=zz-t.z,pc=Math.cos(t.pitch),ps=Math.sin(t.pitch);yy=pivot+py*pc-pz*ps;zz=t.z+py*ps+pz*pc;}if(t.fall){const fy=yy-(t.y||0),fz=zz-t.z,fc=Math.cos(t.fall),fs=Math.sin(t.fall);yy=(t.y||0)+fy*fc-fz*fs+.3*fs;zz=t.z+fy*fs+fz*fc;}const px=xx-t.x,pz=zz-t.z;const wx=t.x+px*cos+pz*sin,wz=t.z-px*sin+pz*cos;return {...this.project(wx,yy,wz),depth:wx*.57+yy*.624+wz};};
  const faces=[
   {n:[0,1],v:[[-w/2,0,d/2],[w/2,0,d/2],[w/2,h,d/2],[-w/2,h,d/2]]},
   {n:[0,-1],v:[[w/2,0,-d/2],[-w/2,0,-d/2],[-w/2,h,-d/2],[w/2,h,-d/2]]},
   {n:[1,0],v:[[w/2,0,d/2],[w/2,0,-d/2],[w/2,h,-d/2],[w/2,h,d/2]]},
   {n:[-1,0],v:[[-w/2,0,-d/2],[-w/2,0,d/2],[-w/2,h,d/2],[-w/2,h,-d/2]]}
  ];
- for(const face of faces){const nx=face.n[0]*cos+face.n[1]*sin,nz=-face.n[0]*sin+face.n[1]*cos;if(t.fall||nx*.57+nz>.001)this.polygon(face.v.map(v=>point(...v)),shade(color,.74-.09*nx+.09*nz));}
+ for(const face of faces){const nx=face.n[0]*cos+face.n[1]*sin,nz=-face.n[0]*sin+face.n[1]*cos;if(t.fall||t.pitch||nx*.57+nz>.001)this.polygon(face.v.map(v=>point(...v)),shade(color,.74-.09*nx+.09*nz));}
  if(t.fall)this.polygon([point(-w/2,0,-d/2),point(w/2,0,-d/2),point(w/2,0,d/2),point(-w/2,0,d/2)],shade(color,.65));this.polygon([point(-w/2,h,-d/2),point(w/2,h,-d/2),point(w/2,h,d/2),point(-w/2,h,d/2)],top||shade(color,1.13));
  }
  drawFace(x,y,z,big,drawing){
@@ -47,6 +47,7 @@ class CampaignScene{
    facing=Math.atan2(dx,dz);x+=dx*amount;z+=dz*amount;y+=Math.abs(stride)*.18;gesture=Math.sin(Math.max(0,Math.min(1,(progress-.42)/.30))*Math.PI);const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);};swing=progress<.54?-.9*ease((progress-.42)/.12):progress<.61?-.9+2.5*ease((progress-.54)/.07):1.6*(1-ease((progress-.65)/.1));x+=dx/distance*Math.sin(swing)*.16;z+=dz/distance*Math.sin(swing)*.16;
   }else if(anim.style==='magic'){gesture=Math.sin(Math.min(1,progress/.6)*Math.PI/2);y+=this.reduced?0:Math.sin(progress*Math.PI)*.14;}else {gesture=Math.sin(progress*Math.PI);x+=(unit.side==='party'?1:-1)*gesture*.1;y+=gesture*.025;}
  }
+ const creaturePose=anim&&window.CreatureActions?.pose(unit,pos,anim.destination||this.positions.get(anim.target),anim,time,this.reduced);if(creaturePose)return {...creaturePose,anim};
  if(anim&&!this.reduced){const p=(time-anim.at)/anim.duration,motion=CombatVFX.profile(anim.skill,anim.style).motion,hit=Math.max(0,Math.sin(Math.max(0,Math.min(1,(p-.42)/.3))*Math.PI));if(motion==='leap')y+=hit*.55;if(motion==='spin'&&facing!==null)facing+=hit*Math.PI*2;if(motion==='thrust')swing*=.4;if(motion==='dash')y+=hit*.08;}
  if(unit.side==='enemy'&&!anim&&!this.tavern){const knight=(this.state?.summons||[]).findLast(k=>k.hp>0&&k.taunt),p=knight?this.positionFor(knight,0):null,wanted=p?Math.atan2(p.x-pos.x,p.z-pos.z):unit.kind==='rat'?0:-Math.PI/2;this.enemyFacing??=new Map();const old=this.enemyFacing.get(unit.id)||{angle:unit.kind==='rat'?0:-Math.PI/2,at:time},dt=Math.max(0,Math.min(.08,(time-old.at)/1000)),difference=Math.atan2(Math.sin(wanted-old.angle),Math.cos(wanted-old.angle));facing=old.angle+difference*(this.reduced?1:1-Math.exp(-dt*8));this.enemyFacing.set(unit.id,{angle:facing,at:time});}
  return {x,z,y,gesture,stride,swing,facing,anim};
@@ -150,11 +151,11 @@ class CampaignScene{
  if(hit){flash=time-hit.at<220;if(!this.reduced)x+=Math.sin((time-hit.at)/35)*.045;}
  if(!unit.hp&&!fallen){const death=this.effects.find(e=>e.target===unit.id&&e.type==='damage');y=-.6*(death?Math.max(0,Math.min(1,(time-death.at)/450)):1);}
  this.shadow(x,z,unit.kind==='king'?1:.64,.5,unit.hp?.32:.15);
- if(pose.anim?.style==='magic')this.casting(x,y,z,time,pose.anim);
+ if(pose.anim?.style==='magic'&&!pose.anim.creatureMotion)this.casting(x,y,z,time,pose.anim);
  const selected=this.selected===unit.id,active=this.state&&DungeonCampaign.active(this.state)?.id===unit.id;
  if(selected||active){const c=this.paint,p=this.project(x,.025,z);c.save();c.translate(p.x,p.y);c.scale(1,.45);c.beginPath();c.ellipse(0,0,this.scale*.7,this.scale*.7,0,0,Math.PI*2);c.strokeStyle=active?'#e1d5a7':'#e0b293';c.lineWidth=active?2:1.5;c.stroke();if(active){c.fillStyle='#e3d5a614';c.fill();}c.restore();}
  // Sort body surfaces together so belts, arms and hair cannot paint over nearer torsos.
- this.fallenTint=fallen;this.actorPolygons=[];this.bodyTransform={x,z,y,fall,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
+ this.fallenTint=fallen;this.actorPolygons=[];this.bodyTransform={x,z,y,fall,pitch:pose.pitch||0,wingFold:pose.wingFold||0,angle:this.tavern?(unit.facing||0):pose.facing??(this.camp?Math.atan2(-pos.x,-pos.z):unit.kind==='rat'?0:unit.side==='party'?Math.PI/2:-Math.PI/2)};
  const armLift=pose.swing?0:pose.gesture*(pose.anim?.style==='magic'?.6:.3);
  const look=unit.appearance||{},color=flash?(hit?.style==='cosmic'?'#c078ff':'#ff3d48'):look.clothes||unit.color,skin=look.skin|| (unit.side==='party'?(index===2?'#d2bba3':'#d4bea0'):unit.kind==='skeleton'?'#dfd8bf':'#b29b7d');
  if(this.creature(unit,x,y,z,time,pose,color)){}else if(unit.kind==='slime'){
@@ -300,11 +301,12 @@ class CampaignScene{
  const now=performance.now(),actor=this.state&&DungeonCampaign.unit(this.state,result.actor);
  const support=['focus','potion','revive'].includes(result.action)||!!(DungeonCampaign.SKILLS[result.skill]?.heal||DungeonCampaign.SKILLS[result.skill]?.summon||DungeonCampaign.SKILLS[result.skill]?.self);
  const style=result.skill==='universe'?'cosmic':result.skill==='strike'&&actor?.side==='party'?DungeonCampaign.weaponFor(this.state,actor).style:(result.skill?DungeonCampaign.skillFor(this.state,actor,result.skill)?.style:null)||(actor?.side==='party'&&this.state&&DungeonCampaign.weaponFor(this.state,actor).skill===result.skill?DungeonCampaign.weaponFor(this.state,actor).style:null)|| (support?(result.action==='focus'?'focus':'heal'):result.skill==='ember'||actor?.kind==='wisp'||actor?.kind==='mage'||actor?.job==='mage'?'magic':result.skill==='volley'||actor?.job==='ranger'||actor?.kind==='archer'?'arrow':result.skill==='sunder'||DungeonCampaign.SKILLS[result.skill]?.ultimate?'heavy':'slash');
+ const creatureMotion=!support&&window.CreatureActions?.recipe(actor,DungeonCampaign.SKILLS[result.skill]||{});
  const critical=result.events?.some(e=>e.critical)&&result.skill!=='universe';const duration=result.skill==='universe'?10000:DungeonCampaign.SKILLS[result.skill]?.duration|| (critical?2400:['slash','heavy'].includes(style)?1500:this.reduced?300:1100),impactAt=result.skill==='universe'?9000:DungeonCampaign.SKILLS[result.skill]?.impactAt|| (DungeonCampaign.SKILLS[result.skill]?.cinematic?6000:DungeonCampaign.SKILLS[result.skill]?.duration?1000:critical?1450:['slash','heavy'].includes(style)?885:this.reduced?80:450);
  const primary=result.events?.find(e=>e.type==='damage'&&e.source===result.actor&&e.target!==result.actor)||result.events?.[0];
  const targetUnit=this.state&&DungeonCampaign.unit(this.state,primary?.target),roster=targetUnit?.side==='party'?this.state.party:this.state?.enemies,targetIndex=roster?.findIndex(p=>p.id===primary?.target),destination=targetUnit?this.positionFor(targetUnit,targetIndex):null;
- this.animations.push({element:actor?DungeonCampaign.attackElement(this.state,actor,result.skill||'strike'):'physical',enemy:actor?.side==='enemy',actor:result.actor,target:primary?.target,destination:destination?{worldX:destination.x,worldZ:destination.z}:null,style,skill:result.skill||result.action,missed:primary?.type==='miss',critical:result.events?.some(e=>e.critical),ultimate:!!(DungeonCampaign.SKILLS[result.skill]?.cinematic||DungeonCampaign.SKILLS[result.skill]?.ultimate||DungeonCampaign.SKILLS[result.skill]?.raceUltimate),impactAt,at:now,duration});
- for(const event of result.events||[])this.effects.push({...event,style,at:now+impactAt,start:now,duration});
+ this.animations.push({creatureMotion,element:actor?DungeonCampaign.attackElement(this.state,actor,result.skill||'strike'):'physical',enemy:actor?.side==='enemy',actor:result.actor,target:primary?.target,destination:destination?{worldX:destination.x,worldZ:destination.z}:null,style,skill:result.skill||result.action,missed:primary?.type==='miss',critical:result.events?.some(e=>e.critical),ultimate:!!(DungeonCampaign.SKILLS[result.skill]?.cinematic||DungeonCampaign.SKILLS[result.skill]?.ultimate||DungeonCampaign.SKILLS[result.skill]?.raceUltimate),impactAt,at:now,duration});
+ for(const event of result.events||[])this.effects.push({...event,creatureMotion,style,at:now+impactAt,start:now,duration});
  return {duration,impactAt,style};
  }
  drawDefeats(time){const c=this.paint;for(const e of this.effects){const unit=this.state&&DungeonCampaign.unit(this.state,e.target);if(e.type!=='damage'||!(unit?.side==='enemy'&&unit.hp<=0||e.target?.startsWith('knight-')&&e.defeated))continue;const age=time-e.at;if(age<0||age>1100)continue;const p=this.point(e.target);if(!p)continue;const t=age/1100,purple=e.style==='cosmic';c.save();c.globalAlpha=1-t;for(let i=0;i<36;i++){const angle=i*2.399,x=p.x+Math.cos(angle)*this.scale*(.2+t*.9),y=p.groundY-this.scale*(.25+(i%7)*.16)-t*this.scale*(.5+(i%5)*.1);c.fillStyle=purple?(i%3?'#bb75ff':'#eee1ff'):(i%3?'#aaa2a7':'#e3b280');if(purple&&t<.65){c.beginPath();c.moveTo(x,y-9);c.quadraticCurveTo(x+6,y+5,x,y+7);c.quadraticCurveTo(x-6,y+5,x,y-9);c.fill();}else c.fillRect(x,y,Math.max(1,4*(1-t)),Math.max(1,4*(1-t)));}c.restore();}}
@@ -322,7 +324,7 @@ class CampaignScene{
   const color=e.critical?'#ffe16b':e.status==='poison'?'#b5d979':e.style==='magic'?'#b6bfff':e.style==='arrow'?'#e2d2a2':e.style==='heal'?'#bfe9a1':e.style==='focus'?'#9dd6e3':'#ffe7c0';
   const tx=target.x,ty=target.y+this.scale*.65;if(e.critical&&elapsed>=0&&elapsed<350){c.save();c.strokeStyle='#ffe26b';c.lineWidth=3;for(let i=0;i<4;i++){const angle=Math.PI/4+i*Math.PI/2;c.beginPath();c.moveTo(tx+Math.cos(angle)*9,ty+Math.sin(angle)*9);c.lineTo(tx+Math.cos(angle)*18,ty+Math.sin(angle)*18);c.stroke();}c.restore();}
   c.save();c.lineCap='round';c.lineJoin='round';
-  if(!this.reduced&&source&&['arrow','magic'].includes(e.style)&&elapsed<0){
+  if(!e.creatureMotion&&!this.reduced&&source&&['arrow','magic'].includes(e.style)&&elapsed<0){
    const flight=Math.max(0,Math.min(1,(time-e.start-100)/(e.at-e.start-100)));if(flight>0){
     const sx=source.x,sy=source.y+this.scale*.65,dx=tx-sx,dy=ty-sy,x=sx+dx*flight,y=sy+dy*flight-Math.sin(flight*Math.PI)*this.scale*.35;
     c.strokeStyle=color;c.lineWidth=e.style==='arrow'?2:4;c.shadowColor=color;c.shadowBlur=e.style==='magic'?15:0;c.beginPath();c.moveTo(x-dx*.055,y-dy*.055);c.lineTo(x,y);c.stroke();
@@ -357,7 +359,7 @@ class CampaignScene{
  entries.forEach(({u,index})=>this.actor(u,index,time));
  if(this.camp)this.drawCampfire(time);
  const impactFrame=this.animations.find(a=>a.critical&&a.style!=='cosmic'&&time-a.at-a.impactAt>=0&&time-a.at-a.impactAt<65);if(impactFrame&&!this.reduced){c.save();c.globalCompositeOperation='difference';c.fillStyle='#fff7df';c.fillRect(0,0,this.width,this.height);c.restore();}
- window.RaidFX?.arena(this,time);this.drawEffects(time);this.drawDefeats(time);CombatVFX.draw(this,time);window.RaidFX?.attacks(this,time);window.OceanVisuals?.attacks(this,time);window.OceanVisuals?.atmosphere(this,time);window.RuggedVisuals?.atmosphere(this,time);if(!window.RuggedWorlds?.REGIONS[this.biome]||this.raid)window.FrontierVisuals?.atmosphere(this,time);c.restore();
+ window.RaidFX?.arena(this,time);this.drawEffects(time);this.drawDefeats(time);CombatVFX.draw(this,time);window.CreatureActions?.draw(this,time);window.RaidFX?.attacks(this,time);window.OceanVisuals?.attacks(this,time);window.OceanVisuals?.atmosphere(this,time);window.RuggedVisuals?.atmosphere(this,time);if(!window.RuggedWorlds?.REGIONS[this.biome]||this.raid)window.FrontierVisuals?.atmosphere(this,time);c.restore();
  this.effects=this.effects.filter(e=>time-e.at<1200);this.animations=this.animations.filter(a=>time-a.at<a.duration);
  if(!this.reduced){c.fillStyle=this.biome==='forest'?'#d3e2a333':this.biome==='throne'?'#f78c6944':'#ead69e33';for(let i=0;i<18;i++){const x=(seeded(i+10)*this.width+Math.sin(time/5000+i)*18),y=(seeded(i+20)*this.height-time/110*(.2+seeded(i+30)))%this.height;c.fillRect(x,y<0?y+this.height:y,i%3===0?2:1,i%3===0?2:1);}}
  if(this.menuTrailerActive)window.MenuTrailer?.overlay(this,time);
