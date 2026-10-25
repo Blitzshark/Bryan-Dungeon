@@ -661,3 +661,5 @@ Click Look around to capture the mouse, then move it freely; Escape releases it 
 `first-person.js` contains preferences, camera math, geometry collection and the renderer. Tests cover projection, look limits, persistence and articulated geometry; browser checks cover mouse capture/release, impact timing, map and raid-domain changes, image faces, resizing and transitions.
 
 The title’s journey, tavern and trading-hub actions share a row. Collection tools sit to the right on wider windows. The main menu fills three columns on desktop and two on phones, with scrolling available on short screens. These menu-only styles do not shrink the restored battle interface.
+
+The jungle/desert model set also covers Powder Rat, Threefold Root, Glass Adder, Dune Scuttler, Bristleback Tortoise, Sailback Lizard, Salt Jackal, Thirsting Urn, Glass Dune Wyrm, Carapace King, Sunken Obelisk and Sand-Sail Devourer. Seven lightweight normal creatures accompany five distinct bosses: a branching plant, circular-mawed worm, horned scarab, floating ruin and broad sand ray. They reuse the existing combat identities and work in both tactical and first-person rendering.
