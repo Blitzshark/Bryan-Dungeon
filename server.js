@@ -13,11 +13,14 @@ app.get('/play', (req, res) => res.sendFile(path.join(__dirname, 'index.html')))
 app.use(express.static(__dirname, { dotfiles: 'deny', index: 'index.html' }));
 const server = app.listen(process.env.PORT || 8080, '0.0.0.0', () => console.log('Bryan’s Basement campaign listening on ' + server.address().port));
 
+const voiceRelay=require('./lib/voice-relay').attach(server);
+
 // Railway sends SIGTERM when replacing or stopping a deployment. Finish active
 // requests (including account writes) before exiting; idle keep-alives can close.
 function shutdown(signal) {
  if (shuttingDown) return;
  shuttingDown = true;
+ voiceRelay.close();
  console.log('Received ' + signal + '; finishing active requests.');
  const deadline = setTimeout(() => {
   console.error('Shutdown timed out after 8 seconds. Closing remaining connections.');

@@ -673,3 +673,11 @@ Reviewed all 189 active enemy identities in browser contact sheets. `creature-po
 In first person, local-player damage now triggers a brief red screen flash and irregular blood marks at the viewport edges. Marks persist beyond the short combat-particle lifetime and fade fully over 1.8 seconds; repeated hits are bounded, other players’ damage does not trigger them, and leaving battle clears them. Reduced Motion uses a gentler flash. Overlays do not intercept controls or cover the bottom action deck.
 
 A small “Scroll down for more” button appears when additional title-menu options are below the viewport. It scrolls the menu when clicked and hides at the bottom or when no scroll is needed. The background battle continues playing, with its vertical anchor moving downward as the menu scrolls; its horizontal position remains fixed.
+
+### Voice chat and fallen-player movement
+
+Open **Voice → Join voice** in a shared lobby, campaign, duel, Monster Masquerade, tavern or trading hub. The microphone is requested only after joining. Mute, deafen, individual volume sliders and Leave voice are available; changing areas or leaving stops the microphone. HTTPS (or localhost) is required. Voice follows the authenticated room, including downed players, and does not change combat state.
+
+Railway's Node server relays live mono speech through `/api/voice-relay`; it requires no additional service or environment variables. Frames are forwarded only to authenticated members of the same voice channel and are not recorded. Vercel falls back to browser WebRTC; networks requiring TURN can configure `VOICE_TURN_URLS` and `VOICE_TURN_SECRET` for a TURN service using temporary HMAC credentials. The TURN secret stays on the server.
+
+In first person, downed players can look around to move their limp character's head and repeatedly press **W** to flop their arms, legs and body. These cosmetic movements sync to other players, stay near the original spot and never revive, heal or consume a turn. Reduced Motion softens the movement; carrying and revival restore the existing poses. Hollow Armor now has an open, empty suit of haunted armor, a battered shield and a chipped sword.

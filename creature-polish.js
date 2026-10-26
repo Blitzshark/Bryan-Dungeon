@@ -7,7 +7,22 @@ function creature(s,u,x,y,z,time,pose={},color){const id=u.enemyType;if(!heights
 if(['golem','tilegolem','cairnwalker','icecairn'].includes(id)){
  const ice=id==='icecairn',mosaic=id==='tilegolem',small=id==='cairnwalker',rock=ice?'#819fa7':mosaic?'#b1a27d':'#85867a',edge=ice?'#c2d5cf':mosaic?'#c3bd96':'#b2ac94';
  b(0,.75,0,small?.65:1,.8,.65,rock);b(-.09,1.52,0,small?.85:1.22,.46,.8,edge);b(.06,2.03,-.02,.68,.4,.61,rock);eyes(.06,2.21,.31,.18,ice?'#d0eee0':'#d9cf99');for(const side of [-1,1]){link([side*.28,.85,0],[side*.42,.16,.05],.26,rock);b(side*.43,.06,.18,.43,.24,.65,edge);link([side*.48,1.7,0],[side*(small?.73:.95),.85,.23],.28,rock);b(side*(small?.76:.98),.71,.3,.43,.37,.5,edge);b(side*.3,1.75,.44,.18,.12,.08,small?'#8fa37e':'#a8c9bb');}b(0,1.22,.35,.24,.2,.08,'#a6ba9e');if(mosaic)for(let i=0;i<7;i++)b((i%3-1)*.26,1+i%2*.25,.42,.19,.18,.07,['#759e9c','#c4a27d','#8c999b'][i%3]);if(ice){for(let i=0;i<8;i++){const a=i*2.4;b(Math.cos(a)*.7,1.4+i%3*.45,Math.sin(a)*.5,.48,.4,.43,i%2?rock:edge);}for(const side of [-1,1]){b(side*1.17,.7,.25,.55,.5,.65,rock);spike(side*.55,2.06,-.1,.3,.55,'#cae0da');}}
-}else if(['armor','shutterknight','warden','papyrusguard','skeleton'].includes(id)){
+}else if(id==='armor'){
+ // A haunted suit with an open rib cage and disconnected plates, not a solid golem.
+ const steel='#647579',edge='#a6b0a4',rust='#887050',voidColor='#172c32',glow='#83d5c8',hover=Math.sin(t/820)*.025;
+ for(const side of [-1,1]){b(side*.21,.08,.06,.3,.19,.48,steel);b(side*.21,.26,0,.22,.45,.26,steel);b(side*.21,.64,.01,.29,.13,.34,edge);b(side*.21,.79,-.02,.2,.28,.24,steel);b(side*.21,.32,.15,.06,.28,.035,rust);}
+ b(0,.98,-.06,.63,.16,.38,steel);b(0,1.52+hover,-.1,.66,.18,.36,edge);
+ // Leave the chest physically hollow between the side braces and rear ribs.
+ for(const side of [-1,1]){b(side*.27,1.12+hover,0,.13,.43,.3,steel);for(let i=0;i<3;i++)b(side*.2,1.13+i*.13+hover,-.16,.23,.055,.055,edge);b(side*.17,1.57+hover,.12,.24,.11,.09,rust);}
+ for(let i=0;i<3;i++)b((i-1)*.15,.91,-.24,.13,.27+(i%2)*.08,.065,'#4a6663');
+ // Open-faced great helm, with a deep empty visor and small spectral embers.
+ b(0,1.83+hover,-.16,.56,.36,.16,steel);b(0,2.13+hover,0,.63,.13,.49,edge);for(const side of [-1,1]){b(side*.25,1.81+hover,.04,.13,.36,.34,steel);b(side*.16,1.84+hover,.24,.2,.11,.07,steel);b(side*.14,2.02+hover,.12,.075,.045,.025,glow);}b(0,1.9+hover,.11,.025,.15,.025,voidColor);b(0,2.26+hover,-.02,.09,.2,.28,rust);
+ // Heavy left pauldron and a buckled tower shield balance a narrow sword arm.
+ b(-.52,1.51+hover,-.02,.47,.26,.52,steel);b(-.55,1.77+hover,-.02,.5,.09,.53,edge);b(.45,1.49+hover,0,.29,.19,.36,steel);
+ for(const side of [-1,1]){b(side*.49,1.14+hover,.01,.19,.28,.24,steel);for(let i=0;i<3;i++)b(side*.49,1.04+i*.1+hover,.12,.11,.035,.04,rust);b(side*.51,.92+hover,.05,.23,.15,.25,edge);}
+ b(-.62,.76+hover,.23,.13,.79,.57,steel);b(-.7,.79+hover,.23,.045,.74,.52,edge);b(-.72,1.03+hover,.23,.04,.1,.3,rust);b(-.72,.87+hover,.2,.045,.13,.045,glow);
+ const swing=g*.35;b(.55,.89+hover,.15+swing,.11,.25,.12,'#5a4a3b');b(.55,1.12+hover,.18+swing,.4,.07,.16,edge);b(.55,1.19+hover,.21+swing,.12,.68,.1,steel);b(.59,1.87+hover,.21+swing,.2,.1,.1,edge);for(let i=0;i<3;i++)b(.62,1.26+i*.17+hover,.22+swing,.07,.07,.12,voidColor);
+} else if(['shutterknight','warden','papyrusguard','skeleton'].includes(id)){
  const bone=id==='skeleton',mummy=id==='papyrusguard',king=id==='warden',metal=bone?'#c8c5aa':mummy?'#b8ae8e':id==='shutterknight'?'#7e9b9c':'#6f8185',trim=mummy?'#e1d3ad':bone?'#e3d9b9':'#b6bba3';
  b(0,.7,0,.55,.75,.36,metal);b(0,1.48,0,.6,.45,.48,metal);for(const side of [-1,1]){b(side*.17,.09,0,.18,.62,.23,metal);b(side*.17,.05,.12,.23,.16,.36,trim);link([side*.36,1.31,0],[side*.46,.71,.09],.15,metal);b(side*.38,1.4,0,.28,.23,.42,trim);}if(bone){for(let i=0;i<4;i++)b(0,.85+i*.14,.22,.48-i*.04,.065,.1,trim);b(0,.79,.18,.09,.62,.09,'#8f9f95');for(const side of [-1,1])b(side*.15,1.73,.25,.15,.16,.055,'#354b4b');b(0,1.49,.27,.29,.1,.07,trim);for(let i=0;i<4;i++)b((i-1.5)*.065,1.52,.31,.04,.08,.03,'#536561');}
  else{b(0,1.68,.26,.4,.1,.06,mummy?'#3e5250':'#343f4c');eyes(0,1.75,.3,.12,'#c0ddd3');b(0,1.92,0,.61,.12,.49,trim);if(mummy){for(let i=0;i<5;i++){b(0,.81+i*.12,.21,.56,.065,.05,trim);b(0,1.55+i*.07,.27,.53,.035,.04,'#d4c6a5');}b(-.24,1.6,.31,.08,.35,.05,'#aca88a');}else{b(0,1.05,.22,.15,.34,.06,'#bac5af');b(-.49,.69,.12,.1,.71,.47,metal);b(-.56,.94,.15,.03,.2,.23,trim);b(.49,.69,.22,.07,.86,.08,'#cbd4c8');b(.49,.74,.22,.32,.065,.1,trim);}}if(king){for(let i=-2;i<=2;i++)spike(i*.15,2.05,0,.15,.27+(2-Math.abs(i))*.07,'#c9b47d');b(0,1.1,-.27,.64,.6,.1,'#68766f');for(const side of [-1,1]){b(side*.43,1.58,-.01,.35,.3,.48,'#93a09c');b(side*.2,.45,-.22,.18,.7,.16,'#7b8e89');}}
