@@ -1,6 +1,15 @@
 (function(){
 'use strict';
 function weapon(s,key,x,Y,z,b,lift){const A=window.ArsenalContent;if(!A.WEAPONS[key])return false;const X=x+.6*b,Z=z+.04*b,H=h=>Y(h+lift),box=(dx,h,dz,w,t,d,color)=>s.box(X+dx*b,H(h),Z+dz*b,w*b,t*b,d*b,color);const element=CombatElements.TYPES[A.WEAPONS[key].element].color;
+if(key==='blackglass'){const old=s.bodyTransform;if(old)s.bodyTransform={...old,angle:old.angle+Math.PI};window.SniperArts?.firearmModel(s,x-.1,Y(1.45),z-.45,{firearm:'sniper',raise:.25});s.bodyTransform=old;return true;}
+if(key==='sunpike'){box(0,.05,0,.06,1.7,.06,'#856f50');box(0,1.67,0,.18,.48,.09,'#ead59b');box(0,1.55,0,.45,.07,.1,'#bda05e');return true;}
+if(key==='clockrifle'||key==='tiderepeater'){box(0,.9,.1,.17,.18,.85,'#6e6658');box(0,.94,.68,.075,.075,.6,'#b0b8b0');box(0,.7,-.15,.12,.3,.17,'#655344');for(let i=0;i<4;i++)box(.09,1,.02+i*.12,.04,.07,.055,element);if(key==='clockrifle'){box(0,1.15,.16,.13,.12,.36,'#4e696a');box(.12,.98,.07,.13,.035,.06,'#ccb77a');}else{box(-.12,.87,.3,.1,.19,.5,'#5a8e94');box(.12,.87,.3,.1,.19,.5,'#5a8e94');}return true;}
+if(key==='chainwhip'||key==='meteorflail'){box(0,.45,0,.1,.65,.1,'#7b604b');for(let i=0;i<8;i++)box(Math.sin(i*.3)*.3,.9-i*.06,.09+i*.1,.065,.065,.065,'#b8b8ad');if(key==='meteorflail'){box(.25,.35,.85,.37,.35,.37,'#6c5a51');for(let i=0;i<4;i++)box(.12+i*.08,.5,.87,.045,.2,.045,element);}return true;}
+if(key==='thornbook'){box(0,.6,0,.55,.68,.18,'#3f6650');box(0,.65,.11,.47,.55,.04,'#e0d7b3');for(let i=0;i<4;i++)box(-.14+i*.09,.8+i%2*.15,.14,.05,.04,.025,element);box(-.26,.61,0,.06,.64,.23,'#9d8660');return true;}
+if(key==='moonchakrams'){for(const hand of [0,-1])for(let i=0;i<12;i++){const a=i*Math.PI/6;box(hand*.95+Math.cos(a)*.25,.9+Math.sin(a)*.25,0,.1,.1,.07,i%3?'#c8c9c1':element);}return true;}
+if(key==='deepanchor'){box(0,.2,0,.12,1.25,.13,'#667d81');box(0,.9,0,.72,.12,.13,'#9bb0ad');for(const side of [-1,1]){box(side*.3,.18,0,.14,.5,.18,'#70898b');box(side*.2,.2,0,.35,.12,.18,'#9badac');}return true;}
+if(key==='glassrapier'){box(0,.45,0,.055,1.3,.055,'#c5d9d6');for(let i=0;i<10;i++){const a=i*Math.PI/5;box(Math.cos(a)*.18,.48+Math.sin(a)*.14,0,.045,.045,.1,'#a39bba');}return true;}
+if(key==='bellscepter'){box(0,.05,0,.075,1.25,.075,'#958268');box(0,1.25,0,.25,.35,.25,'#c7ad72');box(0,1.2,0,.4,.09,.38,'#dfc58b');box(0,1.15,0,.08,.12,.08,element);return true;}
 if(key==='prismcrossbow'){box(0,.55,0,.13,.75,.16,'#6d5968');box(0,1.05,0,.95,.1,.13,'#c3c2b1');for(const side of [-1,1])box(side*.4,.93,0,.1,.22,.12,element);box(0,.75,.12,.1,.5,.08,element);return true;}
 box(0,.08,0,.075,1.5,.075,'#7b6851');
 if(key==='coraltrident'){box(0,1.23,0,.7,.09,.1,'#d6bb9a');for(const dx of [-.28,0,.28])box(dx,1.28,0,.09,dx===0?.55:.4,.1,element);}
