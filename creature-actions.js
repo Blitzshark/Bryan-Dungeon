@@ -1,7 +1,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.CreatureActions=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 const clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>{n=clamp(n);return n*n*(3-2*n);},mix=(a,b,t)=>a+(b-a)*t;
-function recipe(unit,skill={}){if(unit?.side!=='enemy'||skill.cinematic||skill.guardian||skill.heal||skill.summon||skill.self)return null;const body=[unit.enemyType,unit.kind,unit.form].join(' ').toLowerCase(),name=(skill.name||'').toLowerCase();if(skill.shell)return {kind:'brace',family:'armored',height:.7};
+function recipe(unit,skill={}){if((unit?.side!=='enemy'&&!unit?.controlledMonster)||skill.cinematic||skill.guardian||skill.heal||skill.summon||skill.self)return null;const body=[unit.enemyType,unit.kind,unit.form].join(' ').toLowerCase(),name=(skill.name||'').toLowerCase();if(skill.shell)return {kind:'brace',family:'armored',height:.7};
  if(/toad|frog|bognewt/.test(body))return {family:'toad',kind:/tongue/.test(name)?'tongue':/hop|flop|quake|leap/.test(name)?'frog-hop':'croak',height:/crownedtoad|eldertoad/.test(body)?1.5:.8};
  if(/macaw|vulture|snowowl|bellcrane|skywing|skyphoenix|\broc\b|harrier|zephyr/.test(body))return {family:'bird',kind:/feather.*lance|quill|plume/.test(name)?'feather':/wing|draft|flash|gust/.test(name)?'wing-gust':'bird-dive',height:1.2};
  if(/bat|dreammoth|rootbat/.test(body))return {family:'bat',kind:'swoop',height:1.2};
