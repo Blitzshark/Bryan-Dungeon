@@ -10,5 +10,6 @@ class Field{
 function field(scene){return scene.corpseMotion??=new Field();}
 function pose(scene,u,base,time){if(u.hp>0||base.transport){scene.corpseMotion?.rows.delete(u.id);return base;}const r=scene.corpseMotion?.step(u.id,time,scene.reduced);if(!r)return base;return {...base,x:base.x+r.x,z:base.z+r.z,y:base.y+r.y,corpse:r};}
 function legs(s,x,Y,z,big,color,r){for(const side of [-1,1]){const old=s.partTransform,angle=.2+(side>0?Math.sin(r.phase):Math.cos(r.phase))*r.limb,hip=Y(.52),ey=hip-.25*big*Math.cos(angle),ez=z-.25*big*Math.sin(angle);s.partTransform={y:hip,z,angle};s.box(x+side*.16*big,Y(.27),z,.26*big,.25*big,.3*big,color);s.partTransform={y:ey,z:ez,angle:Math.max(.05,angle+.25)};s.box(x+side*.16*big,ey-.25*big,ez,.24*big,.25*big,.28*big,color);s.partTransform=old;}}
-return {Field,field,pose,legs};
+function arms(s,x,Y,z,big,color,skin,e){for(const side of [-1,1]){const old=s.partTransform,angle=side<0?e.left:e.right,shoulder=Y(1.12),ey=shoulder-.38*big*Math.cos(angle),ez=z-.38*big*Math.sin(angle);s.partTransform={y:shoulder,z,angle};s.box(x+side*.44*big,Y(.74),z,.24*big,.38*big,.28*big,color);s.partTransform={y:ey,z:ez,angle:angle+e.curl};s.box(x+side*.44*big,ey-.28*big,ez,.2*big,.28*big,.24*big,color);s.box(x+side*.44*big,ey-.4*big,ez,.19*big,.14*big,.22*big,skin);s.partTransform=old;}}
+return {Field,field,pose,legs,arms};
 });
