@@ -676,8 +676,10 @@ A small “Scroll down for more” button appears when additional title-menu opt
 
 ### Voice chat and fallen-player movement
 
-Open **Voice → Join voice** in a shared lobby, campaign, duel, Monster Masquerade, tavern or trading hub. The microphone is requested only after joining. Mute, deafen, individual volume sliders and Leave voice are available; changing areas or leaving stops the microphone. HTTPS (or localhost) is required. Voice follows the authenticated room, including downed players, and does not change combat state.
+Open **Voice → Join voice** in a shared lobby, campaign, Monster Masquerade, tavern or trading hub. The microphone is requested only after joining. Mute, deafen, individual volume sliders and Leave voice are available; changing areas or leaving stops the microphone. HTTPS (or localhost) is required. Voice follows the authenticated room, including downed players, and does not change combat state.
 
 Railway's Node server relays live mono speech through `/api/voice-relay`; it requires no additional service or environment variables. Frames are forwarded only to authenticated members of the same voice channel and are not recorded. Vercel falls back to browser WebRTC; networks requiring TURN can configure `VOICE_TURN_URLS` and `VOICE_TURN_SECRET` for a TURN service using temporary HMAC credentials. The TURN secret stays on the server.
 
 In first person, downed players can look around to move their limp character's head and repeatedly press **W** to flop their arms, legs and body. These cosmetic movements sync to other players, stay near the original spot and never revive, heal or consume a turn. Reduced Motion softens the movement; carrying and revival restore the existing poses. Hollow Armor now has an open, empty suit of haunted armor, a battered shield and a chipped sword.
+
+Adventure Journal (menu or Battle recap at rest) stores the last 30 battles locally per signed-in account. It records combat only, grants no rewards and does not change run state. Player-versus-player duels have been removed; cooperative Monster Masquerade lobbies remain.
